@@ -1,8 +1,7 @@
 # Talent Platform V1 - Dependency Map
 
-> **Who this is for:** Every team member, including those newer to development or working in a second language. Every technical term is explained when it first appears.
 >
-> **What this document does:** Shows how every GitHub issue connects to other issues, what order things must be built, and why. Use it alongside the GitHub project board to understand what you can work on and what you're waiting for.
+> **What this document does:** Shows how every GitHub issue connects to other issues, what order things must be built, and why.
 >
 > **Note on issue numbers:** All `#N` references in this document match the actual GitHub issue numbers at github.com/gianpremrajaram/talent_platform_v1/issues. Issues run from #2 to #40.
 >
