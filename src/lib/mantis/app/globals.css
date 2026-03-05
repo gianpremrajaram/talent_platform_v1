@@ -1,0 +1,32 @@
+/* scroll bar */
+@import 'slick-carousel/slick/slick.css';
+@import 'slick-carousel/slick/slick-theme.css';
+@import 'simplebar-react/dist/simplebar.min.css';
+
+/* apex-chart */
+@import '../../public/assets/third-party/apex-chart.css';
+
+/* map */
+@import 'maplibre-gl/dist/maplibre-gl.css';
+@import 'maplibre-react-components/style.css';
+
+.css-13ddxbb > * + * {
+  margin: 0 !important;
+}
+
+.maplibregl-popup-content {
+  border-radius: 12px !important;
+  padding: 0 !important;
+}
+
+.maplibregl-popup-tip {
+  margin-top: -1px !important;
+}
+
+html[data-color-scheme='dark'] .maplibregl-popup-tip {
+  border-top-color: var(--palette-background-paper) !important;
+}
+
+html[data-color-scheme='dark'] .maplibregl-popup-anchor-top .maplibregl-popup-tip {
+  border-bottom-color: var(--palette-background-paper) !important;
+}
