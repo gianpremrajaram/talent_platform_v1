@@ -10,11 +10,13 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.1.0",
     "@auth/prisma-adapter": "^2.11.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.5",
     "@mui/material": "^7.3.5",
+    "@mui/material-nextjs": "^7.3.9",
     "@prisma/client": "^6.19.0",
     "@types/bcryptjs": "^2.4.6",
     "bcryptjs": "^3.0.3",
@@ -32,6 +34,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "baseline-browser-mapping": "^2.10.0",
     "eslint": "^9",
     "eslint-config-next": "16.0.3",
     "prisma": "^6.19.0",

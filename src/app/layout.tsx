@@ -2,10 +2,12 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import ClientLayout from "@/components/ClientLayout";
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v14-appRouter";
 
 export const metadata: Metadata = {
   title: "Alliances Platform - UCL Computer Science",
-  description: "A self-service application intended for use by industry partners, academic staff, and students; maintained by the Strategic Alliances Team at UCL Computer Science.",
+  description:
+    "A self-service application intended for use by industry partners, academic staff, and students; maintained by the Strategic Alliances Team at UCL Computer Science.",
 };
 
 export default function RootLayout({
@@ -16,7 +18,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ClientLayout>{children}</ClientLayout>
+        <AppRouterCacheProvider options={{ key: "mui" }}>
+          <ClientLayout>{children}</ClientLayout>
+        </AppRouterCacheProvider>
       </body>
     </html>
   );
