@@ -38,7 +38,7 @@ All amendments from `github_issues_v2_amendments.md` applied. This is the end-to
 
 ---
 
-### Issue #1
+### Issue #2
 
 **Title:** [L1/decision] Map scaffold roles and tiers to Talent Platform user model
 **Labels:** `decision`, `L1`
@@ -63,11 +63,11 @@ The existing scaffold exposes `roleKeys` (e.g. ADMIN, MODULE_LEADER, MEMBER) and
 - [ ] TierGate, middleware, and registration issues can reference this mapping
 - [ ] Decision reviewed by at least Sadhana (tech lead)
 
-**Blocks:** #2 (type contracts), #4 (TierGate), #5 (middleware), #6 (RBAC refactor), #15 (login page), #16 (student registration), #17 (recruiter registration)
+**Blocks:** #3 (type contracts), #5 (TierGate), #6 (middleware), #7 (RBAC refactor), #16 (login page), #17 (student registration), #18 (recruiter registration)
 
 ---
 
-### Issue #2
+### Issue #3
 
 **Title:** [L1/arch] Create shared type contracts (src/types/index.ts)
 **Labels:** `arch`, `L1`
@@ -80,7 +80,7 @@ Without a single type file, parallel builders invent their own data shapes and b
 
 **Scope**
 Create `src/types/index.ts` defining types for every entity that crosses a component boundary:
-- `UserTier` (union of tier keys + `'student'` + `'admin'` - values derived from Issue #1 mapping)
+- `UserTier` (union of tier keys + `'student'` + `'admin'` - values derived from Issue #2 mapping)
 - `ConsentStatus` (`'pending' | 'consented' | 'withdrawn'`)
 - `UserRole` (union of role keys)
 - `StudentProfile` (id, name, skills, experience, certifications, projects, externalLinks, consentStatus, tier)
@@ -89,20 +89,20 @@ Create `src/types/index.ts` defining types for every entity that crosses a compo
 - `AdminRecommendation` (id, studentId, firmId, adminId, createdAt, revokedAt)
 - `StudentCV` (id, studentId, label, fileUrl, uploadedAt)
 - `CompanyConsent` (studentId, companyId, consented, updatedAt)
-- `ApiResponse<T>` (success, data?, error?) - shared API response shape (see Issue #7)
+- `ApiResponse<T>` (success, data?, error?) - shared API response shape (see Issue #8)
 
 **Acceptance criteria**
 - [ ] `src/types/index.ts` exists and exports all types listed above
-- [ ] Types align with the Prisma schema extensions (Issue #12)
+- [ ] Types align with the Prisma schema extensions (Issue #13)
 - [ ] No circular imports
-- [ ] All downstream service stubs (Issue #3) import from this file
+- [ ] All downstream service stubs (Issue #4) import from this file
 
-**Depends on:** #1 (role/tier mapping decision - needed to define UserTier correctly)
+**Depends on:** #2 (role/tier mapping decision - needed to define UserTier correctly)
 **Blocks:** Every L2+ feature issue
 
 ---
 
-### Issue #3
+### Issue #4
 
 **Title:** [L1/arch] Create service layer stubs (src/lib/services/)
 **Labels:** `arch`, `L1`
@@ -128,12 +128,12 @@ Create `src/lib/services/` with stub files returning hardcoded dummy data:
 - [ ] Stubs return hardcoded dummy data matching the type contracts
 - [ ] No direct Prisma calls in stubs (those get wired in L2-L4)
 
-**Depends on:** #2 (type contracts)
+**Depends on:** #3 (type contracts)
 **Blocks:** All L2+ feature issues
 
 ---
 
-### Issue #4
+### Issue #5
 
 **Title:** [L1/arch] Build TierGate component
 **Labels:** `arch`, `L1`
@@ -151,7 +151,7 @@ Create `src/components/TierGate.tsx` as a client component reading from session 
 - Both props combinable: `<TierGate tier="gold" role="MEMBER">` requires BOTH
 - When gated out: renders `null` (hidden), not an error page
 - Dev bypass mode: always renders children, controlled by env var or constant
-- Tier rank values derived from Issue #1 mapping
+- Tier rank values derived from Issue #2 mapping
 
 **Acceptance criteria**
 - [ ] `TierGate` component exists and is importable
@@ -159,12 +159,12 @@ Create `src/components/TierGate.tsx` as a client component reading from session 
 - [ ] Reads tier/role from JWT session (no extra DB calls)
 - [ ] Dev bypass mode toggle exists
 
-**Depends on:** #1 (role/tier mapping)
+**Depends on:** #2 (role/tier mapping)
 **Blocks:** All L2+ UI issues with restricted sections
 
 ---
 
-### Issue #5
+### Issue #6
 
 **Title:** [L1/arch] Create middleware route protection (src/middleware.ts)
 **Labels:** `arch`, `L1`
@@ -173,7 +173,7 @@ Create `src/components/TierGate.tsx` as a client component reading from session 
 --- BODY ---
 
 **What and why**
-Route-level auth + tier blocking before page render - the first layer of defence. TierGate (#4) is the second layer at component level. Currently no middleware exists; all checks happen inside page components.
+Route-level auth + tier blocking before page render - the first layer of defence. TierGate (#5) is the second layer at component level. Currently no middleware exists; all checks happen inside page components.
 
 **Scope**
 Create `src/middleware.ts` with `config.matcher` for protected routes:
@@ -196,12 +196,12 @@ Decode JWT, check auth, check tier rank from token. Redirect to `/sign-in` or `/
 - [ ] Tier-gated routes redirect to `/access-denied` when tier insufficient
 - [ ] Pages still call `userCanAccessApp()` for DB-backed checks (defence in depth)
 
-**Depends on:** #1 (role/tier mapping)
+**Depends on:** #2 (role/tier mapping)
 **Blocks:** All L2+ route-level access control
 
 ---
 
-### Issue #6
+### Issue #7
 
 **Title:** [L1/arch] Review and refactor existing RBAC logic
 **Labels:** `arch`, `L1`
@@ -224,12 +224,12 @@ The existing `userCanAccessApp()` in `src/lib/access-control.ts` works at the ap
 - [ ] Feature-permission map is a config object, not scattered logic
 - [ ] All existing RBAC paths verified with test scenarios (admin, gold, silver, bronze, student)
 
-**Depends on:** #1 (role/tier mapping), #4 (TierGate component)
+**Depends on:** #2 (role/tier mapping), #5 (TierGate component)
 **Blocks:** L2+ pages that need feature-level gating
 
 ---
 
-### Issue #7
+### Issue #8
 
 **Title:** [L1/arch] Define error handling contract
 **Labels:** `arch`, `L1`
@@ -252,12 +252,12 @@ Five developers building different pages will each handle errors differently unl
 - [ ] At least one existing API route refactored to use the new response shape as a reference implementation
 - [ ] Pattern documented in `CLAUDE.md` or a `CONTRIBUTING.md`
 
-**Depends on:** #2 (type contracts)
+**Depends on:** #3 (type contracts)
 **Blocks:** All API route development in L2+
 
 ---
 
-### Issue #8
+### Issue #9
 
 **Title:** [L1/arch] Define data validation layer (Zod schemas)
 **Labels:** `arch`, `L1`
@@ -278,14 +278,14 @@ Student profile fields, job posting fields, and company registration all accept 
 - [ ] Zod installed as a dependency
 - [ ] Validation schemas exist for: `StudentProfile`, `JobPosting`, `UserRegistration`, `CompanyConsent`
 - [ ] At least one existing API route uses schema validation as reference implementation
-- [ ] Validation errors return structured messages via the error handling contract (#7)
+- [ ] Validation errors return structured messages via the error handling contract (#8)
 
-**Depends on:** #2 (type contracts), #7 (error contract)
+**Depends on:** #3 (type contracts), #8 (error contract)
 **Blocks:** All form-based features in L2+
 
 ---
 
-### Issue #9
+### Issue #10
 
 **Title:** [L1/arch] Centralized audit logging pattern
 **Labels:** `arch`, `L1`
@@ -308,12 +308,12 @@ Report 3's schema includes `cv_access_logs` for GDPR audit trail, and the `Audit
 - [ ] Documentation lists which service functions require audit calls
 - [ ] Function is non-blocking (doesn't slow down the main request)
 
-**Depends on:** #2 (type contracts for action enum). Note: AuditLog model already exists in scaffold Prisma schema - no schema change needed for this service.
+**Depends on:** #3 (type contracts for action enum). Note: AuditLog model already exists in scaffold Prisma schema - no schema change needed for this service.
 **Blocks:** L4 recruiter search, L4 recommendation gateway
 
 ---
 
-### Issue #10
+### Issue #11
 
 **Title:** [L1/arch] Centralized student data access layer
 **Labels:** `arch`, `L1`
@@ -337,12 +337,12 @@ Create a single `getStudents(filters, callerRole, callerCompanyId?)` function in
 - [ ] Dashboard queries return total counts without consent filter
 - [ ] No downstream feature calls Prisma directly for student data
 
-**Depends on:** #3 (service stubs)
+**Depends on:** #4 (service stubs)
 **Blocks:** L4 recruiter search, L4 recommendation gateway, L4 dashboard metrics
 
 ---
 
-### Issue #11
+### Issue #12
 
 **Title:** [L1/arch] Company lifecycle state machine
 **Labels:** `arch`, `L1`
@@ -357,7 +357,7 @@ A company goes through: registered -> pending admin approval -> approved (with t
 - Define company status enum: `PENDING`, `APPROVED`, `SUSPENDED`, `BANNED`
 - Create `getCompanyStatus(companyId)` function returning the enum
 - Wire into auth flow - `userCanAccessApp()` must check company status
-- Ensure the `AppSuspension` table (L3, #32) feeds into this state machine
+- Ensure the `AppSuspension` table (L3, #33) feeds into this state machine
 
 **Acceptance criteria**
 - [ ] Company status enum defined in `src/types/index.ts`
@@ -365,12 +365,12 @@ A company goes through: registered -> pending admin approval -> approved (with t
 - [ ] `userCanAccessApp()` extended to check company status
 - [ ] Pending/suspended/banned company users blocked from talent features
 
-**Depends on:** #2 (type contracts), #6 (RBAC refactor)
-**Blocks:** L2 admin company approval (#26), L3 admin suspend/ban (#32)
+**Depends on:** #3 (type contracts), #7 (RBAC refactor)
+**Blocks:** L2 admin company approval (#27), L3 admin suspend/ban (#33)
 
 ---
 
-### Issue #12
+### Issue #13
 
 **Title:** [L1/infra] Extend Prisma schema for V1
 **Labels:** `infra`, `L1`
@@ -379,7 +379,7 @@ A company goes through: registered -> pending admin approval -> approved (with t
 --- BODY ---
 
 **What and why**
-The existing schema lacks tables/fields needed for the Talent Platform. Per the implementation playbook's refined schema decisions, the following must be added in a single coordinated migration before parallel work starts. This is the #1 parallelisation risk - schema drift without CI/CD.
+The existing schema lacks tables/fields needed for the Talent Platform. Per the implementation playbook's refined schema decisions, the following must be added in a single coordinated migration before parallel work starts. This is the #2 parallelisation risk - schema drift without CI/CD.
 
 **Scope**
 Add to `prisma/schema.prisma`:
@@ -407,7 +407,7 @@ Run `npx prisma migrate dev`. All team members must pull and migrate after this 
 
 ---
 
-### Issue #13
+### Issue #14
 
 **Title:** [L1/infra] Add student, admin, and recruiter seed users
 **Labels:** `infra`, `L1`
@@ -432,12 +432,12 @@ The seed script (`prisma/seed.ts`) only creates INDUSTRY partner users from `pri
 - [ ] At least one student has consent records
 - [ ] Seed is idempotent (can run multiple times without duplicates)
 
-**Depends on:** #12 (Prisma schema extension)
+**Depends on:** #13 (Prisma schema extension)
 **Blocks:** L2 consent, L2 student profile, L2 recruiter flows
 
 ---
 
-### Issue #14
+### Issue #15
 
 **Title:** [L1/infra] Create .env.example
 **Labels:** `infra`, `L1`
@@ -465,7 +465,7 @@ Create `.env.example` documenting:
 
 ---
 
-### Issue #15
+### Issue #16
 
 **Title:** [L1/feature] Login page UI review and refactor (SETUP-1)
 **Labels:** `feature`, `L1`
@@ -482,7 +482,7 @@ The planning doc explicitly identifies SETUP-1 (login page) as the most importan
 - Review existing `SignInForm.tsx` for code quality and role handling
 - Verify post-login redirect logic in `post-sign-in/page.tsx` for all roles (student, recruiter tiers, admin)
 - Add recruiter-specific post-login routing (currently missing)
-- Add "Register" link/button that routes to new `/register` page (built in #16 and #17) without admin gate
+- Add "Register" link/button that routes to new `/register` page (built in #17 and #18) without admin gate
 - Ensure login error states are clear and accessible
 - Remove or gate the existing admin-only register flow in SignInForm
 
@@ -493,12 +493,12 @@ The planning doc explicitly identifies SETUP-1 (login page) as the most importan
 - [ ] Login error messages are clear
 - [ ] Existing admin functionality preserved
 
-**Depends on:** #1 (role/tier mapping)
+**Depends on:** #2 (role/tier mapping)
 **Blocks:** All user-facing features that require authentication
 
 ---
 
-### Issue #16
+### Issue #17
 
 **Title:** [L1/feature] Student self-registration with UCL domain check
 **Labels:** `feature`, `L1`
@@ -512,7 +512,7 @@ The planning doc explicitly identifies SETUP-1 (login page) as the most importan
 Currently, registration is admin-only (`SignInForm` checks admin status, `create-user` API is admin-gated). Students need a self-service registration path. Per the coding start doc: use a dummy domain list for dev (`@ucl.ac.uk`), real UCL verification deferred.
 
 **Scope**
-- New `/register` page (shared with recruiter registration, #17) with role selector
+- New `/register` page (shared with recruiter registration, #18) with role selector
 - New `/api/account/register` route (separate from admin `create-user`)
 - UCL email domain validation (dummy list: `@ucl.ac.uk` for dev)
 - Account created with `STUDENT` role, consent status = pending
@@ -525,12 +525,12 @@ Currently, registration is admin-only (`SignInForm` checks admin status, `create
 - [ ] Post-registration redirect works correctly
 - [ ] Password stored with bcrypt (not plaintext)
 
-**Depends on:** #12 (schema), #14 (.env.example)
+**Depends on:** #13 (schema), #15 (.env.example)
 **Blocks:** L2 student profile, L2 consent
 
 ---
 
-### Issue #17
+### Issue #18
 
 **Title:** [L1/feature] Recruiter self-registration with pending approval flow
 **Labels:** `feature`, `L1`
@@ -544,7 +544,7 @@ Currently, registration is admin-only (`SignInForm` checks admin status, `create
 Recruiters can self-register but their account starts in a pending state. They cannot access talent features until an admin approves their company and assigns a membership tier. The existing `create-user` route is admin-only; a new self-service path is needed.
 
 **Scope**
-- Shared `/register` page with student registration (#16) - role selector ("I'm a student" / "I'm a recruiter")
+- Shared `/register` page with student registration (#17) - role selector ("I'm a student" / "I'm a recruiter")
 - Recruiter enters: company email, name, company name, password
 - Account created with `PENDING_RECRUITER` status (no active role)
 - Company domain recorded for admin review
@@ -555,14 +555,14 @@ Recruiters can self-register but their account starts in a pending state. They c
 - [ ] Account created in pending state (no access to talent features)
 - [ ] Company name/domain captured
 - [ ] Pending recruiter login shows "awaiting approval" message
-- [ ] Admin can see pending registrations (wired in L2, #26)
+- [ ] Admin can see pending registrations (wired in L2, #27)
 
-**Depends on:** #12 (schema), #11 (company lifecycle)
-**Blocks:** L2 admin company approval (#26)
+**Depends on:** #13 (schema), #12 (company lifecycle)
+**Blocks:** L2 admin company approval (#27)
 
 ---
 
-### Issue #18
+### Issue #19
 
 **Title:** [L1/feature] SSO placeholder stub and scaffold review
 **Labels:** `feature`, `L1`
@@ -592,7 +592,7 @@ The coding start doc says "SSO is already in scaffold" but this is inaccurate - 
 
 ---
 
-### Issue #19
+### Issue #20
 
 **Title:** [L1/feature] 2FA review and placeholder
 **Labels:** `feature`, `L1`
@@ -615,12 +615,12 @@ The coding start doc notes "2FA is already built-in via SSO integration BUT we d
 - [ ] Placeholder/comment in `auth.ts`
 - [ ] Recommended approach noted for handover documentation
 
-**Depends on:** #18 (SSO review)
+**Depends on:** #19 (SSO review)
 **Blocks:** Nothing (informational for handover)
 
 ---
 
-### Issue #20
+### Issue #21
 
 **Title:** [L1/bug] Fix temp password generation - use crypto.randomBytes
 **Labels:** `bug`, `L1`
@@ -639,7 +639,7 @@ Replace `Math.random()` with `crypto.randomBytes()` in the `create-user` route.
 - [ ] Existing functionality unchanged (user still receives temp password)
 
 **Depends on:** Nothing
-**Blocks:** #16 (student registration), #17 (recruiter registration)
+**Blocks:** #17 (student registration), #18 (recruiter registration)
 
 ---
 
@@ -647,7 +647,7 @@ Replace `Math.random()` with `crypto.randomBytes()` in the `create-user` route.
 
 ---
 
-### Issue #21
+### Issue #22
 
 **Title:** [L2/arch] Loading, empty, and error state UI components
 **Labels:** `arch`, `L2`
@@ -662,7 +662,7 @@ Service stubs return dummy data during dev, but UI components also need defined 
 Create shared UI components in `src/components/ui/`:
 - `<LoadingState />` - spinner/skeleton for data loading
 - `<EmptyState message="..." />` - friendly empty state with customizable message
-- `<ErrorState error={...} />` - error display using the error contract (#7)
+- `<ErrorState error={...} />` - error display using the error contract (#8)
 
 **Acceptance criteria**
 - [ ] Three components exist in `src/components/ui/`
@@ -670,12 +670,12 @@ Create shared UI components in `src/components/ui/`:
 - [ ] Each component accepts customization props (message, icon, retry action)
 - [ ] At least one existing page refactored to use them as reference
 
-**Depends on:** #7 (error handling contract)
+**Depends on:** #8 (error handling contract)
 **Blocks:** Nothing strictly. Recommended to land before L2 UI work begins to ensure consistency, but L2 features can start without this if needed.
 
 ---
 
-### Issue #22
+### Issue #23
 
 **Title:** [L2/decision] CV storage architecture decision
 **Labels:** `decision`, `L2`
@@ -692,7 +692,7 @@ Decide between:
 - **Option B: S3-compatible storage** - upload to S3/Supabase/R2. Industry standard. Requires cloud account.
 - **Option C: PostgreSQL bytea** - store bytes in DB. Not recommended by Prisma docs.
 
-Implementation playbook recommends: Option A for V1 (URL field), migrate to Option B before production. The `StudentCV` schema stores `file_url` (string) regardless - swapping backend later changes only the service layer (file storage abstraction defined in #12).
+Implementation playbook recommends: Option A for V1 (URL field), migrate to Option B before production. The `StudentCV` schema stores `file_url` (string) regardless - swapping backend later changes only the service layer (file storage abstraction defined in #13).
 
 **Acceptance criteria**
 - [ ] Decision documented and agreed with Daniel/client
@@ -700,11 +700,11 @@ Implementation playbook recommends: Option A for V1 (URL field), migrate to Opti
 - [ ] `src/lib/services/cv.ts` interface works regardless of backend choice
 
 **Depends on:** Nothing (decision can happen in parallel)
-**Blocks:** L3 CV upload (#28)
+**Blocks:** L3 CV upload (#29)
 
 ---
 
-### Issue #23
+### Issue #24
 
 **Title:** [L2/feature] Consent toggle - binary provide/withdraw
 **Labels:** `feature`, `L2`
@@ -729,13 +729,13 @@ Students need a binary toggle: "make me visible to recruiters" / "hide me from r
 - [ ] Toggle persists to DB via `StudentCompanyConsent` table
 - [ ] Toggling off removes visibility from all recruiters
 - [ ] Toggling on makes student visible to all approved companies (default whitelist)
-- [ ] Consent changes logged via audit function (#9)
+- [ ] Consent changes logged via audit function (#10)
 
-**Depends on:** #3 (service stubs), #13 (seed users)
+**Depends on:** #4 (service stubs), #14 (seed users)
 
 ---
 
-### Issue #24
+### Issue #25
 
 **Title:** [L2/feature] Per-company whitelist/blacklist consent
 **Labels:** `feature`, `L2`
@@ -746,7 +746,7 @@ Students need a binary toggle: "make me visible to recruiters" / "hide me from r
 **As a** student, **I want to** choose which specific companies can see my profile, **so that** I can share my information with companies I'm interested in while blocking others.
 
 **What this means**
-Extends the binary consent toggle (#23) with per-company granularity. A student who has consented globally can blacklist specific companies, or a student can whitelist only specific companies. Uses the same `StudentCompanyConsent` junction table.
+Extends the binary consent toggle (#24) with per-company granularity. A student who has consented globally can blacklist specific companies, or a student can whitelist only specific companies. Uses the same `StudentCompanyConsent` junction table.
 
 **Scope**
 - UI in `StudentView.tsx`: list of approved companies with per-company toggle
@@ -762,11 +762,11 @@ Extends the binary consent toggle (#23) with per-company granularity. A student 
 - [ ] Admin recommendations (L4) respect per-company consent
 - [ ] Changes logged via audit function
 
-**Depends on:** #23 (binary consent)
+**Depends on:** #24 (binary consent)
 
 ---
 
-### Issue #25
+### Issue #26
 
 **Title:** [L2/feature] Student profile form - skills, experience, certifications, projects, external links
 **Labels:** `feature`, `L2`
@@ -789,23 +789,23 @@ The `StudentView.tsx` component is currently an empty shell with placeholder tex
   - Projects (structured input - title, description, URL)
   - LinkedIn URL and GitHub URL (optional, validated as URL format, displayed as external links opening in new tab)
 - Wire `lib/services/student-profile.ts` to real Prisma CRUD
-- Validate input with Zod schema (#8)
+- Validate input with Zod schema (#9)
 
 **Acceptance criteria**
 - [ ] Profile form renders in student view
 - [ ] All fields save to `StudentProfile` table
 - [ ] Form validates input before submission
 - [ ] Profile data loads on page revisit (edit mode)
-- [ ] Degree type and location fields match the enum values agreed in #12
+- [ ] Degree type and location fields match the enum values agreed in #13
 - [ ] LinkedIn and GitHub URL fields present on profile form (optional)
 - [ ] URLs validated as valid format
 - [ ] Links render as clickable external links (new tab)
 
-**Depends on:** #8 (validation), #16 (student registration)
+**Depends on:** #9 (validation), #17 (student registration)
 
 ---
 
-### Issue #26
+### Issue #27
 
 **Title:** [L2/feature] Admin approve/reject company registration
 **Labels:** `feature`, `L2`
@@ -816,7 +816,7 @@ The `StudentView.tsx` component is currently an empty shell with placeholder tex
 **As an** admin, **I want to** review and approve or reject recruiter company registrations, **so that** only verified companies can access the talent platform.
 
 **What this means**
-When a recruiter self-registers (#17), their account is pending. The admin needs a UI to see pending registrations, approve (assign tier + MEMBER role + organisation), or reject. The existing `update-user/route.ts` already handles org creation and role assignment in a transaction - this can be reused. The admin must select which membership tier to assign during approval (silver, gold, or platinum). This determines what platform features the recruiter can access. The tier selection should be a dropdown in the approval UI. Bronze tier means no platform access, so approving as bronze is equivalent to rejecting.
+When a recruiter self-registers (#18), their account is pending. The admin needs a UI to see pending registrations, approve (assign tier + MEMBER role + organisation), or reject. The existing `update-user/route.ts` already handles org creation and role assignment in a transaction - this can be reused. The admin must select which membership tier to assign during approval (silver, gold, or platinum). This determines what platform features the recruiter can access. The tier selection should be a dropdown in the approval UI. Bronze tier means no platform access, so approving as bronze is equivalent to rejecting.
 
 **Scope**
 - Admin panel section: "Pending Company Registrations" list
@@ -833,11 +833,11 @@ When a recruiter self-registers (#17), their account is pending. The admin needs
 - [ ] Approved recruiter can access talent features on next login
 - [ ] Reuses existing `update-user` transaction logic where possible
 
-**Depends on:** #17 (recruiter registration), #11 (company lifecycle)
+**Depends on:** #18 (recruiter registration), #12 (company lifecycle)
 
 ---
 
-### Issue #27
+### Issue #28
 
 **Title:** [L2/feature] Recruiter post job - text-only job postings
 **Labels:** `feature`, `L2`
@@ -865,7 +865,7 @@ The `PartnerJobBoardView.tsx` component is currently an empty shell. Recruiters 
 - [ ] Expired postings auto-hidden or flagged
 - [ ] Input validated with Zod schema
 
-**Depends on:** #8 (validation), #26 (approved companies exist)
+**Depends on:** #9 (validation), #27 (approved companies exist)
 
 ---
 
@@ -873,7 +873,7 @@ The `PartnerJobBoardView.tsx` component is currently an empty shell. Recruiters 
 
 ---
 
-### Issue #28
+### Issue #29
 
 **Title:** [L3/feature] CV upload, update, delete, and replace
 **Labels:** `feature`, `L3`
@@ -884,7 +884,7 @@ The `PartnerJobBoardView.tsx` component is currently an empty shell. Recruiters 
 **As a** student, **I want to** upload and manage my CV on the platform, **so that** approved recruiters and admins can access it when evaluating me for opportunities.
 
 **What this means**
-Core CV CRUD operations. The storage backend depends on the CV storage decision (#22). Regardless of storage backend choice, the code calls the file storage abstraction interface defined in `src/lib/services/cv.ts` (#12). If Option A (URL field), the "upload" is just saving a user-provided URL. If Option B (S3), it's a real file upload. The UI and service layer work identically in both cases. The `StudentCV` table schema works for both.
+Core CV CRUD operations. The storage backend depends on the CV storage decision (#23). Regardless of storage backend choice, the code calls the file storage abstraction interface defined in `src/lib/services/cv.ts` (#13). If Option A (URL field), the "upload" is just saving a user-provided URL. If Option B (S3), it's a real file upload. The UI and service layer work identically in both cases. The `StudentCV` table schema works for both.
 
 **Scope**
 - CV management section in `StudentView.tsx`
@@ -899,13 +899,13 @@ Core CV CRUD operations. The storage backend depends on the CV storage decision 
 - [ ] Student can view their uploaded CVs
 - [ ] Student can delete a CV
 - [ ] Student can replace/update a CV
-- [ ] CV access logged via audit function (#9)
+- [ ] CV access logged via audit function (#10)
 
-**Depends on:** #22 (storage decision), #25 (student profile)
+**Depends on:** #23 (storage decision), #26 (student profile)
 
 ---
 
-### Issue #29
+### Issue #30
 
 **Title:** [L3/feature] Multiple CV uploads per student
 **Labels:** `feature`, `L3`
@@ -916,7 +916,7 @@ Core CV CRUD operations. The storage backend depends on the CV storage decision 
 **As a** student, **I want to** upload multiple CVs with different labels, **so that** I can tailor my applications (e.g., ML-focused vs systems-focused CV).
 
 **What this means**
-Extends CV upload (#28) to support multiple CVs per student. Each CV has a `label` field for identification. The `StudentCV` table already supports this (1:many relationship via `student_id` FK).
+Extends CV upload (#29) to support multiple CVs per student. Each CV has a `label` field for identification. The `StudentCV` table already supports this (1:many relationship via `student_id` FK).
 
 **Scope**
 - UI: list of uploaded CVs with labels
@@ -930,11 +930,11 @@ Extends CV upload (#28) to support multiple CVs per student. Each CV has a `labe
 - [ ] All CVs manageable independently
 - [ ] CV list displays with labels and upload dates
 
-**Depends on:** #28 (basic CV CRUD)
+**Depends on:** #29 (basic CV CRUD)
 
 ---
 
-### Issue #30
+### Issue #31
 
 **Title:** [L3/feature] CV keyword tagging
 **Labels:** `feature`, `L3`
@@ -957,11 +957,11 @@ Per the coding start doc: "normalise tags single big string." Can push to stretc
 - [ ] Tags stored and retrievable
 - [ ] Tags searchable/filterable (used by L4 recommendation gateway)
 
-**Depends on:** #28 (basic CV CRUD)
+**Depends on:** #29 (basic CV CRUD)
 
 ---
 
-### Issue #31
+### Issue #32
 
 **Title:** [L3/feature] Account deletion - fix FK cascade and self-delete UI
 **Labels:** `feature`, `L3`
@@ -987,11 +987,11 @@ The existing `delete-user/route.ts` cleans up `UserRole` and `Membership` but do
 - [ ] Student-facing self-delete UI with confirmation dialog
 - [ ] Admin can still delete any user (existing functionality preserved)
 
-**Depends on:** #12 (schema - new tables must be included in cleanup)
+**Depends on:** #13 (schema - new tables must be included in cleanup)
 
 ---
 
-### Issue #32
+### Issue #33
 
 **Title:** [L3/feature] Admin suspend/ban - per-app AppSuspension table
 **Labels:** `feature`, `L3`
@@ -1005,7 +1005,7 @@ The existing `delete-user/route.ts` cleans up `UserRole` and `Membership` but do
 Per the coding start doc: "separate access table - vs normalising only admin has access to. If a student is marked as suspended in parent table, it will suspend students from other related applications." A separate `AppSuspension` table scopes suspension to a specific app context.
 
 **Scope**
-- `AppSuspension` table already added in #12
+- `AppSuspension` table already added in #13
 - Admin UI: suspend/ban button on user management panel
 - Suspend: sets `suspended_at`, user loses access to specified app
 - Lift: sets `lifted_at`, access restored
@@ -1019,7 +1019,7 @@ Per the coding start doc: "separate access table - vs normalising only admin has
 - [ ] Suspension is per-app (other apps unaffected)
 - [ ] Suspension history retained for audit (rows not deleted)
 
-**Depends on:** #12 (schema), #11 (company lifecycle state machine)
+**Depends on:** #13 (schema), #12 (company lifecycle state machine)
 
 ---
 
@@ -1027,7 +1027,7 @@ Per the coding start doc: "separate access table - vs normalising only admin has
 
 ---
 
-### Issue #33
+### Issue #34
 
 **Title:** [L4/feature] Recruiter search students - consent-gated, Gold/Platinum only
 **Labels:** `feature`, `L4`
@@ -1058,11 +1058,11 @@ The `PartnerFullView.tsx` component is currently an empty shell. This is the cor
 - [ ] Search filters work: location, degree type, skills
 - [ ] Search actions logged to audit trail
 
-**Depends on:** #10 (student data access layer), #24 (per-company consent)
+**Depends on:** #11 (student data access layer), #25 (per-company consent)
 
 ---
 
-### Issue #34
+### Issue #35
 
 **Title:** [L4/feature] Admin recommendation gateway (A1) - create, revoke, per-firm isolation
 **Labels:** `feature`, `L4`
@@ -1093,11 +1093,11 @@ Highest-complexity V1 feature. Three-layer dependency: consent check -> Gold/Pla
 - [ ] Consent withdrawal after recommendation hides student from recruiter
 - [ ] All recommendation actions logged to audit trail
 
-**Depends on:** #10 (student data access layer), #24 (per-company consent), #26 (approved firms exist)
+**Depends on:** #11 (student data access layer), #25 (per-company consent), #27 (approved firms exist)
 
 ---
 
-### Issue #35
+### Issue #36
 
 **Title:** [L4/feature] Admin dashboard - Talent Platform metrics
 **Labels:** `feature`, `L4`
@@ -1125,7 +1125,7 @@ Per coding start doc: "North star metric: What users passed initial verification
 - [ ] At least one metric visualized as pie/donut chart
 - [ ] Data refreshes on page load (server-side fetch)
 
-**Depends on:** #23 (consent data), #26 (approved companies)
+**Depends on:** #24 (consent data), #27 (approved companies)
 
 ---
 
@@ -1133,7 +1133,7 @@ Per coding start doc: "North star metric: What users passed initial verification
 
 ---
 
-### Issue #36
+### Issue #37
 
 **Title:** [L5/feature] Recruiter contacts student - mailto with audit log
 **Labels:** `feature`, `L5`
@@ -1158,11 +1158,11 @@ Per coding start doc: "We will handle this simply, potentially with status messa
 - [ ] Contact action logged to audit trail
 - [ ] Confirmation message displayed to recruiter
 
-**Depends on:** #33 (recruiter search functional)
+**Depends on:** #34 (recruiter search functional)
 
 ---
 
-### Issue #37
+### Issue #38
 
 **Title:** [L5/feature] Student notification on contact request
 **Labels:** `feature`, `L5`
@@ -1186,11 +1186,11 @@ Per coding start doc: "Default to email trigger. Potentially in app - build noti
 - [ ] Notification includes company name and context
 - [ ] Notification history viewable by student
 
-**Depends on:** #36 (recruiter contact)
+**Depends on:** #37 (recruiter contact)
 
 ---
 
-### Issue #38
+### Issue #39
 
 **Title:** [L5/feature] Stretch dashboard filters
 **Labels:** `feature`, `L5`
@@ -1201,7 +1201,7 @@ Per coding start doc: "Default to email trigger. Potentially in app - build noti
 **As an** admin, **I want to** filter dashboard metrics by date range, tier, and other dimensions, **so that** I can analyze platform trends over time.
 
 **What this means**
-Extends the admin dashboard (#35) with filtering capabilities. This is explicitly marked as stretch in the coding start doc.
+Extends the admin dashboard (#36) with filtering capabilities. This is explicitly marked as stretch in the coding start doc.
 
 **Scope**
 - Date range picker for metrics
@@ -1214,11 +1214,11 @@ Extends the admin dashboard (#35) with filtering capabilities. This is explicitl
 - [ ] Filtered metrics display correctly
 - [ ] Filters combinable
 
-**Depends on:** #35 (admin dashboard)
+**Depends on:** #36 (admin dashboard)
 
 ---
 
-### Issue #39
+### Issue #40
 
 **Title:** [L5/research] Option B - Admin surfaces firms to students
 **Labels:** `research`, `L5`
@@ -1239,7 +1239,7 @@ This is a bolt-on after the recommendation gateway (A1) ships. Significantly sim
 - [ ] If built: admin can flag companies as recommended
 - [ ] If built: student job board shows flagged companies first
 
-**Depends on:** #34 (recommendation gateway A1)
+**Depends on:** #35 (recommendation gateway A1)
 
 ---
 
@@ -1247,11 +1247,11 @@ This is a bolt-on after the recommendation gateway (A1) ships. Significantly sim
 
 | Layer | Issues | Count |
 |-------|--------|-------|
-| L1 - Foundation Lock | #1-#20 | 20 |
-| L2 - Consent, Profiles, Job Board | #21-#27 | 7 |
-| L3 - CV Library & Account Management | #28-#32 | 5 |
-| L4 - Search, Recommendations, Dashboard | #33-#35 | 3 |
-| L5 - Notifications & Stretch | #36-#39 | 4 |
+| L1 - Foundation Lock | #2-#21 | 20 |
+| L2 - Consent, Profiles, Job Board | #22-#28 | 7 |
+| L3 - CV Library & Account Management | #29-#33 | 5 |
+| L4 - Search, Recommendations, Dashboard | #34-#36 | 3 |
+| L5 - Notifications & Stretch | #37-#40 | 4 |
 | **Total** | | **39** |
 
 **By type:**
