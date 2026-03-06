@@ -20,16 +20,14 @@ type TalentDiscoveryPageProps = {
   searchParams: Promise<SearchParamsObject>;
 };
 
-function getFirst(
-  value: string | string[] | undefined,
-): string | undefined {
+function getFirst(value: string | string[] | undefined): string | undefined {
   if (!value) return undefined;
   return Array.isArray(value) ? value[0] : value;
 }
 
-export default async function TalentDiscoveryPage(
-  { searchParams }: TalentDiscoveryPageProps,
-) {
+export default async function TalentDiscoveryPage({
+  searchParams,
+}: TalentDiscoveryPageProps) {
   const sp = await searchParams;
   const view = getFirst(sp.view) ?? "default"; // "student" | "job-board" | "cv-library" | "default"
 
@@ -79,14 +77,7 @@ export default async function TalentDiscoveryPage(
         "/access-denied?reason=student-view-role&appKey=TALENT_DISCOVERY",
       );
     }
-
-    // Students/admins can access student view regardless of tier
-    return (
-      <TalentDiscoveryStudentView
-        title={copy.title}
-        description={copy.description}
-      />
-    );
+    redirect("/talent-discovery-standalone/student-dashboard"); //render the new student dashboard view
   }
 
   // ─────────────────────────────────────────
@@ -98,9 +89,7 @@ export default async function TalentDiscoveryPage(
   if (!hasAdminRole) {
     const canAccessApp = await userCanAccessApp(userId, "TALENT_DISCOVERY");
     if (!canAccessApp) {
-      redirect(
-        "/access-denied?reason=access-denied&appKey=TALENT_DISCOVERY",
-      );
+      redirect("/access-denied?reason=access-denied&appKey=TALENT_DISCOVERY");
     }
   }
 
@@ -175,7 +164,5 @@ export default async function TalentDiscoveryPage(
   // ─────────────────────────────────────────
   // 7) Fallback – should rarely be reached
   // ─────────────────────────────────────────
-  redirect(
-    "/access-denied?reason=access-denied&appKey=TALENT_DISCOVERY",
-  );
+  redirect("/access-denied?reason=access-denied&appKey=TALENT_DISCOVERY");
 }

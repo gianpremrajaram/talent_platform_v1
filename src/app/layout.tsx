@@ -1,7 +1,6 @@
 // src/app/layout.tsx
 import "./globals.css";
 import type { Metadata } from "next";
-import ClientLayout from "@/components/ClientLayout";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v14-appRouter";
 
 export const metadata: Metadata = {
@@ -19,7 +18,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AppRouterCacheProvider options={{ key: "mui" }}>
-          <ClientLayout>{children}</ClientLayout>
+          {children}
         </AppRouterCacheProvider>
       </body>
     </html>
