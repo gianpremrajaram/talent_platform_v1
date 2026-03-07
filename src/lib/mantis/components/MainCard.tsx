@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { CSSProperties, ReactNode, Ref } from 'react';
+import { CSSProperties, ReactNode, Ref } from "react";
 
 // material-ui
-import { useColorScheme } from '@mui/material/styles';
-import Card, { CardProps } from '@mui/material/Card';
-import CardContent, { CardContentProps } from '@mui/material/CardContent';
-import CardHeader, { CardHeaderProps } from '@mui/material/CardHeader';
-import Divider from '@mui/material/Divider';
+import { useColorScheme } from "@mui/material/styles";
+import Card, { CardProps } from "@mui/material/Card";
+import CardContent, { CardContentProps } from "@mui/material/CardContent";
+import CardHeader, { CardHeaderProps } from "@mui/material/CardHeader";
+import Divider from "@mui/material/Divider";
 
 // project imports
-import Highlighter from './third-party/Highlighter';
+import Highlighter from "./third-party/Highlighter";
 
 // ==============================|| CUSTOM - MAIN CARD ||============================== //
 
@@ -21,11 +21,11 @@ export interface MainCardProps {
   subheader?: ReactNode | string;
   style?: CSSProperties;
   content?: boolean;
-  contentSX?: CardContentProps['sx'];
+  contentSX?: CardContentProps["sx"];
   darkTitle?: boolean;
   divider?: boolean;
-  sx?: CardProps['sx'];
-  secondary?: CardHeaderProps['action'];
+  sx?: CardProps["sx"];
+  secondary?: CardHeaderProps["action"];
   shadow?: string;
   elevation?: number;
   title?: ReactNode | string;
@@ -62,28 +62,40 @@ export default function MainCard({
     <Card
       elevation={elevation || 0}
       sx={(theme) => ({
-        position: 'relative',
-        ...(border && { border: `1px solid ${theme.vars.palette.grey['A800']}` }),
+        position: "relative",
+        ...(border && { border: `1px solid ${theme.palette.grey[300]}` }),
         borderRadius: 1,
-        boxShadow: boxShadow && !border ? shadow || theme.vars.customShadows.z1 : 'inherit',
-        ':hover': { boxShadow: boxShadow ? shadow || theme.vars.customShadows.z1 : 'inherit' },
-        ...(colorScheme === 'dark' && {
+        boxShadow:
+          boxShadow && !border
+            ? shadow || theme.vars.customShadows.z1
+            : "inherit",
+        ":hover": {
+          boxShadow: boxShadow
+            ? shadow || theme.vars.customShadows.z1
+            : "inherit",
+        },
+        ...(colorScheme === "dark" && {
           borderColor: theme.vars.palette.divider,
           boxShadow: shadow || theme.vars.customShadows.z1,
-          ':hover': { boxShadow: shadow || theme.vars.customShadows.z1 }
+          ":hover": { boxShadow: shadow || theme.vars.customShadows.z1 },
         }),
         ...(codeHighlight && {
-          '& pre': { margin: 0, padding: '12px !important', fontFamily: theme.typography.fontFamily, fontSize: '0.75rem' }
+          "& pre": {
+            margin: 0,
+            padding: "12px !important",
+            fontFamily: theme.typography.fontFamily,
+            fontSize: "0.75rem",
+          },
         }),
         ...(modal && {
-          position: 'absolute' as const,
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: { xs: `calc(100% - 50px)`, sm: 'auto' },
-          maxWidth: 768
+          position: "absolute" as const,
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: { xs: `calc(100% - 50px)`, sm: "auto" },
+          maxWidth: 768,
         }),
-        ...(typeof sx === 'function' ? sx(theme) : sx || {})
+        ...(typeof sx === "function" ? sx(theme) : sx || {}),
       })}
       ref={ref}
       {...others}
@@ -92,7 +104,10 @@ export default function MainCard({
       {title && (
         <CardHeader
           sx={{ p: 2.5 }}
-          slotProps={{ title: { variant: darkTitle ? 'h4' : 'subtitle1' }, action: { sx: { m: '0px auto', alignSelf: 'center' } } }}
+          slotProps={{
+            title: { variant: darkTitle ? "h4" : "subtitle1" },
+            action: { sx: { m: "0px auto", alignSelf: "center" } },
+          }}
           title={title}
           action={secondary}
           subheader={subheader}
@@ -106,7 +121,17 @@ export default function MainCard({
       {content && (
         <CardContent
           sx={contentSX}
-          {...(modal && { slotProps: { root: { sx: { overflowY: 'auto', minHeight: 'auto', maxHeight: `calc(100vh - 200px)` } } } })}
+          {...(modal && {
+            slotProps: {
+              root: {
+                sx: {
+                  overflowY: "auto",
+                  minHeight: "auto",
+                  maxHeight: `calc(100vh - 200px)`,
+                },
+              },
+            },
+          })}
         >
           {children}
         </CardContent>
@@ -116,7 +141,7 @@ export default function MainCard({
       {/* card footer - clipboard & highlighter  */}
       {codeString && (
         <>
-          <Divider sx={{ borderStyle: 'dashed' }} />
+          <Divider sx={{ borderStyle: "dashed" }} />
           <Highlighter codeString={codeString} codeHighlight={codeHighlight} />
         </>
       )}
