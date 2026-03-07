@@ -37,7 +37,7 @@ export default function DashboardTopBar({ title }: DashboardTopBarProps) {
         }}
       >
         <Typography
-          variant="h4"
+          variant="h5"
           sx={{
             fontWeight: 500,
             color: "text.primary",

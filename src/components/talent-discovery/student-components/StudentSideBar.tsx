@@ -30,22 +30,22 @@ type NavItem = {
 const profileItems: NavItem[] = [
   {
     label: "Dashboard",
-    href: "/student-dashboard",
+    href: "/talent-discovery-standalone/student-dashboard",
     icon: <DashboardOutlinedIcon />,
   },
   {
     label: "Personal Info",
-    href: "/student-dashboard/personal-info",
+    href: "/talent-discovery-standalone/student-personal-information",
     icon: <PersonOutlineOutlinedIcon />,
   },
   {
     label: "Academic Information",
-    href: "/student-dashboard/academic-information",
+    href: "/talent-discovery-standalone/student-academic-information",
     icon: <SchoolOutlinedIcon />,
   },
   {
     label: "Skills and Experience",
-    href: "/student-dashboard/skills-experience",
+    href: "/talent-discovery-standalone/student-skills-experience",
     icon: <WorkOutlineOutlinedIcon />,
   },
 ];
@@ -53,17 +53,17 @@ const profileItems: NavItem[] = [
 const cvItems: NavItem[] = [
   {
     label: "Upload CV",
-    href: "/student-dashboard/upload-cv",
+    href: "/talent-discovery-standalone/student-upload-cv",
     icon: <UploadFileOutlinedIcon />,
   },
   {
     label: "CV Library",
-    href: "/student-dashboard/cv-library",
+    href: "/talent-discovery-standalone/student-cv-library",
     icon: <FolderOpenOutlinedIcon />,
   },
   {
     label: "CV Tags",
-    href: "/student-dashboard/cv-tags",
+    href: "/talent-discovery-standalone/student-cv-tags",
     icon: <TagOutlinedIcon />,
   },
 ];
@@ -71,12 +71,12 @@ const cvItems: NavItem[] = [
 const settingsItems: NavItem[] = [
   {
     label: "Visibility Settings",
-    href: "/student-dashboard/visibility-settings",
+    href: "/talent-discovery-standalone/student-visibility-settings",
     icon: <SettingsOutlinedIcon />,
   },
   {
     label: "Security Settings",
-    href: "/student-dashboard/security-settings",
+    href: "/talent-discovery-standalone/student-security-settings",
     icon: <SettingsOutlinedIcon />,
   },
 ];
