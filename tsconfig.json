@@ -13,13 +13,23 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
+    "baseUrl": "./src",
     "plugins": [
       {
         "name": "next"
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["*"],
+      "components/*": ["lib/mantis/components/*"],
+      "utils/*": ["lib/mantis/utils/*"],
+      "types/*": ["lib/mantis/types/*"],
+      "hooks/*": ["lib/mantis/hooks/*"],
+      "contexts/*": ["lib/mantis/contexts/*"],
+      "data/*": ["lib/mantis/data/*"],
+      "pages/*": ["lib/mantis/pages/*"],
+      "routes/*": ["lib/mantis/routes/*"],
+      "config": ["lib/mantis/config"]
     }
   },
   "include": [
