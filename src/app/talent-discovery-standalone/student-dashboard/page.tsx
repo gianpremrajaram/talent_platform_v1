@@ -34,6 +34,7 @@ export default function StudentDashboardPage() {
             Current Job Openings
           </Typography>
           <DashboardStatsRow items={stats} />
+          {/* render the job table */}
           <JobOpeningsTable />
         </Box>
       </Box>
