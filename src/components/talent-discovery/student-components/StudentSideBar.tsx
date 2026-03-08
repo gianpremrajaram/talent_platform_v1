@@ -61,11 +61,6 @@ const cvItems: NavItem[] = [
     href: "/talent-discovery-standalone/student-cv-library",
     icon: <FolderOpenOutlinedIcon />,
   },
-  {
-    label: "CV Tags",
-    href: "/talent-discovery-standalone/student-cv-tags",
-    icon: <TagOutlinedIcon />,
-  },
 ];
 
 const settingsItems: NavItem[] = [
