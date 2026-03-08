@@ -53,18 +53,13 @@ const profileItems: NavItem[] = [
 const cvItems: NavItem[] = [
   {
     label: "Upload CV",
-    href: "/talent-discovery-standalone/student-upload-cv",
+    href: "/talent-discovery-standalone/student-cv-functions",
     icon: <UploadFileOutlinedIcon />,
   },
   {
     label: "CV Library",
     href: "/talent-discovery-standalone/student-cv-library",
     icon: <FolderOpenOutlinedIcon />,
-  },
-  {
-    label: "CV Tags",
-    href: "/talent-discovery-standalone/student-cv-tags",
-    icon: <TagOutlinedIcon />,
   },
 ];
 
