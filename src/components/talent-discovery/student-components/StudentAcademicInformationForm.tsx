@@ -422,24 +422,6 @@ export default function StudentAcademicInformationForm({
               ))}
             </Stack>
           </Box>
-
-          <Box sx={{ mt: 4 }}>
-            <Typography variant="h5" sx={{ fontWeight: 600 }}>
-              Additional Academic Information
-            </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-              Include information like relevant courses being pursued and career
-              aspirations
-            </Typography>
-            <TextField
-              fullWidth
-              multiline
-              minRows={4}
-              value={additionalInfo}
-              onChange={(e) => setAdditionalInfo(e.target.value)}
-              sx={inputSx}
-            />
-          </Box>
         </CardContent>
 
         <Dialog
