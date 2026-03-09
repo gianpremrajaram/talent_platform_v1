@@ -18,6 +18,7 @@ import {
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { saveStudentPersonalInfoAction } from "@/app/talent-discovery-standalone/student-personal-information/action";
 
 type StudentPersonalInfoFormValues = {
   firstName: string;
@@ -36,8 +37,27 @@ type StudentPersonalInfoFormValues = {
   postalCode: string;
 };
 
+type StudentPersonalInfoInitialValues = {
+  //this is the prop we will use to call from main page, because of DOB.
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  dateOfBirth?: string | null;
+  gender?: string;
+  phoneCode?: string;
+  phoneNumber?: string;
+  designation?: string;
+  address1?: string;
+  address2?: string;
+  country?: string;
+  state?: string;
+  city?: string;
+  postalCode?: string;
+};
+
 type StudentPersonalInfoFormProps = {
-  initialValues?: Partial<StudentPersonalInfoFormValues>;
+  userId: string;
+  initialValues?: StudentPersonalInfoInitialValues;
   onCancel?: () => void;
   onSave?: (values: StudentPersonalInfoFormValues) => void;
 };
@@ -178,6 +198,7 @@ function EmptyStateCard({
 }
 
 export default function StudentPersonalInfoForm({
+  userId,
   initialValues,
   onCancel,
   onSave,
@@ -188,7 +209,9 @@ export default function StudentPersonalInfoForm({
     () => ({
       ...defaultValues,
       ...initialValues,
-      dateOfBirth: initialValues?.dateOfBirth ?? null,
+      dateOfBirth: initialValues?.dateOfBirth
+        ? dayjs(initialValues.dateOfBirth)
+        : null,
     }),
     [initialValues],
   );
@@ -250,7 +273,7 @@ export default function StudentPersonalInfoForm({
     }
   };
 
-  const handleSavePersonal = () => {
+  const handleSavePersonal = async () => {
     const validationErrors = validatePersonalInfo(values);
 
     setErrors((prev) => ({
@@ -270,6 +293,22 @@ export default function StudentPersonalInfoForm({
 
     if (hasError) return;
 
+    await saveStudentPersonalInfoAction({
+      userId,
+      data: {
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+        dateOfBirth: values.dateOfBirth
+          ? values.dateOfBirth.toISOString()
+          : null,
+        gender: values.gender,
+        phoneCode: values.phoneCode,
+        phoneNumber: values.phoneNumber,
+        designation: values.designation,
+      },
+    });
+
     const nextSavedValues = { ...savedValues, ...values };
     setSavedValues(nextSavedValues);
     setValues(nextSavedValues);
@@ -277,7 +316,7 @@ export default function StudentPersonalInfoForm({
     onSave?.(nextSavedValues);
   };
 
-  const handleSaveAddress = () => {
+  const handleSaveAddress = async () => {
     const validationErrors = validateAddressInfo(values);
 
     setErrors((prev) => ({
@@ -296,6 +335,18 @@ export default function StudentPersonalInfoForm({
     const hasError = addressFields.some((field) => validationErrors[field]);
 
     if (hasError) return;
+
+    await saveStudentPersonalInfoAction({
+      userId,
+      data: {
+        address1: values.address1,
+        address2: values.address2,
+        country: values.country,
+        state: values.state,
+        city: values.city,
+        postalCode: values.postalCode,
+      },
+    });
 
     const nextSavedValues = { ...savedValues, ...values };
     setSavedValues(nextSavedValues);
