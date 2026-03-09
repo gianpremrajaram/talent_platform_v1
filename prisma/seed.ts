@@ -180,6 +180,107 @@ async function seedAppAccessRules(apps: any, tiers: Map<string, number>) {
   console.log('  - TALENT_DISCOVERY: ALLOW Silver+');
 }
 
+// ─────────────────────────────────────────────────────────────
+//   NEW: Seed Roles and Specific Users (Issue #14)
+// ─────────────────────────────────────────────────────────────
+
+async function seedSpecificRolesAndUsers() {
+  console.log('\nSeeding Roles and Specific Users for Issue #14...');
+
+  // 1. 确保角色存在
+  const roles = ['ADMIN', 'STUDENT', 'RECRUITER'];
+  const roleMap = new Map();
+  for (const r of roles) {
+    const role = await prisma.role.upsert({
+      where: { key: r },
+      update: {},
+      create: { key: r, label: r.charAt(0) + r.slice(1).toLowerCase() },
+    });
+    roleMap.set(r, role.id);
+  }
+
+  const commonPassword = await hashPassword('password123');
+
+  // 2. Seed 1 Admin
+  await prisma.user.upsert({
+    where: { email: 'admin@ucl.ac.uk' },
+    update: {},
+    create: {
+      email: 'admin@ucl.ac.uk',
+      passwordHash: commonPassword,
+      firstName: 'Global',
+      lastName: 'Admin',
+      roles: { create: { roleId: roleMap.get('ADMIN') } }
+    }
+  });
+  console.log('  - Seeded 1 Admin');
+
+// 3. Seed 3 Students with Profiles and Consents (Updated for Issue #14)
+  for (let i = 1; i <= 3; i++) {
+    await prisma.user.upsert({
+      where: { email: `student${i}@ucl.ac.uk` },
+      update: {},
+      create: {
+        email: `student${i}@ucl.ac.uk`,
+        passwordHash: commonPassword,
+        firstName: `Student${i}`,
+        lastName: 'UCL',
+        roles: { create: { roleId: roleMap.get('STUDENT') } },
+        // 满足 "Populate StudentProfile records" 要求
+        studentProfile: {
+          create: { bio: `I am student number ${i}` }
+        },
+        // 满足 "varying consent states" 和 "at least one student has consent records" 要求
+        consents: i === 1 ? undefined : {
+          create: {
+            type: 'PRIVACY_POLICY',
+            accepted: i === 2 // 学生2同意，学生3拒绝
+          }
+        },
+        studentSkills: {
+          create: [{ name: 'TypeScript' }, { name: 'Prisma' }]
+        },
+        studentProjects: {
+          create: [{ title: 'Seed Project', description: 'Working on Issue #14' }]
+        }
+      }
+    });
+  }
+
+  // 4. Seed 2 Recruiters (1 Approved, 1 Pending)
+  // 注意：Recruiter 需要关联到一个 Organisation (Industry)
+  const org = await prisma.organisation.findFirst({ where: { type: 'INDUSTRY' } });
+  
+  const recruiterData = [
+    { email: 'recruiter.active@example.com', status: 'active' },
+    { email: 'recruiter.pending@example.com', status: 'pending' }
+  ];
+
+  for (const r of recruiterData) {
+    await prisma.user.upsert({
+      where: { email: r.email },
+      update: {},
+      create: {
+        email: r.email,
+        passwordHash: commonPassword,
+        firstName: 'Recruiter',
+        lastName: r.status,
+        roles: { create: { roleId: roleMap.get('RECRUITER') } },
+        memberships: {
+          create: {
+            organisationId: org?.id || 1,
+            membershipTierId: (await prisma.membershipTier.findFirst())?.id || 1,
+            status: r.status,
+            isActive: r.status === 'active'
+          }
+        }
+      }
+    });
+  }
+  console.log('  - Seeded 2 Recruiters (1 active, 1 pending)');
+}
+
+
 //
 // ─────────────────────────────────────────────────────────────
 //   MAIN SEED LOGIC (existing, untouched except final calls)
@@ -315,6 +416,9 @@ async function main() {
   //
   const apps = await seedApps();
   await seedAppAccessRules(apps, tierIdByYaml);
+
+// NEW: add this for seed create
+  await seedSpecificRolesAndUsers();
 
   console.log('\nSeeding complete ✅');
 }
