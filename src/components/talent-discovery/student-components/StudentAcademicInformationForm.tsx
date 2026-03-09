@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, startTransition } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import {
   Box,
@@ -23,8 +23,13 @@ import { Add, Close } from "@mui/icons-material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import {
+  addStudentUniversityAction,
+  deleteStudentUniversityAction,
+} from "../../../app/talent-discovery-standalone/student-academic-information/action";
 
 type CollegeForm = {
+  id?: string;
   universityName: string;
   fieldOfStudy: string;
   grade: string;
@@ -33,7 +38,23 @@ type CollegeForm = {
   endDate: Dayjs | null;
 };
 
+type UniversityFromServer = {
+  id: string;
+  universityName: string;
+  fieldOfStudy: string;
+  grade: string;
+  degreeProgram: string;
+  startDate: string | null;
+  endDate: string | null;
+};
+
+type StudentAcademicInformationFormProps = {
+  userId: string;
+  university: UniversityFromServer[];
+};
+
 const emptyCollege: CollegeForm = {
+  id: "",
   universityName: "",
   fieldOfStudy: "",
   grade: "",
@@ -67,33 +88,28 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-export default function StudentAcademicInformationForm() {
+export default function StudentAcademicInformationForm({
+  userId,
+  university,
+}: StudentAcademicInformationFormProps) {
   const theme = useTheme();
 
-  const [colleges, setColleges] = useState<CollegeForm[]>([
-    {
-      universityName: "Stebin",
-      fieldOfStudy: "Computer Science",
-      grade: "Predicted Merit",
-      degreeProgram: "Masters of Science",
-      startDate: dayjs("2024-09-01"),
-      endDate: dayjs("2026-01-01"),
-    },
-  ]);
-
-  const [achievements, setAchievements] = useState<string[]>([
-    "Deans List 2025",
-    "First Prize UCL Hackathon",
-    "Fintech Society Head",
-  ]);
-
-  const [additionalInfo, setAdditionalInfo] = useState(
-    "Include information like relevant courses being pursued and career aspirations",
+  const [colleges, setColleges] = useState<CollegeForm[]>(
+    university.map((uni) => ({
+      id: uni.id,
+      universityName: uni.universityName,
+      fieldOfStudy: uni.fieldOfStudy,
+      grade: uni.grade ?? "",
+      degreeProgram: uni.degreeProgram,
+      startDate: uni.startDate ? dayjs(uni.startDate) : null,
+      endDate: uni.endDate ? dayjs(uni.endDate) : null,
+    })),
   );
 
+  const [achievements, setAchievements] = useState<string[]>([]);
+  const [additionalInfo, setAdditionalInfo] = useState("");
   const [tagDialogOpen, setTagDialogOpen] = useState(false);
   const [newTag, setNewTag] = useState("");
-
   const [collegeDialogOpen, setCollegeDialogOpen] = useState(false);
   const [newCollege, setNewCollege] = useState<CollegeForm>({
     ...emptyCollege,
@@ -101,6 +117,7 @@ export default function StudentAcademicInformationForm() {
   const [editingCollegeIndex, setEditingCollegeIndex] = useState<number | null>(
     null,
   );
+  const [isSubmittingCollege, setIsSubmittingCollege] = useState(false);
 
   const handleNewCollegeChange = <K extends keyof CollegeForm>(
     field: K,
@@ -121,26 +138,50 @@ export default function StudentAcademicInformationForm() {
     setCollegeDialogOpen(true);
   };
 
-  const handleCollegeSubmit = () => {
+  const handleCollegeSubmit = async () => {
     if (!newCollege.universityName.trim()) return;
 
-    if (editingCollegeIndex !== null) {
-      setColleges((prev) =>
-        prev.map((college, index) =>
-          index === editingCollegeIndex ? { ...newCollege } : college,
-        ),
-      );
-    } else {
-      setColleges((prev) => [...prev, { ...newCollege }]);
-    }
+    try {
+      setIsSubmittingCollege(true);
 
-    setNewCollege({ ...emptyCollege });
-    setEditingCollegeIndex(null);
-    setCollegeDialogOpen(false);
+      if (editingCollegeIndex !== null) {
+        setColleges((prev) =>
+          prev.map((college, index) =>
+            index === editingCollegeIndex ? { ...newCollege } : college,
+          ),
+        );
+      } else {
+        await addStudentUniversityAction({
+          userId,
+          universityName: newCollege.universityName.trim(),
+          fieldOfStudy: newCollege.fieldOfStudy.trim(),
+          degreeProgram: newCollege.degreeProgram.trim(),
+          grade: newCollege.grade.trim() || undefined,
+          startDate: newCollege.startDate
+            ? newCollege.startDate.toISOString()
+            : null,
+          endDate: newCollege.endDate ? newCollege.endDate.toISOString() : null,
+        });
+
+        setColleges((prev) => [...prev, { ...newCollege }]);
+      }
+
+      setNewCollege({ ...emptyCollege });
+      setEditingCollegeIndex(null);
+      setCollegeDialogOpen(false);
+    } catch (error) {
+      console.error("Failed to save university:", error);
+    } finally {
+      setIsSubmittingCollege(false);
+    }
   };
 
-  const removeCollege = (index: number) => {
-    setColleges((prev) => prev.filter((_, i) => i !== index));
+  const removeCollege = (id: string) => {
+    startTransition(async () => {
+      await deleteStudentUniversityAction(id);
+
+      setColleges((prev) => prev.filter((college) => college.id !== id));
+    });
   };
 
   const addTag = () => {
@@ -162,20 +203,6 @@ export default function StudentAcademicInformationForm() {
 
   const removeTag = (tagToDelete: string) => {
     setAchievements((prev) => prev.filter((tag) => tag !== tagToDelete));
-  };
-
-  const handleSave = () => {
-    console.log({
-      colleges: colleges.map((college) => ({
-        ...college,
-        startDate: college.startDate
-          ? college.startDate.format("YYYY-MM")
-          : null,
-        endDate: college.endDate ? college.endDate.format("YYYY-MM") : null,
-      })),
-      achievements,
-      additionalInfo,
-    });
   };
 
   return (
@@ -279,7 +306,9 @@ export default function StudentAcademicInformationForm() {
                         </Button>
                         <Button
                           color="error"
-                          onClick={() => removeCollege(index)}
+                          onClick={() =>
+                            college.id && removeCollege(college.id)
+                          }
                         >
                           Delete
                         </Button>
@@ -390,28 +419,10 @@ export default function StudentAcademicInformationForm() {
           </Box>
         </CardContent>
 
-        <Divider />
-
-        <Box
-          sx={{
-            px: { xs: 2, md: 3 },
-            py: 2.5,
-            display: "flex",
-            justifyContent: "flex-end",
-            gap: 2,
-          }}
-        >
-          <Button variant="outlined" color="inherit">
-            Cancel
-          </Button>
-          <Button variant="contained" onClick={handleSave}>
-            Save
-          </Button>
-        </Box>
-
         <Dialog
           open={collegeDialogOpen}
           onClose={() => {
+            if (isSubmittingCollege) return;
             setCollegeDialogOpen(false);
             setEditingCollegeIndex(null);
             setNewCollege({ ...emptyCollege });
@@ -521,11 +532,20 @@ export default function StudentAcademicInformationForm() {
                 setNewCollege({ ...emptyCollege });
               }}
               color="inherit"
+              disabled={isSubmittingCollege}
             >
               Cancel
             </Button>
-            <Button onClick={handleCollegeSubmit} variant="contained">
-              {editingCollegeIndex !== null ? "Save Changes" : "Add University"}
+            <Button
+              onClick={handleCollegeSubmit}
+              variant="contained"
+              disabled={isSubmittingCollege}
+            >
+              {isSubmittingCollege
+                ? "Saving..."
+                : editingCollegeIndex !== null
+                  ? "Save Changes"
+                  : "Add University"}
             </Button>
           </DialogActions>
         </Dialog>

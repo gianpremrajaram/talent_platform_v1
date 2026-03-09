@@ -86,3 +86,34 @@ export async function deleteStudentProject(id: string) {
     where: { id },
   });
 }
+
+export async function getStudentUniversities(userId: string) {
+  return prisma.studentUniversity.findMany({
+    where: { userId },
+  });
+}
+
+export async function addStudentUniversity(
+  userId: string,
+  data: {
+    universityName: string;
+    degreeProgram: string;
+    fieldOfStudy: string;
+    grade?: string;
+    startDate?: Date;
+    endDate?: Date;
+  },
+) {
+  return prisma.studentUniversity.create({
+    data: {
+      userId,
+      ...data,
+    },
+  });
+}
+
+export async function deleteStudentUniversity(id: string) {
+  return prisma.studentUniversity.delete({
+    where: { id },
+  });
+}
