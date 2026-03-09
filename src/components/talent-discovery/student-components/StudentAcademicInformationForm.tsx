@@ -76,6 +76,25 @@ const selectSx = {
   backgroundColor: "#fff",
 };
 
+function formatGraduationDate(college: CollegeForm) {
+  const { expectedDay, expectedMonth, expectedYear } = college;
+  if (!expectedDay && !expectedMonth && !expectedYear) return "Not specified";
+  return [expectedDay, expectedMonth, expectedYear].filter(Boolean).join(" ");
+}
+
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <Box>
+      <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 0.5 }}>
+        {label}
+      </Typography>
+      <Typography variant="body1" sx={{ fontWeight: 500 }}>
+        {value || "—"}
+      </Typography>
+    </Box>
+  );
+}
+
 export default function StudentAcademicInformationForm() {
   const theme = useTheme();
 
@@ -108,33 +127,41 @@ export default function StudentAcademicInformationForm() {
   const [newCollege, setNewCollege] = useState<CollegeForm>({
     ...emptyCollege,
   });
-
-  const handleCollegeChange = (
-    index: number,
-    field: keyof CollegeForm,
-    value: string,
-  ) => {
-    setColleges((prev) =>
-      prev.map((college, i) =>
-        i === index ? { ...college, [field]: value } : college,
-      ),
-    );
-  };
+  const [editingCollegeIndex, setEditingCollegeIndex] = useState<number | null>(
+    null,
+  );
 
   const handleNewCollegeChange = (field: keyof CollegeForm, value: string) => {
     setNewCollege((prev) => ({ ...prev, [field]: value }));
   };
 
-  const openCollegeDialog = () => {
+  const openAddCollegeDialog = () => {
+    setEditingCollegeIndex(null);
     setNewCollege({ ...emptyCollege });
     setCollegeDialogOpen(true);
   };
 
-  const addCollege = () => {
+  const openEditCollegeDialog = (index: number) => {
+    setEditingCollegeIndex(index);
+    setNewCollege({ ...colleges[index] });
+    setCollegeDialogOpen(true);
+  };
+
+  const handleCollegeSubmit = () => {
     if (!newCollege.universityName.trim()) return;
 
-    setColleges((prev) => [...prev, { ...newCollege }]);
+    if (editingCollegeIndex !== null) {
+      setColleges((prev) =>
+        prev.map((college, index) =>
+          index === editingCollegeIndex ? { ...newCollege } : college,
+        ),
+      );
+    } else {
+      setColleges((prev) => [...prev, { ...newCollege }]);
+    }
+
     setNewCollege({ ...emptyCollege });
+    setEditingCollegeIndex(null);
     setCollegeDialogOpen(false);
   };
 
@@ -199,189 +226,120 @@ export default function StudentAcademicInformationForm() {
 
       <Divider />
 
-      {colleges.map((college, index) => (
-        <Box key={index}>
-          <CardContent sx={{ px: { xs: 2, md: 3 }, py: 3 }}>
-            <Stack
-              direction="row"
-              alignItems="center"
-              justifyContent="space-between"
-              sx={{ mb: 3 }}
+      <CardContent sx={{ px: { xs: 2, md: 3 }, py: 3 }}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          sx={{ mb: 2.5 }}
+        >
+          <Typography variant="h5" sx={{ fontWeight: 600 }}>
+            Universities
+          </Typography>
+
+          <Button
+            variant="outlined"
+            startIcon={<Add />}
+            onClick={openAddCollegeDialog}
+          >
+            Add University
+          </Button>
+        </Stack>
+
+        <Stack spacing={2}>
+          {colleges.length === 0 ? (
+            <Box
+              sx={{
+                border: "1px dashed",
+                borderColor: "divider",
+                borderRadius: 2,
+                p: 3,
+                textAlign: "center",
+              }}
             >
-              <Typography variant="h4" sx={{ fontWeight: 500, fontSize: 24 }}>
-                College {index + 1}
+              <Typography variant="body1" color="text.secondary">
+                No universities added yet.
               </Typography>
-
-              <Stack direction="row" spacing={1.5}>
-                {index === 0 && (
-                  <Button
-                    variant="outlined"
-                    startIcon={<Add />}
-                    onClick={openCollegeDialog}
+            </Box>
+          ) : (
+            colleges.map((college, index) => (
+              <Card
+                key={`${college.universityName}-${index}`}
+                elevation={0}
+                sx={{
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 2,
+                }}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Stack
+                    direction={{ xs: "column", sm: "row" }}
+                    alignItems={{ xs: "flex-start", sm: "center" }}
+                    justifyContent="space-between"
+                    spacing={2}
+                    sx={{ mb: 2.5 }}
                   >
-                    Add College
-                  </Button>
-                )}
+                    <Box>
+                      <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                        {college.universityName}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        University {index + 1}
+                      </Typography>
+                    </Box>
 
-                {colleges.length > 1 && (
-                  <Button color="error" onClick={() => removeCollege(index)}>
-                    Remove
-                  </Button>
-                )}
-              </Stack>
-            </Stack>
+                    <Stack direction="row" spacing={1.5}>
+                      <Button
+                        variant="outlined"
+                        onClick={() => openEditCollegeDialog(index)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        color="error"
+                        onClick={() => removeCollege(index)}
+                      >
+                        Delete
+                      </Button>
+                    </Stack>
+                  </Stack>
 
-            <Grid container spacing={3}>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Typography
-                  variant="subtitle1"
-                  sx={{ mb: 1.1, fontWeight: 500 }}
-                >
-                  University Name
-                </Typography>
-                <TextField
-                  fullWidth
-                  value={college.universityName}
-                  onChange={(e) =>
-                    handleCollegeChange(index, "universityName", e.target.value)
-                  }
-                  sx={inputSx}
-                />
-              </Grid>
+                  <Grid container spacing={3}>
+                    <Grid size={{ xs: 12, md: 6 }}>
+                      <InfoRow
+                        label="Field of Study"
+                        value={college.fieldOfStudy}
+                      />
+                    </Grid>
 
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Typography
-                  variant="subtitle1"
-                  sx={{ mb: 1.1, fontWeight: 500 }}
-                >
-                  Field of Study
-                </Typography>
-                <TextField
-                  fullWidth
-                  value={college.fieldOfStudy}
-                  onChange={(e) =>
-                    handleCollegeChange(index, "fieldOfStudy", e.target.value)
-                  }
-                  sx={inputSx}
-                />
-              </Grid>
+                    <Grid size={{ xs: 12, md: 6 }}>
+                      <InfoRow
+                        label="Degree Program"
+                        value={college.degreeProgram}
+                      />
+                    </Grid>
 
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Typography
-                  variant="subtitle1"
-                  sx={{ mb: 1.1, fontWeight: 500 }}
-                >
-                  Grade Received / Expected
-                </Typography>
-                <TextField
-                  fullWidth
-                  value={college.grade}
-                  onChange={(e) =>
-                    handleCollegeChange(index, "grade", e.target.value)
-                  }
-                  sx={inputSx}
-                />
-              </Grid>
+                    <Grid size={{ xs: 12, md: 6 }}>
+                      <InfoRow
+                        label="Grade Received / Expected"
+                        value={college.grade}
+                      />
+                    </Grid>
 
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Typography
-                  variant="subtitle1"
-                  sx={{ mb: 1.1, fontWeight: 500 }}
-                >
-                  Degree Program
-                </Typography>
-                <TextField
-                  fullWidth
-                  value={college.degreeProgram}
-                  onChange={(e) =>
-                    handleCollegeChange(index, "degreeProgram", e.target.value)
-                  }
-                  sx={inputSx}
-                />
-              </Grid>
-
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Typography
-                  variant="subtitle1"
-                  sx={{ mb: 1.1, fontWeight: 500 }}
-                >
-                  Expected Graduation
-                </Typography>
-
-                <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-                  <FormControl fullWidth>
-                    <InputLabel>Day</InputLabel>
-                    <Select
-                      label="Day"
-                      value={college.expectedDay}
-                      onChange={(e) =>
-                        handleCollegeChange(
-                          index,
-                          "expectedDay",
-                          String(e.target.value),
-                        )
-                      }
-                      sx={selectSx}
-                    >
-                      {days.map((day) => (
-                        <MenuItem key={day} value={String(day)}>
-                          {day}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-
-                  <FormControl fullWidth>
-                    <InputLabel>Month</InputLabel>
-                    <Select
-                      label="Month"
-                      value={college.expectedMonth}
-                      onChange={(e) =>
-                        handleCollegeChange(
-                          index,
-                          "expectedMonth",
-                          String(e.target.value),
-                        )
-                      }
-                      sx={selectSx}
-                    >
-                      {months.map((month) => (
-                        <MenuItem key={month} value={month}>
-                          {month}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-
-                  <FormControl fullWidth>
-                    <InputLabel>Year</InputLabel>
-                    <Select
-                      label="Year"
-                      value={college.expectedYear}
-                      onChange={(e) =>
-                        handleCollegeChange(
-                          index,
-                          "expectedYear",
-                          String(e.target.value),
-                        )
-                      }
-                      sx={selectSx}
-                    >
-                      {years.map((year) => (
-                        <MenuItem key={year} value={String(year)}>
-                          {year}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Stack>
-              </Grid>
-            </Grid>
-          </CardContent>
-
-          {index !== colleges.length - 1 && <Divider />}
-        </Box>
-      ))}
+                    <Grid size={{ xs: 12, md: 6 }}>
+                      <InfoRow
+                        label="Expected Graduation"
+                        value={formatGraduationDate(college)}
+                      />
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </Stack>
+      </CardContent>
 
       <Divider />
 
@@ -465,11 +423,18 @@ export default function StudentAcademicInformationForm() {
 
       <Dialog
         open={collegeDialogOpen}
-        onClose={() => setCollegeDialogOpen(false)}
+        onClose={() => {
+          setCollegeDialogOpen(false);
+          setEditingCollegeIndex(null);
+          setNewCollege({ ...emptyCollege });
+        }}
         fullWidth
         maxWidth="md"
       >
-        <DialogTitle>Add New College</DialogTitle>
+        <DialogTitle>
+          {editingCollegeIndex !== null ? "Edit University" : "Add University"}
+        </DialogTitle>
+
         <DialogContent>
           <Grid container spacing={3} sx={{ mt: 0.5 }}>
             <Grid size={{ xs: 12, md: 6 }}>
@@ -528,6 +493,7 @@ export default function StudentAcademicInformationForm() {
                       String(e.target.value),
                     )
                   }
+                  sx={selectSx}
                 >
                   {days.map((day) => (
                     <MenuItem key={day} value={String(day)}>
@@ -550,6 +516,7 @@ export default function StudentAcademicInformationForm() {
                       String(e.target.value),
                     )
                   }
+                  sx={selectSx}
                 >
                   {months.map((month) => (
                     <MenuItem key={month} value={month}>
@@ -572,6 +539,7 @@ export default function StudentAcademicInformationForm() {
                       String(e.target.value),
                     )
                   }
+                  sx={selectSx}
                 >
                   {years.map((year) => (
                     <MenuItem key={year} value={String(year)}>
@@ -583,12 +551,20 @@ export default function StudentAcademicInformationForm() {
             </Grid>
           </Grid>
         </DialogContent>
+
         <DialogActions>
-          <Button onClick={() => setCollegeDialogOpen(false)} color="inherit">
+          <Button
+            onClick={() => {
+              setCollegeDialogOpen(false);
+              setEditingCollegeIndex(null);
+              setNewCollege({ ...emptyCollege });
+            }}
+            color="inherit"
+          >
             Cancel
           </Button>
-          <Button onClick={addCollege} variant="contained">
-            Add College
+          <Button onClick={handleCollegeSubmit} variant="contained">
+            {editingCollegeIndex !== null ? "Save Changes" : "Add University"}
           </Button>
         </DialogActions>
       </Dialog>
