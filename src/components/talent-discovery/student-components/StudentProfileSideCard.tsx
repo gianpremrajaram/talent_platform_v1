@@ -10,11 +10,11 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import TwitterIcon from "@mui/icons-material/Twitter";
+import XIcon from "@mui/icons-material/X";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import GitHubIcon from "@mui/icons-material/GitHub";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
-import KeyOutlinedIcon from "@mui/icons-material/KeyOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 
 type MenuItem = {
@@ -24,8 +24,8 @@ type MenuItem = {
   onClick?: () => void;
 };
 
-type SocialLink = {
-  platform: "twitter" | "facebook" | "linkedin";
+export type SocialLink = {
+  platform: "twitter" | "facebook" | "linkedin" | "github";
   href?: string;
 };
 
@@ -39,9 +39,23 @@ type ProfileSidebarCardProps = {
 };
 
 function SocialIcon({ platform }: { platform: SocialLink["platform"] }) {
-  if (platform === "twitter") return <TwitterIcon fontSize="small" />;
+  if (platform === "twitter") return <XIcon fontSize="small" />;
   if (platform === "facebook") return <FacebookIcon fontSize="small" />;
+  if (platform === "github") return <GitHubIcon fontSize="small" />;
   return <LinkedInIcon fontSize="small" />;
+}
+
+function getSocialBg(platform: SocialLink["platform"]) {
+  switch (platform) {
+    case "linkedin":
+      return "#0A66C2";
+    case "facebook":
+      return "#1877F2";
+    case "github":
+      return "#171515";
+    case "twitter":
+      return "#000000";
+  }
 }
 
 export default function StudentProfileSideCard({
@@ -49,11 +63,7 @@ export default function StudentProfileSideCard({
   role,
   avatarSrc,
   projectCount,
-  socialLinks = [
-    { platform: "twitter" },
-    { platform: "facebook" },
-    { platform: "linkedin" },
-  ],
+  socialLinks = [],
   menuItems = [
     {
       label: "Personal Information",
@@ -66,6 +76,8 @@ export default function StudentProfileSideCard({
     },
   ],
 }: ProfileSidebarCardProps) {
+  const clickableSocialLinks = socialLinks.filter((item) => !!item.href);
+
   return (
     <Card
       elevation={0}
@@ -79,7 +91,6 @@ export default function StudentProfileSideCard({
       }}
     >
       <CardContent sx={{ p: 0 }}>
-        {/* Profile Section */}
         <Box sx={{ px: 2, pt: 3, pb: 2, textAlign: "center" }}>
           <Box
             sx={{
@@ -118,35 +129,39 @@ export default function StudentProfileSideCard({
             {role}
           </Typography>
 
-          {/* Social Icons */}
-          <Stack
-            direction="row"
-            spacing={1}
-            justifyContent="center"
-            sx={{ mb: 2 }}
-          >
-            {socialLinks.map((item, index) => (
-              <IconButton
-                key={`${item.platform}-${index}`}
-                component={item.href ? "a" : "button"}
-                href={item.href}
-                sx={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: 1,
-                  bgcolor: "primary.main",
-                  color: "common.white",
-                  "&:hover": {
-                    bgcolor: "primary.dark",
-                  },
-                }}
-              >
-                <SocialIcon platform={item.platform} />
-              </IconButton>
-            ))}
-          </Stack>
+          {!!clickableSocialLinks.length && (
+            <Stack
+              direction="row"
+              spacing={1}
+              justifyContent="center"
+              sx={{ mb: 2 }}
+            >
+              {clickableSocialLinks.map((item, index) => (
+                <IconButton
+                  key={`${item.platform}-${index}`}
+                  component="a"
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={item.platform}
+                  sx={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: 1,
+                    bgcolor: getSocialBg(item.platform),
+                    color: "common.white",
+                    "&:hover": {
+                      opacity: 0.9,
+                      bgcolor: getSocialBg(item.platform),
+                    },
+                  }}
+                >
+                  <SocialIcon platform={item.platform} />
+                </IconButton>
+              ))}
+            </Stack>
+          )}
 
-          {/* Stats */}
           <Stack
             direction="row"
             divider={<Divider orientation="vertical" flexItem />}
@@ -163,7 +178,6 @@ export default function StudentProfileSideCard({
           </Stack>
         </Box>
 
-        {/* Menu Section */}
         <Box sx={{ px: 2, pb: 2 }}>
           <Stack spacing={0.5}>
             {menuItems.map((item, index) => (

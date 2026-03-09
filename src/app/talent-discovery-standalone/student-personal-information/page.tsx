@@ -9,12 +9,25 @@ import {
   getStudentPersonalInfo,
   getStudentSocialLinks,
 } from "@/lib/services/student-services";
-import dayjs from "dayjs";
+
+function mapDbPlatformToSidebarPlatform(
+  platform: "LINKEDIN" | "FACEBOOK" | "GITHUB" | "TWITTER",
+): "linkedin" | "facebook" | "github" | "twitter" {
+  switch (platform) {
+    case "LINKEDIN":
+      return "linkedin";
+    case "FACEBOOK":
+      return "facebook";
+    case "GITHUB":
+      return "github";
+    case "TWITTER":
+      return "twitter";
+  }
+}
 
 export default async function StudentPersonalInformationPage() {
   const session = await getServerAuthSession();
   const sessionUser = session?.user as any | undefined;
-
   if (!sessionUser?.id) {
     redirect("/sign-in");
   }
@@ -26,7 +39,10 @@ export default async function StudentPersonalInformationPage() {
   const lastName = rest.join(" ");
   const personalInfo = await getStudentPersonalInfo(userId);
   const socialLinks = await getStudentSocialLinks(userId);
-
+  const sidebarSocialLinks = socialLinks.map((link) => ({
+    platform: mapDbPlatformToSidebarPlatform(link.platform),
+    href: link.url,
+  }));
   const initialValues = {
     firstName: firstName ?? undefined,
     lastName: lastName ?? undefined,
@@ -74,6 +90,7 @@ export default async function StudentPersonalInformationPage() {
               name="Sadhana"
               role="Student"
               projectCount={3}
+              socialLinks={sidebarSocialLinks}
             />
             <StudentPersonalInfoForm
               userId={userId}
