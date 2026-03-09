@@ -24,7 +24,9 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import {
+  addStudentAcheivementTagAction,
   addStudentUniversityAction,
+  deleteStudentAcheivementTagAction,
   deleteStudentUniversityAction,
 } from "../../../app/talent-discovery-standalone/student-academic-information/action";
 
@@ -36,6 +38,11 @@ type CollegeForm = {
   degreeProgram: string;
   startDate: Dayjs | null;
   endDate: Dayjs | null;
+};
+
+type AcheivementTag = {
+  id: string;
+  name: string;
 };
 
 type UniversityFromServer = {
@@ -51,6 +58,7 @@ type UniversityFromServer = {
 type StudentAcademicInformationFormProps = {
   userId: string;
   university: UniversityFromServer[];
+  acheivementTags: { id: string; name: string }[];
 };
 
 const emptyCollege: CollegeForm = {
@@ -91,6 +99,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 export default function StudentAcademicInformationForm({
   userId,
   university,
+  acheivementTags,
 }: StudentAcademicInformationFormProps) {
   const theme = useTheme();
 
@@ -105,8 +114,9 @@ export default function StudentAcademicInformationForm({
       endDate: uni.endDate ? dayjs(uni.endDate) : null,
     })),
   );
-
-  const [achievements, setAchievements] = useState<string[]>([]);
+  //initialize the acheivement tags
+  const [achievements, setAchievements] =
+    useState<AcheivementTag[]>(acheivementTags);
   const [additionalInfo, setAdditionalInfo] = useState("");
   const [tagDialogOpen, setTagDialogOpen] = useState(false);
   const [newTag, setNewTag] = useState("");
@@ -184,25 +194,38 @@ export default function StudentAcademicInformationForm({
     });
   };
 
-  const addTag = () => {
+  const addTag = async () => {
     const trimmed = newTag.trim();
     if (!trimmed) return;
 
-    if (
-      achievements.some((tag) => tag.toLowerCase() === trimmed.toLowerCase())
-    ) {
+    const exists = achievements.some(
+      (tag) => tag.name.toLowerCase() === trimmed.toLowerCase(),
+    );
+    if (exists) {
       setNewTag("");
       setTagDialogOpen(false);
       return;
     }
 
-    setAchievements((prev) => [...prev, trimmed]);
-    setNewTag("");
-    setTagDialogOpen(false);
+    try {
+      const created = await addStudentAcheivementTagAction(userId, trimmed);
+      setAchievements((prev) => [...prev, created]);
+      setNewTag("");
+      setTagDialogOpen(false);
+    } catch (error) {
+      console.error("Failed to add achievement tag:", error);
+    }
   };
 
-  const removeTag = (tagToDelete: string) => {
-    setAchievements((prev) => prev.filter((tag) => tag !== tagToDelete));
+  const removeTag = async (tagToDelete: AcheivementTag) => {
+    setAchievements((prev) => prev.filter((tag) => tag.id !== tagToDelete.id));
+    try {
+      await deleteStudentAcheivementTagAction(tagToDelete.id);
+    } catch (error) {
+      console.error("Failed to delete achievement tag:", error);
+      //if it errors restore the tag and preserve it.
+      setAchievements((prev) => [...prev, tagToDelete]);
+    }
   };
 
   return (
@@ -385,8 +408,8 @@ export default function StudentAcademicInformationForm({
             <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
               {achievements.map((achievement) => (
                 <Chip
-                  key={achievement}
-                  label={achievement}
+                  key={achievement.id}
+                  label={achievement.name}
                   onDelete={() => removeTag(achievement)}
                   deleteIcon={<Close fontSize="small" />}
                   sx={{

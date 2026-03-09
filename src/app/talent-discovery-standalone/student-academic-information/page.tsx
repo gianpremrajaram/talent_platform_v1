@@ -4,7 +4,10 @@ import StudentProfileSideCard from "@/components/talent-discovery/student-compon
 import StudentAcademicExperienceForm from "@/components/talent-discovery/student-components/StudentAcademicInformationForm";
 import { Box } from "@mui/material";
 import { getServerAuthSession } from "@/lib/getServerAuthSession";
-import { getStudentUniversities } from "@/lib/services/student-services";
+import {
+  getStudentAcheivementTags,
+  getStudentUniversities,
+} from "@/lib/services/student-services";
 import { redirect } from "next/navigation";
 
 export default async function StudentAcademicInformationPage() {
@@ -17,6 +20,7 @@ export default async function StudentAcademicInformationPage() {
 
   const userId = sessionUser.id as string;
   const universities = await getStudentUniversities(userId);
+  const acheivementTags = await getStudentAcheivementTags(userId);
 
   // Convert DB dates into serializable values for the client component
   const transformedUniversities = universities.map((uni) => ({
@@ -64,6 +68,7 @@ export default async function StudentAcademicInformationPage() {
             <StudentAcademicExperienceForm
               userId={userId}
               university={transformedUniversities}
+              acheivementTags={acheivementTags}
             />
           </Box>
         </Box>

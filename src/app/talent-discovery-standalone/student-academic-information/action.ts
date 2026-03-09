@@ -2,6 +2,8 @@
 import {
   addStudentUniversity,
   deleteStudentUniversity,
+  deleteStudentAcheivementTag,
+  addStudentAcheivementTag,
 } from "@/lib/services/student-services";
 import { revalidatePath } from "next/cache";
 
@@ -38,7 +40,21 @@ export async function addStudentUniversityAction(
   return created;
 }
 
+export async function addStudentAcheivementTagAction(
+  userId: string,
+  name: string,
+) {
+  const created = await addStudentAcheivementTag(userId, name);
+  revalidatePath("/talent-discovery-standalone/student-academic-information");
+  return created;
+}
+
 export async function deleteStudentUniversityAction(id: string) {
   await deleteStudentUniversity(id);
+  revalidatePath("/talent-discovery-standalone/student-academic-information");
+}
+
+export async function deleteStudentAcheivementTagAction(id: string) {
+  await deleteStudentAcheivementTag(id);
   revalidatePath("/talent-discovery-standalone/student-academic-information");
 }

@@ -22,6 +22,12 @@ export async function getStudentTechnicalSkills(userId: string) {
   });
 }
 
+export async function getStudentAcheivementTags(userId: string) {
+  return prisma.studentAcheivementTag.findMany({
+    where: { userId },
+  });
+}
+
 export async function addWorkExperience(
   userId: string,
   data: {
@@ -48,6 +54,21 @@ export async function addStudentSkill(userId: string, name: string) {
       userId,
       name,
     },
+  });
+}
+
+export async function addStudentAcheivementTag(userId: string, name: string) {
+  return prisma.studentAcheivementTag.create({
+    data: {
+      userId,
+      name,
+    },
+  });
+}
+
+export async function deleteStudentAcheivementTag(id: string) {
+  return prisma.studentAcheivementTag.delete({
+    where: { id },
   });
 }
 

@@ -40,11 +40,12 @@ model User {
   membershipDashboardMember MembershipDashboardMember? @relation("UserDashboardMember")
 
   // Audit log relation (actor)
-  auditLogs           AuditLog[]              @relation("AuditActor")
-  workExperiences     StudentWorkExperience[] @relation("UserWorkExperiences")
-  studentProjects     StudentProjects[]       @relation("StudentProjects")
-  studentSkills       StudentSkill[]          @relation("StudentSkills")
-  studentUniversities StudentUniversity[]     @relation("StudentUniversity")
+  auditLogs              AuditLog[]              @relation("AuditActor")
+  workExperiences        StudentWorkExperience[] @relation("UserWorkExperiences")
+  studentProjects        StudentProjects[]       @relation("StudentProjects")
+  studentSkills          StudentSkill[]          @relation("StudentSkills")
+  studentUniversities    StudentUniversity[]     @relation("StudentUniversity")
+  studentAcheivementTags StudentAcheivementTag[] @relation("StudentAcheivementTag")
 }
 
 model Organisation {
@@ -301,5 +302,18 @@ model StudentUniversity {
 
   user User @relation("StudentUniversity", fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
+}
+
+model StudentAcheivementTag {
+  id     String @id @default(cuid())
+  userId String
+
+  name      String
+  createdAt DateTime @default(now())
+
+  user User @relation("StudentAcheivementTag", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
   @@index([userId])
 }
