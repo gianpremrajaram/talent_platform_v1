@@ -40,7 +40,8 @@ model User {
   membershipDashboardMember MembershipDashboardMember? @relation("UserDashboardMember")
 
   // Audit log relation (actor)
-  auditLogs AuditLog[] @relation("AuditActor")
+  auditLogs       AuditLog[]              @relation("AuditActor")
+  workExperiences StudentWorkExperience[] @relation("UserWorkExperiences")
 }
 
 model Organisation {
@@ -236,4 +237,21 @@ model AuditLog {
 
   @@index([entityType, entityId])
   @@index([actorId])
+}
+
+model StudentWorkExperience {
+  id     String @id @default(cuid())
+  userId String // ← Direct link to User instead of StudentProfile
+
+  company     String
+  title       String
+  description String?
+  startDate   DateTime?
+  endDate     DateTime?
+  isCurrent   Boolean   @default(false)
+  location    String?
+
+  user User @relation("UserWorkExperiences", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
