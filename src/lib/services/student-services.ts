@@ -22,6 +22,12 @@ export async function getStudentTechnicalSkills(userId: string) {
   });
 }
 
+export async function getStudentAcheivementTags(userId: string) {
+  return prisma.studentAcheivementTag.findMany({
+    where: { userId },
+  });
+}
+
 export async function addWorkExperience(
   userId: string,
   data: {
@@ -48,6 +54,21 @@ export async function addStudentSkill(userId: string, name: string) {
       userId,
       name,
     },
+  });
+}
+
+export async function addStudentAcheivementTag(userId: string, name: string) {
+  return prisma.studentAcheivementTag.create({
+    data: {
+      userId,
+      name,
+    },
+  });
+}
+
+export async function deleteStudentAcheivementTag(id: string) {
+  return prisma.studentAcheivementTag.delete({
+    where: { id },
   });
 }
 
@@ -83,6 +104,56 @@ export async function deleteWorkExperience(id: string) {
 
 export async function deleteStudentProject(id: string) {
   return prisma.studentProjects.delete({
+    where: { id },
+  });
+}
+
+export async function getStudentUniversities(userId: string) {
+  return prisma.studentUniversity.findMany({
+    where: { userId },
+  });
+}
+
+export async function addStudentUniversity(
+  userId: string,
+  data: {
+    universityName: string;
+    degreeProgram: string;
+    fieldOfStudy: string;
+    grade?: string;
+    startDate?: Date;
+    endDate?: Date;
+  },
+) {
+  return prisma.studentUniversity.create({
+    data: {
+      userId,
+      ...data,
+    },
+  });
+}
+
+export async function updateStudentUniversity(
+  id: string,
+  data: {
+    universityName?: string;
+    degreeProgram?: string;
+    fieldOfStudy?: string;
+    grade?: string;
+    startDate?: Date;
+    endDate?: Date;
+  },
+) {
+  return prisma.studentUniversity.update({
+    where: {
+      id,
+    },
+    data,
+  });
+}
+
+export async function deleteStudentUniversity(id: string) {
+  return prisma.studentUniversity.delete({
     where: { id },
   });
 }

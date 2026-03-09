@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, startTransition } from "react";
+import dayjs, { Dayjs } from "dayjs";
 import {
   Box,
   Button,
@@ -12,56 +13,63 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
-  FormControl,
   Grid,
-  InputLabel,
-  MenuItem,
-  Select,
   Stack,
   TextField,
   Typography,
   useTheme,
 } from "@mui/material";
 import { Add, Close } from "@mui/icons-material";
-
-const days = Array.from({ length: 31 }, (_, i) => i + 1);
-const months = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
-const years = Array.from(
-  { length: 10 },
-  (_, i) => new Date().getFullYear() + i,
-);
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import {
+  addStudentAcheivementTagAction,
+  addStudentUniversityAction,
+  updateStudentUniversityAction,
+  deleteStudentAcheivementTagAction,
+  deleteStudentUniversityAction,
+} from "../../../app/talent-discovery-standalone/student-academic-information/action";
 
 type CollegeForm = {
+  id?: string;
   universityName: string;
   fieldOfStudy: string;
   grade: string;
   degreeProgram: string;
-  expectedDay: string;
-  expectedMonth: string;
-  expectedYear: string;
+  startDate: Dayjs | null;
+  endDate: Dayjs | null;
+};
+
+type AcheivementTag = {
+  id: string;
+  name: string;
+};
+
+type UniversityFromServer = {
+  id: string;
+  universityName: string;
+  fieldOfStudy: string;
+  grade: string;
+  degreeProgram: string;
+  startDate: string | null;
+  endDate: string | null;
+};
+
+type StudentAcademicInformationFormProps = {
+  userId: string;
+  university: UniversityFromServer[];
+  acheivementTags: { id: string; name: string }[];
 };
 
 const emptyCollege: CollegeForm = {
+  id: "",
   universityName: "",
   fieldOfStudy: "",
   grade: "",
   degreeProgram: "",
-  expectedDay: "",
-  expectedMonth: "",
-  expectedYear: "",
+  startDate: null,
+  endDate: null,
 };
 
 const inputSx = {
@@ -71,15 +79,9 @@ const inputSx = {
   },
 };
 
-const selectSx = {
-  borderRadius: 1.5,
-  backgroundColor: "#fff",
-};
-
-function formatGraduationDate(college: CollegeForm) {
-  const { expectedDay, expectedMonth, expectedYear } = college;
-  if (!expectedDay && !expectedMonth && !expectedYear) return "Not specified";
-  return [expectedDay, expectedMonth, expectedYear].filter(Boolean).join(" ");
+function formatMonthYear(date: Dayjs | null) {
+  if (!date) return "Not specified";
+  return date.format("MMMM YYYY");
 }
 
 function InfoRow({ label, value }: { label: string; value: string }) {
@@ -95,34 +97,30 @@ function InfoRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-export default function StudentAcademicInformationForm() {
+export default function StudentAcademicInformationForm({
+  userId,
+  university,
+  acheivementTags,
+}: StudentAcademicInformationFormProps) {
   const theme = useTheme();
 
-  const [colleges, setColleges] = useState<CollegeForm[]>([
-    {
-      universityName: "Stebin",
-      fieldOfStudy: "Computer Science",
-      grade: "Predicted Merit",
-      degreeProgram: "Masters of Science",
-      expectedDay: "30",
-      expectedMonth: "January",
-      expectedYear: "2026",
-    },
-  ]);
-
-  const [achievements, setAchievements] = useState<string[]>([
-    "Deans List 2025",
-    "First Prize UCL Hackathon",
-    "Fintech Society Head",
-  ]);
-
-  const [additionalInfo, setAdditionalInfo] = useState(
-    "Include information like relevant courses being pursued and career aspirations",
+  const [colleges, setColleges] = useState<CollegeForm[]>(
+    university.map((uni) => ({
+      id: uni.id,
+      universityName: uni.universityName,
+      fieldOfStudy: uni.fieldOfStudy,
+      grade: uni.grade ?? "",
+      degreeProgram: uni.degreeProgram,
+      startDate: uni.startDate ? dayjs(uni.startDate) : null,
+      endDate: uni.endDate ? dayjs(uni.endDate) : null,
+    })),
   );
-
+  //initialize the acheivement tags
+  const [achievements, setAchievements] =
+    useState<AcheivementTag[]>(acheivementTags);
+  const [additionalInfo, setAdditionalInfo] = useState("");
   const [tagDialogOpen, setTagDialogOpen] = useState(false);
   const [newTag, setNewTag] = useState("");
-
   const [collegeDialogOpen, setCollegeDialogOpen] = useState(false);
   const [newCollege, setNewCollege] = useState<CollegeForm>({
     ...emptyCollege,
@@ -130,8 +128,12 @@ export default function StudentAcademicInformationForm() {
   const [editingCollegeIndex, setEditingCollegeIndex] = useState<number | null>(
     null,
   );
+  const [isSubmittingCollege, setIsSubmittingCollege] = useState(false);
 
-  const handleNewCollegeChange = (field: keyof CollegeForm, value: string) => {
+  const handleNewCollegeChange = <K extends keyof CollegeForm>(
+    field: K,
+    value: CollegeForm[K],
+  ) => {
     setNewCollege((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -147,461 +149,468 @@ export default function StudentAcademicInformationForm() {
     setCollegeDialogOpen(true);
   };
 
-  const handleCollegeSubmit = () => {
+  const handleCollegeSubmit = async () => {
     if (!newCollege.universityName.trim()) return;
 
-    if (editingCollegeIndex !== null) {
-      setColleges((prev) =>
-        prev.map((college, index) =>
-          index === editingCollegeIndex ? { ...newCollege } : college,
-        ),
-      );
-    } else {
-      setColleges((prev) => [...prev, { ...newCollege }]);
+    try {
+      setIsSubmittingCollege(true);
+
+      if (editingCollegeIndex !== null) {
+        const editingCollege = colleges[editingCollegeIndex];
+        if (!editingCollege.id) return;
+
+        const updated = await updateStudentUniversityAction({
+          id: editingCollege.id,
+          userId,
+          universityName: newCollege.universityName.trim(),
+          fieldOfStudy: newCollege.fieldOfStudy.trim(),
+          degreeProgram: newCollege.degreeProgram.trim(),
+          grade: newCollege.grade.trim() || undefined,
+          startDate: newCollege.startDate
+            ? newCollege.startDate.toISOString()
+            : null,
+          endDate: newCollege.endDate ? newCollege.endDate.toISOString() : null,
+        });
+
+        setColleges((prev) =>
+          prev.map((college, index) =>
+            index === editingCollegeIndex
+              ? {
+                  ...newCollege,
+                  id: updated.id,
+                }
+              : college,
+          ),
+        );
+      } else {
+        await addStudentUniversityAction({
+          userId,
+          universityName: newCollege.universityName.trim(),
+          fieldOfStudy: newCollege.fieldOfStudy.trim(),
+          degreeProgram: newCollege.degreeProgram.trim(),
+          grade: newCollege.grade.trim() || undefined,
+          startDate: newCollege.startDate
+            ? newCollege.startDate.toISOString()
+            : null,
+          endDate: newCollege.endDate ? newCollege.endDate.toISOString() : null,
+        });
+
+        setColleges((prev) => [...prev, { ...newCollege }]);
+      }
+
+      setNewCollege({ ...emptyCollege });
+      setEditingCollegeIndex(null);
+      setCollegeDialogOpen(false);
+    } catch (error) {
+      console.error("Failed to save university:", error);
+    } finally {
+      setIsSubmittingCollege(false);
     }
-
-    setNewCollege({ ...emptyCollege });
-    setEditingCollegeIndex(null);
-    setCollegeDialogOpen(false);
   };
 
-  const removeCollege = (index: number) => {
-    setColleges((prev) => prev.filter((_, i) => i !== index));
+  const removeCollege = (id: string) => {
+    startTransition(async () => {
+      await deleteStudentUniversityAction(id);
+
+      setColleges((prev) => prev.filter((college) => college.id !== id));
+    });
   };
 
-  const addTag = () => {
+  const addTag = async () => {
     const trimmed = newTag.trim();
     if (!trimmed) return;
 
-    if (
-      achievements.some((tag) => tag.toLowerCase() === trimmed.toLowerCase())
-    ) {
+    const exists = achievements.some(
+      (tag) => tag.name.toLowerCase() === trimmed.toLowerCase(),
+    );
+    if (exists) {
       setNewTag("");
       setTagDialogOpen(false);
       return;
     }
 
-    setAchievements((prev) => [...prev, trimmed]);
-    setNewTag("");
-    setTagDialogOpen(false);
+    try {
+      const created = await addStudentAcheivementTagAction(userId, trimmed);
+      setAchievements((prev) => [...prev, created]);
+      setNewTag("");
+      setTagDialogOpen(false);
+    } catch (error) {
+      console.error("Failed to add achievement tag:", error);
+    }
   };
 
-  const removeTag = (tagToDelete: string) => {
-    setAchievements((prev) => prev.filter((tag) => tag !== tagToDelete));
-  };
-
-  const handleSave = () => {
-    console.log({
-      colleges,
-      achievements,
-      additionalInfo,
-    });
+  const removeTag = async (tagToDelete: AcheivementTag) => {
+    setAchievements((prev) => prev.filter((tag) => tag.id !== tagToDelete.id));
+    try {
+      await deleteStudentAcheivementTagAction(tagToDelete.id);
+    } catch (error) {
+      console.error("Failed to delete achievement tag:", error);
+      //if it errors restore the tag and preserve it.
+      setAchievements((prev) => [...prev, tagToDelete]);
+    }
   };
 
   return (
-    <Card
-      elevation={0}
-      sx={{
-        border: "1px solid",
-        borderColor: "divider",
-        borderRadius: 2,
-        overflow: "hidden",
-        backgroundColor: "#fff",
-      }}
-    >
-      <Box
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <Card
+        elevation={0}
         sx={{
-          px: 3,
-          py: 2,
-          borderBottom: `1px solid ${theme.palette.divider}`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: 2,
+          overflow: "hidden",
+          backgroundColor: "#fff",
         }}
       >
-        <Typography variant="h5" sx={{ fontWeight: 600 }}>
-          Academic Information
-        </Typography>
-      </Box>
-
-      <Divider />
-
-      <CardContent sx={{ px: { xs: 2, md: 3 }, py: 3 }}>
-        <Stack
-          direction="row"
-          alignItems="center"
-          justifyContent="space-between"
-          sx={{ mb: 2.5 }}
+        <Box
+          sx={{
+            px: 3,
+            py: 2,
+            borderBottom: `1px solid ${theme.palette.divider}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
         >
           <Typography variant="h5" sx={{ fontWeight: 600 }}>
-            Universities
+            Academic Information
           </Typography>
+        </Box>
 
-          <Button
-            variant="outlined"
-            startIcon={<Add />}
-            onClick={openAddCollegeDialog}
-          >
-            Add University
-          </Button>
-        </Stack>
+        <Divider />
 
-        <Stack spacing={2}>
-          {colleges.length === 0 ? (
-            <Box
-              sx={{
-                border: "1px dashed",
-                borderColor: "divider",
-                borderRadius: 2,
-                p: 3,
-                textAlign: "center",
-              }}
-            >
-              <Typography variant="body1" color="text.secondary">
-                No universities added yet.
-              </Typography>
-            </Box>
-          ) : (
-            colleges.map((college, index) => (
-              <Card
-                key={`${college.universityName}-${index}`}
-                elevation={0}
-                sx={{
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderRadius: 2,
-                }}
-              >
-                <CardContent sx={{ p: 3 }}>
-                  <Stack
-                    direction={{ xs: "column", sm: "row" }}
-                    alignItems={{ xs: "flex-start", sm: "center" }}
-                    justifyContent="space-between"
-                    spacing={2}
-                    sx={{ mb: 2.5 }}
-                  >
-                    <Box>
-                      <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                        {college.universityName}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        University {index + 1}
-                      </Typography>
-                    </Box>
-
-                    <Stack direction="row" spacing={1.5}>
-                      <Button
-                        variant="outlined"
-                        onClick={() => openEditCollegeDialog(index)}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        color="error"
-                        onClick={() => removeCollege(index)}
-                      >
-                        Delete
-                      </Button>
-                    </Stack>
-                  </Stack>
-
-                  <Grid container spacing={3}>
-                    <Grid size={{ xs: 12, md: 6 }}>
-                      <InfoRow
-                        label="Field of Study"
-                        value={college.fieldOfStudy}
-                      />
-                    </Grid>
-
-                    <Grid size={{ xs: 12, md: 6 }}>
-                      <InfoRow
-                        label="Degree Program"
-                        value={college.degreeProgram}
-                      />
-                    </Grid>
-
-                    <Grid size={{ xs: 12, md: 6 }}>
-                      <InfoRow
-                        label="Grade Received / Expected"
-                        value={college.grade}
-                      />
-                    </Grid>
-
-                    <Grid size={{ xs: 12, md: 6 }}>
-                      <InfoRow
-                        label="Expected Graduation"
-                        value={formatGraduationDate(college)}
-                      />
-                    </Grid>
-                  </Grid>
-                </CardContent>
-              </Card>
-            ))
-          )}
-        </Stack>
-      </CardContent>
-
-      <Divider />
-
-      <CardContent sx={{ px: { xs: 2, md: 3 }, py: 3 }}>
-        <Box sx={{ mt: 0 }}>
+        <CardContent sx={{ px: { xs: 2, md: 3 }, py: 3 }}>
           <Stack
             direction="row"
             alignItems="center"
             justifyContent="space-between"
-            sx={{ mb: 1.5 }}
+            sx={{ mb: 2.5 }}
           >
             <Typography variant="h5" sx={{ fontWeight: 600 }}>
-              Achievement Tags
+              Universities
             </Typography>
 
             <Button
               variant="outlined"
               startIcon={<Add />}
-              onClick={() => setTagDialogOpen(true)}
-              sx={{ px: 2.25, py: 1 }}
+              onClick={openAddCollegeDialog}
             >
-              Add Tag
+              Add University
             </Button>
           </Stack>
 
-          <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-            {achievements.map((achievement) => (
-              <Chip
-                key={achievement}
-                label={achievement}
-                onDelete={() => removeTag(achievement)}
-                deleteIcon={<Close fontSize="small" />}
+          <Stack spacing={2}>
+            {colleges.length === 0 ? (
+              <Box
                 sx={{
-                  borderRadius: 1,
-                  backgroundColor: "#f3f4f6",
-                  "& .MuiChip-label": { px: 1.5 },
-                  "& .MuiChip-deleteIcon": { fontSize: 18 },
+                  border: "1px dashed",
+                  borderColor: "divider",
+                  borderRadius: 2,
+                  p: 3,
+                  textAlign: "center",
                 }}
-              />
-            ))}
+              >
+                <Typography variant="body1" color="text.secondary">
+                  No universities added yet.
+                </Typography>
+              </Box>
+            ) : (
+              colleges.map((college, index) => (
+                <Card
+                  key={`${college.universityName}-${index}`}
+                  elevation={0}
+                  sx={{
+                    border: "1px solid",
+                    borderColor: "divider",
+                    borderRadius: 2,
+                  }}
+                >
+                  <CardContent sx={{ p: 3 }}>
+                    <Stack
+                      direction={{ xs: "column", sm: "row" }}
+                      alignItems={{ xs: "flex-start", sm: "center" }}
+                      justifyContent="space-between"
+                      spacing={2}
+                      sx={{ mb: 2.5 }}
+                    >
+                      <Box>
+                        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                          {college.universityName}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          University {index + 1}
+                        </Typography>
+                      </Box>
+
+                      <Stack direction="row" spacing={1.5}>
+                        <Button
+                          variant="outlined"
+                          onClick={() => openEditCollegeDialog(index)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          color="error"
+                          onClick={() =>
+                            college.id && removeCollege(college.id)
+                          }
+                        >
+                          Delete
+                        </Button>
+                      </Stack>
+                    </Stack>
+
+                    <Grid container spacing={3}>
+                      <Grid size={{ xs: 12, md: 6 }}>
+                        <InfoRow
+                          label="Field of Study"
+                          value={college.fieldOfStudy}
+                        />
+                      </Grid>
+
+                      <Grid size={{ xs: 12, md: 6 }}>
+                        <InfoRow
+                          label="Degree Program"
+                          value={college.degreeProgram}
+                        />
+                      </Grid>
+
+                      <Grid size={{ xs: 12, md: 6 }}>
+                        <InfoRow
+                          label="Grade Received / Expected"
+                          value={college.grade}
+                        />
+                      </Grid>
+
+                      <Grid size={{ xs: 12, md: 6 }}>
+                        <InfoRow
+                          label="Start Date"
+                          value={formatMonthYear(college.startDate)}
+                        />
+                      </Grid>
+
+                      <Grid size={{ xs: 12, md: 6 }}>
+                        <InfoRow
+                          label="End Date / Expected Date"
+                          value={formatMonthYear(college.endDate)}
+                        />
+                      </Grid>
+                    </Grid>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </Stack>
-        </Box>
+        </CardContent>
 
-        <Box sx={{ mt: 4 }}>
-          <Typography variant="h5" sx={{ fontWeight: 600 }}>
-            Additional Academic Information
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-            Include information like relevant courses being pursued and career
-            aspirations
-          </Typography>
-          <TextField
-            fullWidth
-            multiline
-            minRows={4}
-            value={additionalInfo}
-            onChange={(e) => setAdditionalInfo(e.target.value)}
-            sx={inputSx}
-          />
-        </Box>
-      </CardContent>
+        <Divider />
 
-      <Divider />
+        <CardContent sx={{ px: { xs: 2, md: 3 }, py: 3 }}>
+          <Box sx={{ mt: 0 }}>
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+              sx={{ mb: 1.5 }}
+            >
+              <Typography variant="h5" sx={{ fontWeight: 600 }}>
+                Achievement Tags
+              </Typography>
 
-      <Box
-        sx={{
-          px: { xs: 2, md: 3 },
-          py: 2.5,
-          display: "flex",
-          justifyContent: "flex-end",
-          gap: 2,
-        }}
-      >
-        <Button variant="outlined" color="inherit">
-          Cancel
-        </Button>
-        <Button variant="contained" onClick={handleSave}>
-          Save
-        </Button>
-      </Box>
+              <Button
+                variant="outlined"
+                startIcon={<Add />}
+                onClick={() => setTagDialogOpen(true)}
+                sx={{ px: 2.25, py: 1 }}
+              >
+                Add Tag
+              </Button>
+            </Stack>
 
-      <Dialog
-        open={collegeDialogOpen}
-        onClose={() => {
-          setCollegeDialogOpen(false);
-          setEditingCollegeIndex(null);
-          setNewCollege({ ...emptyCollege });
-        }}
-        fullWidth
-        maxWidth="md"
-      >
-        <DialogTitle>
-          {editingCollegeIndex !== null ? "Edit University" : "Add University"}
-        </DialogTitle>
+            <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+              {achievements.map((achievement) => (
+                <Chip
+                  key={achievement.id}
+                  label={achievement.name}
+                  onDelete={() => removeTag(achievement)}
+                  deleteIcon={<Close fontSize="small" />}
+                  sx={{
+                    borderRadius: 1,
+                    backgroundColor: "#f3f4f6",
+                    "& .MuiChip-label": { px: 1.5 },
+                    "& .MuiChip-deleteIcon": { fontSize: 18 },
+                  }}
+                />
+              ))}
+            </Stack>
+          </Box>
+        </CardContent>
 
-        <DialogContent>
-          <Grid container spacing={3} sx={{ mt: 0.5 }}>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <TextField
-                fullWidth
-                label="University Name"
-                value={newCollege.universityName}
-                onChange={(e) =>
-                  handleNewCollegeChange("universityName", e.target.value)
-                }
-              />
-            </Grid>
+        <Dialog
+          open={collegeDialogOpen}
+          onClose={() => {
+            if (isSubmittingCollege) return;
+            setCollegeDialogOpen(false);
+            setEditingCollegeIndex(null);
+            setNewCollege({ ...emptyCollege });
+          }}
+          fullWidth
+          maxWidth="md"
+        >
+          <DialogTitle>
+            {editingCollegeIndex !== null
+              ? "Edit University"
+              : "Add University"}
+          </DialogTitle>
 
-            <Grid size={{ xs: 12, md: 6 }}>
-              <TextField
-                fullWidth
-                label="Field of Study"
-                value={newCollege.fieldOfStudy}
-                onChange={(e) =>
-                  handleNewCollegeChange("fieldOfStudy", e.target.value)
-                }
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 6 }}>
-              <TextField
-                fullWidth
-                label="Grade Received / Expected"
-                value={newCollege.grade}
-                onChange={(e) =>
-                  handleNewCollegeChange("grade", e.target.value)
-                }
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 6 }}>
-              <TextField
-                fullWidth
-                label="Degree Program"
-                value={newCollege.degreeProgram}
-                onChange={(e) =>
-                  handleNewCollegeChange("degreeProgram", e.target.value)
-                }
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 4 }}>
-              <FormControl fullWidth>
-                <InputLabel>Day</InputLabel>
-                <Select
-                  label="Day"
-                  value={newCollege.expectedDay}
+          <DialogContent>
+            <Grid container spacing={3} sx={{ mt: 0.5 }}>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  fullWidth
+                  label="University Name"
+                  value={newCollege.universityName}
                   onChange={(e) =>
+                    handleNewCollegeChange("universityName", e.target.value)
+                  }
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  fullWidth
+                  label="Field of Study"
+                  value={newCollege.fieldOfStudy}
+                  onChange={(e) =>
+                    handleNewCollegeChange("fieldOfStudy", e.target.value)
+                  }
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  fullWidth
+                  label="Grade Received / Expected"
+                  value={newCollege.grade}
+                  onChange={(e) =>
+                    handleNewCollegeChange("grade", e.target.value)
+                  }
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  fullWidth
+                  label="Degree Program"
+                  value={newCollege.degreeProgram}
+                  onChange={(e) =>
+                    handleNewCollegeChange("degreeProgram", e.target.value)
+                  }
+                />
+              </Grid>
+
+              <Grid size={{ xs: 12, md: 6 }}>
+                <DatePicker
+                  label="Start Date"
+                  views={["year", "month"]}
+                  value={newCollege.startDate}
+                  onChange={(value) =>
                     handleNewCollegeChange(
-                      "expectedDay",
-                      String(e.target.value),
+                      "startDate",
+                      value ? dayjs(value) : null,
                     )
                   }
-                  sx={selectSx}
-                >
-                  {days.map((day) => (
-                    <MenuItem key={day} value={String(day)}>
-                      {day}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
+                  format="MMMM YYYY"
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                    },
+                  }}
+                />
+              </Grid>
 
-            <Grid size={{ xs: 12, md: 4 }}>
-              <FormControl fullWidth>
-                <InputLabel>Month</InputLabel>
-                <Select
-                  label="Month"
-                  value={newCollege.expectedMonth}
-                  onChange={(e) =>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <DatePicker
+                  label="End Date / Expected Date"
+                  views={["year", "month"]}
+                  value={newCollege.endDate}
+                  onChange={(value) =>
                     handleNewCollegeChange(
-                      "expectedMonth",
-                      String(e.target.value),
+                      "endDate",
+                      value ? dayjs(value) : null,
                     )
                   }
-                  sx={selectSx}
-                >
-                  {months.map((month) => (
-                    <MenuItem key={month} value={month}>
-                      {month}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+                  format="MMMM YYYY"
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                    },
+                  }}
+                />
+              </Grid>
             </Grid>
+          </DialogContent>
 
-            <Grid size={{ xs: 12, md: 4 }}>
-              <FormControl fullWidth>
-                <InputLabel>Year</InputLabel>
-                <Select
-                  label="Year"
-                  value={newCollege.expectedYear}
-                  onChange={(e) =>
-                    handleNewCollegeChange(
-                      "expectedYear",
-                      String(e.target.value),
-                    )
-                  }
-                  sx={selectSx}
-                >
-                  {years.map((year) => (
-                    <MenuItem key={year} value={String(year)}>
-                      {year}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-          </Grid>
-        </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => {
+                setCollegeDialogOpen(false);
+                setEditingCollegeIndex(null);
+                setNewCollege({ ...emptyCollege });
+              }}
+              color="inherit"
+              disabled={isSubmittingCollege}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCollegeSubmit}
+              variant="contained"
+              disabled={isSubmittingCollege}
+            >
+              {isSubmittingCollege
+                ? "Saving..."
+                : editingCollegeIndex !== null
+                  ? "Save Changes"
+                  : "Add University"}
+            </Button>
+          </DialogActions>
+        </Dialog>
 
-        <DialogActions>
-          <Button
-            onClick={() => {
-              setCollegeDialogOpen(false);
-              setEditingCollegeIndex(null);
-              setNewCollege({ ...emptyCollege });
-            }}
-            color="inherit"
-          >
-            Cancel
-          </Button>
-          <Button onClick={handleCollegeSubmit} variant="contained">
-            {editingCollegeIndex !== null ? "Save Changes" : "Add University"}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog
-        open={tagDialogOpen}
-        onClose={() => setTagDialogOpen(false)}
-        fullWidth
-        maxWidth="xs"
-      >
-        <DialogTitle>Add Academic Achievement</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            fullWidth
-            margin="dense"
-            label="New Tag"
-            value={newTag}
-            onChange={(e) => setNewTag(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                addTag();
-              }
-            }}
-            placeholder="Type a new achievement tag"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setTagDialogOpen(false)} color="inherit">
-            Cancel
-          </Button>
-          <Button onClick={addTag} variant="contained">
-            Add
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Card>
+        <Dialog
+          open={tagDialogOpen}
+          onClose={() => setTagDialogOpen(false)}
+          fullWidth
+          maxWidth="xs"
+        >
+          <DialogTitle>Add Academic Achievement</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              fullWidth
+              margin="dense"
+              label="New Tag"
+              value={newTag}
+              onChange={(e) => setNewTag(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addTag();
+                }
+              }}
+              placeholder="Type a new achievement tag"
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setTagDialogOpen(false)} color="inherit">
+              Cancel
+            </Button>
+            <Button onClick={addTag} variant="contained">
+              Add
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Card>
+    </LocalizationProvider>
   );
 }
