@@ -26,6 +26,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import {
   addStudentAcheivementTagAction,
   addStudentUniversityAction,
+  updateStudentUniversityAction,
   deleteStudentAcheivementTagAction,
   deleteStudentUniversityAction,
 } from "../../../app/talent-discovery-standalone/student-academic-information/action";
@@ -155,9 +156,30 @@ export default function StudentAcademicInformationForm({
       setIsSubmittingCollege(true);
 
       if (editingCollegeIndex !== null) {
+        const editingCollege = colleges[editingCollegeIndex];
+        if (!editingCollege.id) return;
+
+        const updated = await updateStudentUniversityAction({
+          id: editingCollege.id,
+          userId,
+          universityName: newCollege.universityName.trim(),
+          fieldOfStudy: newCollege.fieldOfStudy.trim(),
+          degreeProgram: newCollege.degreeProgram.trim(),
+          grade: newCollege.grade.trim() || undefined,
+          startDate: newCollege.startDate
+            ? newCollege.startDate.toISOString()
+            : null,
+          endDate: newCollege.endDate ? newCollege.endDate.toISOString() : null,
+        });
+
         setColleges((prev) =>
           prev.map((college, index) =>
-            index === editingCollegeIndex ? { ...newCollege } : college,
+            index === editingCollegeIndex
+              ? {
+                  ...newCollege,
+                  id: updated.id,
+                }
+              : college,
           ),
         );
       } else {

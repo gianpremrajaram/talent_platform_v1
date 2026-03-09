@@ -133,6 +133,25 @@ export async function addStudentUniversity(
   });
 }
 
+export async function updateStudentUniversity(
+  id: string,
+  data: {
+    universityName?: string;
+    degreeProgram?: string;
+    fieldOfStudy?: string;
+    grade?: string;
+    startDate?: Date;
+    endDate?: Date;
+  },
+) {
+  return prisma.studentUniversity.update({
+    where: {
+      id,
+    },
+    data,
+  });
+}
+
 export async function deleteStudentUniversity(id: string) {
   return prisma.studentUniversity.delete({
     where: { id },
