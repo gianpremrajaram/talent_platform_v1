@@ -11,6 +11,7 @@ import {
   getStudentWorkExperiences,
   getStudentProjects,
   getStudentTechnicalSkills,
+  getStudentSocialLinks,
 } from "@/lib/services/student-services";
 import { get } from "node:http";
 
@@ -24,6 +25,21 @@ function mapExperience(exp: any) {
     endDate: exp.endDate ? exp.endDate.toISOString() : "",
     description: exp.description ?? "",
   };
+}
+
+function mapDbPlatformToSidebarPlatform(
+  platform: "LINKEDIN" | "FACEBOOK" | "GITHUB" | "TWITTER",
+): "linkedin" | "facebook" | "github" | "twitter" {
+  switch (platform) {
+    case "LINKEDIN":
+      return "linkedin";
+    case "FACEBOOK":
+      return "facebook";
+    case "GITHUB":
+      return "github";
+    case "TWITTER":
+      return "twitter";
+  }
 }
 
 function mapProject(project: any) {
@@ -48,7 +64,11 @@ export default async function StudentCVFunctionsPage() {
   const experiences = await getStudentWorkExperiences(userId);
   const projects = await getStudentProjects(userId);
   const studentTechnicalSkills = await getStudentTechnicalSkills(userId);
-
+  const socialLinks = await getStudentSocialLinks(userId);
+  const sidebarSocialLinks = socialLinks.map((link) => ({
+    platform: mapDbPlatformToSidebarPlatform(link.platform),
+    href: link.url,
+  }));
   console.log(sessionUser);
   const userName = sessionUser.name;
   const roleName = sessionUser.roleKeys[0] === "STUDENT" ? "Student" : "User";
@@ -83,6 +103,7 @@ export default async function StudentCVFunctionsPage() {
               name={userName}
               role={roleName}
               projectCount={3}
+              socialLinks={sidebarSocialLinks}
             />
 
             <Stack spacing={3}>
