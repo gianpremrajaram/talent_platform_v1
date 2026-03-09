@@ -7,7 +7,11 @@ import StudentWorkExperience from "@/components/talent-discovery/student-compone
 import StudentTechnicalSkills from "@/components/talent-discovery/student-components/StudentTechnicalSkills";
 import StudentProjectsSection from "@/components/talent-discovery/student-components/StudentProjectSection";
 import { getServerAuthSession } from "@/lib/getServerAuthSession";
-import { getStudentWorkExperiences } from "@/lib/services/student-services";
+import {
+  getStudentWorkExperiences,
+  getStudentProjects,
+} from "@/lib/services/student-services";
+
 //TODO: add location field in the work expereince dialog box.
 function mapExperience(exp: any) {
   return {
@@ -20,6 +24,17 @@ function mapExperience(exp: any) {
   };
 }
 
+function mapProject(project: any) {
+  return {
+    id: project.id,
+    title: project.title,
+    startDate: project.startDate,
+    endDate: project.endDate,
+    description: project.description ?? "",
+    projectLink: project.projectLink ?? undefined,
+  };
+}
+
 export default async function StudentCVFunctionsPage() {
   const session = await getServerAuthSession();
   const sessionUser = session?.user as any | undefined;
@@ -27,6 +42,7 @@ export default async function StudentCVFunctionsPage() {
 
   const userId = sessionUser.id as string;
   const experiences = await getStudentWorkExperiences(userId);
+  const projects = await getStudentProjects(userId);
   console.log(sessionUser);
   const userName = sessionUser.name;
   const roleName = sessionUser.roleKeys[0] === "STUDENT" ? "Student" : "User";
@@ -69,7 +85,10 @@ export default async function StudentCVFunctionsPage() {
                 initialExperiences={experiences.map(mapExperience)}
               />
               <StudentTechnicalSkills />
-              <StudentProjectsSection />
+              <StudentProjectsSection
+                userId={userId}
+                initialStudentProjects={projects.map(mapProject)}
+              />
             </Stack>
           </Box>
         </Box>

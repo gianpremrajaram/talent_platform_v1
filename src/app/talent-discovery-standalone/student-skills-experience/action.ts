@@ -1,7 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { addWorkExperience } from "@/lib/services/student-services";
+import {
+  addWorkExperience,
+  addStudentProject,
+} from "@/lib/services/student-services";
 
 export async function addWorkExperienceAction(
   userId: string,
@@ -35,4 +38,25 @@ export async function addWorkExperienceAction(
     endDate: created.endDate ? created.endDate.toISOString() : "",
     description: created.description ?? "",
   };
+}
+
+export async function addStudentProjectAction(
+  userId: string,
+  data: {
+    title: string;
+    description?: string;
+    startDate?: string;
+    endDate?: string;
+    projectLink?: string;
+  },
+) {
+  const created = await addStudentProject(userId, {
+    title: data.title,
+    description: data.description || undefined,
+    startDate: data.startDate ? new Date(`${data.startDate}-01`) : undefined,
+    endDate: data.endDate ? new Date(`${data.endDate}-01`) : undefined,
+    projectLink: data.projectLink || undefined,
+  });
+  revalidatePath("/talent-discovery-standalone/student-skills-experience");
+  return created;
 }

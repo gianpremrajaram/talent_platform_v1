@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useTransition } from "react";
 import {
   Box,
   Button,
@@ -17,41 +17,41 @@ import {
   Typography,
 } from "@mui/material";
 import { Add, Delete, GitHub } from "@mui/icons-material";
+import { addStudentProjectAction } from "@/app/talent-discovery-standalone/student-skills-experience/action";
 
 type ProjectItem = {
-  id: number;
+  id: string;
   title: string;
-  timeline: string;
-  githubLink: string;
+  startDate?: Date | string;
+  endDate?: Date | string;
   description: string;
+  projectLink?: string;
 };
 
-export default function StudentProjectsSection() {
-  const [projects, setProjects] = useState<ProjectItem[]>([
-    {
-      id: 1,
-      title: "E-commerce Platform",
-      timeline: "Aug 2023 - Aug 2025",
-      githubLink: "https://github.com/example/ecommerce-platform",
-      description:
-        "Built a full-stack e-commerce platform with React, Node.js, and PostgreSQL. Implemented user authentication, payment processing, and order management.",
-    },
-    {
-      id: 2,
-      title: "ML Stock Predictor",
-      timeline: "Aug 2023 - Aug 2025",
-      githubLink: "https://github.com/example/ml-stock-predictor",
-      description:
-        "Developed a machine learning model to predict stock prices using LSTM neural networks with 85% accuracy on test data.",
-    },
-  ]);
+type Props = {
+  userId: string;
+  initialExperiences?: ProjectItem[];
+};
+
+export default function StudentProjectsSection({
+  userId,
+  initialStudentProjects = [],
+}: {
+  userId: string;
+  initialStudentProjects?: ProjectItem[];
+}) {
+  const [isPending, startTransition] = useTransition();
+  const [projects, setProjects] = useState<ProjectItem[]>(
+    initialStudentProjects,
+  );
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newProject, setNewProject] = useState<Omit<ProjectItem, "id">>({
     title: "",
-    timeline: "",
-    githubLink: "",
+    startDate: undefined,
+    endDate: undefined,
     description: "",
+    projectLink: undefined,
   });
 
   const handleChange = (
@@ -62,26 +62,27 @@ export default function StudentProjectsSection() {
   };
 
   const handleAddProject = () => {
-    if (!newProject.title.trim()) return;
+    startTransition(async () => {
+      const created = await addStudentProjectAction(userId, {
+        title: newProject.title,
+        description: newProject.description,
+        startDate: newProject.startDate as string | undefined,
+        endDate: newProject.endDate as string | undefined,
+        projectLink: newProject.projectLink,
+      });
 
-    setProjects((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        ...newProject,
-      },
-    ]);
-
-    setNewProject({
-      title: "",
-      timeline: "",
-      githubLink: "",
-      description: "",
+      setProjects((prev) => [...prev, created as ProjectItem]);
+      setDialogOpen(false);
+      setNewProject({
+        title: "",
+        startDate: undefined,
+        endDate: undefined,
+        description: "",
+        projectLink: undefined,
+      });
     });
-    setDialogOpen(false);
   };
-
-  const handleRemoveProject = (id: number) => {
+  const handleRemoveProject = (id: string) => {
     setProjects((prev) => prev.filter((project) => project.id !== id));
   };
 
@@ -156,15 +157,28 @@ export default function StudentProjectsSection() {
                         {project.title}
                       </Typography>
 
-                      <Typography
-                        variant="body1"
-                        color="text.primary"
-                        sx={{ mb: 1.25 }}
-                      >
-                        {project.timeline}
-                      </Typography>
+                      {(project.startDate || project.endDate) && (
+                        <Typography
+                          variant="body1"
+                          color="text.primary"
+                          sx={{ mb: 1.25 }}
+                        >
+                          {project.startDate &&
+                          typeof project.startDate === "string"
+                            ? project.startDate
+                            : project.startDate instanceof Date
+                              ? project.startDate.toLocaleDateString()
+                              : ""}{" "}
+                          {project.endDate &&
+                          typeof project.endDate === "string"
+                            ? `- ${project.endDate}`
+                            : project.endDate instanceof Date
+                              ? `- ${project.endDate.toLocaleDateString()}`
+                              : ""}
+                        </Typography>
+                      )}
 
-                      {project.githubLink && (
+                      {project.projectLink && (
                         <Stack
                           direction="row"
                           spacing={0.75}
@@ -175,13 +189,13 @@ export default function StudentProjectsSection() {
                             sx={{ fontSize: 18, color: "text.secondary" }}
                           />
                           <Link
-                            href={project.githubLink}
+                            href={project.projectLink}
                             target="_blank"
                             rel="noopener noreferrer"
                             underline="hover"
                             sx={{ fontSize: 14 }}
                           >
-                            View GitHub Repository
+                            View Project
                           </Link>
                         </Stack>
                       )}
@@ -230,19 +244,27 @@ export default function StudentProjectsSection() {
             />
 
             <TextField
-              label="Timeline"
-              placeholder="Aug 2023 - Aug 2025"
+              label="Start Date"
+              placeholder="2023-08"
               fullWidth
-              value={newProject.timeline}
-              onChange={(e) => handleChange("timeline", e.target.value)}
+              value={newProject.startDate || ""}
+              onChange={(e) => handleChange("startDate", e.target.value)}
             />
 
             <TextField
-              label="GitHub Link"
+              label="End Date"
+              placeholder="2025-08"
+              fullWidth
+              value={newProject.endDate || ""}
+              onChange={(e) => handleChange("endDate", e.target.value)}
+            />
+
+            <TextField
+              label="Project Link"
               placeholder="https://github.com/username/project"
               fullWidth
-              value={newProject.githubLink}
-              onChange={(e) => handleChange("githubLink", e.target.value)}
+              value={newProject.projectLink || ""}
+              onChange={(e) => handleChange("projectLink", e.target.value)}
             />
 
             <TextField
@@ -260,8 +282,12 @@ export default function StudentProjectsSection() {
           <Button onClick={() => setDialogOpen(false)} color="inherit">
             Cancel
           </Button>
-          <Button variant="contained" onClick={handleAddProject}>
-            Add Project
+          <Button
+            variant="contained"
+            onClick={handleAddProject}
+            disabled={isPending}
+          >
+            {isPending ? "Adding..." : "Add Project"}
           </Button>
         </DialogActions>
       </Dialog>

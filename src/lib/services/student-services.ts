@@ -1,8 +1,16 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 
+//api to get the work expereince of the student
 export async function getStudentWorkExperiences(userId: string) {
   return prisma.studentWorkExperience.findMany({
+    where: { userId },
+    orderBy: { startDate: "desc" },
+  });
+}
+//api to get the projects of the student
+export async function getStudentProjects(userId: string) {
+  return prisma.studentProjects.findMany({
     where: { userId },
     orderBy: { startDate: "desc" },
   });
@@ -21,6 +29,24 @@ export async function addWorkExperience(
   },
 ) {
   return prisma.studentWorkExperience.create({
+    data: {
+      userId,
+      ...data,
+    },
+  });
+}
+
+export async function addStudentProject(
+  userId: string,
+  data: {
+    title: string;
+    description?: string;
+    startDate?: Date;
+    endDate?: Date;
+    projectLink?: string;
+  },
+) {
+  return prisma.studentProjects.create({
     data: {
       userId,
       ...data,
