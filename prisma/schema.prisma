@@ -44,6 +44,11 @@ model User {
   workExperiences StudentWorkExperience[] @relation("UserWorkExperiences")
   studentProjects StudentProjects[]       @relation("StudentProjects")
   studentSkills   StudentSkill[]          @relation("StudentSkills")
+  
+  // issue #14 needs seed student has studentprofile and consent 
+  // so i create two model and make those models relate to user model
+  studentProfile StudentProfile?
+  consents       Consent[]
 }
 
 model Organisation {
@@ -66,7 +71,7 @@ enum OrganisationType {
 
 model Role {
   id    Int    @id @default(autoincrement())
-  key   String @unique // "ADMIN", "PARTNER", "ACADEMIC"
+  key   String @unique // "ADMIN", "STUDENT", "RECRUITER"
   label String
 
   userRoles      UserRole[]
@@ -284,4 +289,20 @@ model StudentSkill {
 
   @@unique([userId, name])
   @@index([userId])
+}
+
+model StudentProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bio    String?
+}
+
+model Consent {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // 例如 "PRIVACY_POLICY"
+  accepted  Boolean
+  createdAt DateTime @default(now())
 }
