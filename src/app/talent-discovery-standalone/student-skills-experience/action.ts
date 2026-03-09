@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import {
   addWorkExperience,
   addStudentProject,
+  deleteWorkExperience,
+  deleteStudentProject,
 } from "@/lib/services/student-services";
 
 export async function addWorkExperienceAction(
@@ -59,4 +61,14 @@ export async function addStudentProjectAction(
   });
   revalidatePath("/talent-discovery-standalone/student-skills-experience");
   return created;
+}
+
+export async function deleteWorkExperienceAction(id: string) {
+  await deleteWorkExperience(id);
+  revalidatePath("/talent-discovery-standalone/student-skills-experience");
+}
+
+export async function deleteProjectAction(id: string) {
+  await deleteStudentProject(id);
+  revalidatePath("/talent-discovery-standalone/student-skills-experience");
 }

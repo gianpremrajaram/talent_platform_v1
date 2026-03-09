@@ -16,8 +16,11 @@ import {
   IconButton,
 } from "@mui/material";
 import { Add, Delete } from "@mui/icons-material";
-import { addWorkExperienceAction } from "../../../app/talent-discovery-standalone/student-skills-experience/action";
-
+import {
+  addWorkExperienceAction,
+  deleteWorkExperienceAction,
+} from "../../../app/talent-discovery-standalone/student-skills-experience/action";
+//TODO: show confirmation for delete action!
 type WorkExperience = {
   id: string;
   role: string;
@@ -82,6 +85,13 @@ export default function StudentWorkExperience({
       });
 
       setDialogOpen(false);
+    });
+  };
+
+  const handleRemoveExperience = (id: string) => {
+    startTransition(async () => {
+      await deleteWorkExperienceAction(id);
+      setExperiences((prev) => prev.filter((exp) => exp.id !== id));
     });
   };
 
@@ -184,8 +194,12 @@ export default function StudentWorkExperience({
                       </Typography>
                     </Box>
 
-                    <IconButton color="error" disabled>
-                      {/* delete later */}
+                    <IconButton
+                      color="error"
+                      onClick={() => handleRemoveExperience(exp.id)}
+                      disabled={isPending}
+                    >
+                      <Delete />
                     </IconButton>
                   </Stack>
                 </CardContent>

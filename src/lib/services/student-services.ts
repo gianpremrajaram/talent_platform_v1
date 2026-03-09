@@ -53,3 +53,15 @@ export async function addStudentProject(
     },
   });
 }
+
+export async function deleteWorkExperience(id: string) {
+  return prisma.studentWorkExperience.delete({
+    where: { id },
+  });
+}
+
+export async function deleteStudentProject(id: string) {
+  return prisma.studentProjects.delete({
+    where: { id },
+  });
+}

@@ -17,8 +17,11 @@ import {
   Typography,
 } from "@mui/material";
 import { Add, Delete, GitHub } from "@mui/icons-material";
-import { addStudentProjectAction } from "@/app/talent-discovery-standalone/student-skills-experience/action";
-
+import {
+  addStudentProjectAction,
+  deleteProjectAction,
+} from "@/app/talent-discovery-standalone/student-skills-experience/action";
+//TODO: show confirmation for delete action!
 type ProjectItem = {
   id: string;
   title: string;
@@ -82,8 +85,12 @@ export default function StudentProjectsSection({
       });
     });
   };
+
   const handleRemoveProject = (id: string) => {
-    setProjects((prev) => prev.filter((project) => project.id !== id));
+    startTransition(async () => {
+      await deleteProjectAction(id);
+      setProjects((prev) => prev.filter((project) => project.id !== id));
+    });
   };
 
   return (
