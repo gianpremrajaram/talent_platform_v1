@@ -157,3 +157,37 @@ export async function deleteStudentUniversity(id: string) {
     where: { id },
   });
 }
+
+export async function getStudentPersonalInfo(userId: string) {
+  //it will be unique for every user
+  return prisma.studentPersonalInformation.findUnique({
+    where: { userId },
+  });
+}
+
+//instead of sep add and update we create one single api that safely handles both cases easily.
+export async function upsertStudentPersonalInfo(
+  userId: string,
+  data: {
+    dateOfBirth?: Date;
+    gender?: string;
+    phoneCode?: string;
+    phoneNumber?: string;
+    designation?: string;
+    address1?: string;
+    address2?: string;
+    country?: string;
+    state?: string;
+    city?: string;
+    postalCode?: string;
+  },
+) {
+  return prisma.studentPersonalInformation.upsert({
+    where: { userId },
+    update: data,
+    create: {
+      userId,
+      ...data,
+    },
+  });
+}

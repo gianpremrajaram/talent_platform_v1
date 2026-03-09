@@ -40,12 +40,13 @@ model User {
   membershipDashboardMember MembershipDashboardMember? @relation("UserDashboardMember")
 
   // Audit log relation (actor)
-  auditLogs              AuditLog[]              @relation("AuditActor")
-  workExperiences        StudentWorkExperience[] @relation("UserWorkExperiences")
-  studentProjects        StudentProjects[]       @relation("StudentProjects")
-  studentSkills          StudentSkill[]          @relation("StudentSkills")
-  studentUniversities    StudentUniversity[]     @relation("StudentUniversity")
-  studentAcheivementTags StudentAcheivementTag[] @relation("StudentAcheivementTag")
+  auditLogs                  AuditLog[]                  @relation("AuditActor")
+  workExperiences            StudentWorkExperience[]     @relation("UserWorkExperiences")
+  studentProjects            StudentProjects[]           @relation("StudentProjects")
+  studentSkills              StudentSkill[]              @relation("StudentSkills")
+  studentUniversities        StudentUniversity[]         @relation("StudentUniversity")
+  studentAcheivementTags     StudentAcheivementTag[]     @relation("StudentAcheivementTag")
+  studentPersonalInformation StudentPersonalInformation?
 }
 
 model Organisation {
@@ -315,5 +316,32 @@ model StudentAcheivementTag {
   user User @relation("StudentAcheivementTag", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, name])
+  @@index([userId])
+}
+
+model StudentPersonalInformation {
+  id     String @id @default(cuid())
+  userId String @unique
+
+  dateOfBirth DateTime?
+  gender      String?
+
+  phoneCode   String?
+  phoneNumber String?
+
+  designation String?
+
+  address1   String?
+  address2   String?
+  country    String?
+  state      String?
+  city       String?
+  postalCode String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
 }
