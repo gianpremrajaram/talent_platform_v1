@@ -1,5 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
+import { SocialPlatform } from "@prisma/client";
 
 //api to get the work expereince of the student
 export async function getStudentWorkExperiences(userId: string) {
@@ -18,6 +19,12 @@ export async function getStudentProjects(userId: string) {
 
 export async function getStudentTechnicalSkills(userId: string) {
   return prisma.studentSkill.findMany({
+    where: { userId },
+  });
+}
+
+export async function getStudentAcheivementTags(userId: string) {
+  return prisma.studentAcheivementTag.findMany({
     where: { userId },
   });
 }
@@ -48,6 +55,21 @@ export async function addStudentSkill(userId: string, name: string) {
       userId,
       name,
     },
+  });
+}
+
+export async function addStudentAcheivementTag(userId: string, name: string) {
+  return prisma.studentAcheivementTag.create({
+    data: {
+      userId,
+      name,
+    },
+  });
+}
+
+export async function deleteStudentAcheivementTag(id: string) {
+  return prisma.studentAcheivementTag.delete({
+    where: { id },
   });
 }
 
@@ -83,6 +105,161 @@ export async function deleteWorkExperience(id: string) {
 
 export async function deleteStudentProject(id: string) {
   return prisma.studentProjects.delete({
+    where: { id },
+  });
+}
+
+export async function getStudentUniversities(userId: string) {
+  return prisma.studentUniversity.findMany({
+    where: { userId },
+  });
+}
+
+export async function getStudentSocialLinks(userId: string) {
+  return prisma.studentSocialLink.findMany({
+    where: { userId },
+  });
+}
+
+export async function addStudentUniversity(
+  userId: string,
+  data: {
+    universityName: string;
+    degreeProgram: string;
+    fieldOfStudy: string;
+    grade?: string;
+    startDate?: Date;
+    endDate?: Date;
+  },
+) {
+  return prisma.studentUniversity.create({
+    data: {
+      userId,
+      ...data,
+    },
+  });
+}
+
+export async function updateStudentUniversity(
+  id: string,
+  data: {
+    universityName?: string;
+    degreeProgram?: string;
+    fieldOfStudy?: string;
+    grade?: string;
+    startDate?: Date;
+    endDate?: Date;
+  },
+) {
+  return prisma.studentUniversity.update({
+    where: {
+      id,
+    },
+    data,
+  });
+}
+
+export async function deleteStudentUniversity(id: string) {
+  return prisma.studentUniversity.delete({
+    where: { id },
+  });
+}
+
+export async function getStudentPersonalInfo(userId: string) {
+  //it will be unique for every user
+  return prisma.studentPersonalInformation.findUnique({
+    where: { userId },
+  });
+}
+
+//instead of sep add and update we create one single api that safely handles both cases easily.
+export async function upsertStudentPersonalInfo(
+  userId: string,
+  data: {
+    dateOfBirth?: Date;
+    gender?: string;
+    phoneCode?: string;
+    phoneNumber?: string;
+    designation?: string;
+    address1?: string;
+    address2?: string;
+    country?: string;
+    state?: string;
+    city?: string;
+    postalCode?: string;
+  },
+) {
+  return prisma.studentPersonalInformation.upsert({
+    where: { userId },
+    update: data,
+    create: {
+      userId,
+      ...data,
+    },
+  });
+}
+
+export type StudentSocialLinkInput = {
+  platform: SocialPlatform;
+  url: string;
+};
+
+export async function createStudentSocialLink(
+  userId: string,
+  data: StudentSocialLinkInput,
+) {
+  return prisma.studentSocialLink.create({
+    data: {
+      userId,
+      platform: data.platform,
+      url: data.url,
+    },
+  });
+}
+
+export async function saveStudentSocialLinks(
+  userId: string,
+  links: StudentSocialLinkInput[],
+) {
+  return prisma.$transaction(async (tx) => {
+    await tx.studentSocialLink.deleteMany({
+      where: { userId },
+    });
+
+    if (!links.length) {
+      return [];
+    }
+
+    await tx.studentSocialLink.createMany({
+      data: links.map((link) => ({
+        userId,
+        platform: link.platform,
+        url: link.url,
+      })),
+    });
+
+    return tx.studentSocialLink.findMany({
+      where: { userId },
+      orderBy: { createdAt: "asc" },
+    });
+  });
+}
+
+export async function updateStudentSocialLink(
+  id: string,
+  data: Partial<StudentSocialLinkInput>,
+) {
+  return prisma.studentSocialLink.update({
+    where: { id },
+    data: {
+      ...(data.platform !== undefined ? { platform: data.platform } : {}),
+      ...(data.url !== undefined ? { url: data.url } : {}),
+    },
+  });
+}
+
+export async function deleteStudentSocialLink(id: string) {
+  return prisma.studentSocialLink.delete({
     where: { id },
   });
 }
