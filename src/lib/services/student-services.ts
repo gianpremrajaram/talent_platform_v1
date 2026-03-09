@@ -1,5 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
+import { SocialPlatform } from "@prisma/client";
 
 //api to get the work expereince of the student
 export async function getStudentWorkExperiences(userId: string) {
@@ -114,6 +115,12 @@ export async function getStudentUniversities(userId: string) {
   });
 }
 
+export async function getStudentSocialLinks(userId: string) {
+  return prisma.studentSocialLink.findMany({
+    where: { userId },
+  });
+}
+
 export async function addStudentUniversity(
   userId: string,
   data: {
@@ -189,5 +196,70 @@ export async function upsertStudentPersonalInfo(
       userId,
       ...data,
     },
+  });
+}
+
+export type StudentSocialLinkInput = {
+  platform: SocialPlatform;
+  url: string;
+};
+
+export async function createStudentSocialLink(
+  userId: string,
+  data: StudentSocialLinkInput,
+) {
+  return prisma.studentSocialLink.create({
+    data: {
+      userId,
+      platform: data.platform,
+      url: data.url,
+    },
+  });
+}
+
+export async function saveStudentSocialLinks(
+  userId: string,
+  links: StudentSocialLinkInput[],
+) {
+  return prisma.$transaction(async (tx) => {
+    await tx.studentSocialLink.deleteMany({
+      where: { userId },
+    });
+
+    if (!links.length) {
+      return [];
+    }
+
+    await tx.studentSocialLink.createMany({
+      data: links.map((link) => ({
+        userId,
+        platform: link.platform,
+        url: link.url,
+      })),
+    });
+
+    return tx.studentSocialLink.findMany({
+      where: { userId },
+      orderBy: { createdAt: "asc" },
+    });
+  });
+}
+
+export async function updateStudentSocialLink(
+  id: string,
+  data: Partial<StudentSocialLinkInput>,
+) {
+  return prisma.studentSocialLink.update({
+    where: { id },
+    data: {
+      ...(data.platform !== undefined ? { platform: data.platform } : {}),
+      ...(data.url !== undefined ? { url: data.url } : {}),
+    },
+  });
+}
+
+export async function deleteStudentSocialLink(id: string) {
+  return prisma.studentSocialLink.delete({
+    where: { id },
   });
 }

@@ -1,7 +1,11 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { upsertStudentPersonalInfo } from "@/lib/services/student-services";
+import {
+  upsertStudentPersonalInfo,
+  saveStudentSocialLinks,
+} from "@/lib/services/student-services";
+import { SocialPlatform } from "@prisma/client";
 
 type SaveStudentPersonalInfoInput = {
   userId: string;
@@ -44,4 +48,19 @@ export async function saveStudentPersonalInfoAction({
   });
 
   return { success: true };
+}
+
+type SaveStudentSocialLinksInput = {
+  userId: string;
+  links: {
+    platform: SocialPlatform;
+    url: string;
+  }[];
+};
+
+export async function saveStudentSocialLinksAction({
+  userId,
+  links,
+}: SaveStudentSocialLinksInput) {
+  return saveStudentSocialLinks(userId, links);
 }

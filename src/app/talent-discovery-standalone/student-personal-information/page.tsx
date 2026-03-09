@@ -5,7 +5,10 @@ import StudentProfileSideCard from "@/components/talent-discovery/student-compon
 import StudentPersonalInfoForm from "@/components/talent-discovery/student-components/StudentPersonalInfoForm";
 import { Box } from "@mui/material";
 import { getServerAuthSession } from "@/lib/getServerAuthSession";
-import { getStudentPersonalInfo } from "@/lib/services/student-services";
+import {
+  getStudentPersonalInfo,
+  getStudentSocialLinks,
+} from "@/lib/services/student-services";
 import dayjs from "dayjs";
 
 export default async function StudentPersonalInformationPage() {
@@ -22,6 +25,8 @@ export default async function StudentPersonalInformationPage() {
   const [firstName, ...rest] = fullName.split(" ");
   const lastName = rest.join(" ");
   const personalInfo = await getStudentPersonalInfo(userId);
+  const socialLinks = await getStudentSocialLinks(userId);
+
   const initialValues = {
     firstName: firstName ?? undefined,
     lastName: lastName ?? undefined,
@@ -73,6 +78,7 @@ export default async function StudentPersonalInformationPage() {
             <StudentPersonalInfoForm
               userId={userId}
               initialValues={initialValues}
+              initialSocialLinks={socialLinks}
             />
           </Box>
         </Box>

@@ -47,6 +47,7 @@ model User {
   studentUniversities        StudentUniversity[]         @relation("StudentUniversity")
   studentAcheivementTags     StudentAcheivementTag[]     @relation("StudentAcheivementTag")
   studentPersonalInformation StudentPersonalInformation?
+  studentSocialLinks         StudentSocialLink[]
 }
 
 model Organisation {
@@ -343,5 +344,27 @@ model StudentPersonalInformation {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
+}
+
+enum SocialPlatform {
+  LINKEDIN
+  FACEBOOK
+  GITHUB
+  TWITTER
+}
+
+model StudentSocialLink {
+  id       String         @id @default(cuid())
+  userId   String
+  platform SocialPlatform
+  url      String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, platform])
   @@index([userId])
 }
