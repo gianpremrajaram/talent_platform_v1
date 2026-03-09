@@ -7,8 +7,24 @@ import { getServerAuthSession } from "@/lib/getServerAuthSession";
 import {
   getStudentAcheivementTags,
   getStudentUniversities,
+  getStudentSocialLinks,
 } from "@/lib/services/student-services";
 import { redirect } from "next/navigation";
+
+function mapDbPlatformToSidebarPlatform(
+  platform: "LINKEDIN" | "FACEBOOK" | "GITHUB" | "TWITTER",
+): "linkedin" | "facebook" | "github" | "twitter" {
+  switch (platform) {
+    case "LINKEDIN":
+      return "linkedin";
+    case "FACEBOOK":
+      return "facebook";
+    case "GITHUB":
+      return "github";
+    case "TWITTER":
+      return "twitter";
+  }
+}
 
 export default async function StudentAcademicInformationPage() {
   const session = await getServerAuthSession();
@@ -21,7 +37,11 @@ export default async function StudentAcademicInformationPage() {
   const userId = sessionUser.id as string;
   const universities = await getStudentUniversities(userId);
   const acheivementTags = await getStudentAcheivementTags(userId);
-
+  const socialLinks = await getStudentSocialLinks(userId);
+  const sidebarSocialLinks = socialLinks.map((link) => ({
+    platform: mapDbPlatformToSidebarPlatform(link.platform),
+    href: link.url,
+  }));
   // Convert DB dates into serializable values for the client component
   const transformedUniversities = universities.map((uni) => ({
     id: uni.id,
@@ -63,6 +83,7 @@ export default async function StudentAcademicInformationPage() {
               name="Sadhana"
               role="Student"
               projectCount={3}
+              socialLinks={sidebarSocialLinks}
             />
 
             <StudentAcademicExperienceForm

@@ -18,7 +18,11 @@ import {
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { saveStudentPersonalInfoAction } from "@/app/talent-discovery-standalone/student-personal-information/action";
+import {
+  saveStudentPersonalInfoAction,
+  saveStudentSocialLinksAction,
+} from "@/app/talent-discovery-standalone/student-personal-information/action";
+import StudentSocialLinksSection, { StudentSocialLink } from "./StudentSocials";
 
 type StudentPersonalInfoFormValues = {
   firstName: string;
@@ -55,9 +59,16 @@ type StudentPersonalInfoInitialValues = {
   postalCode?: string;
 };
 
+type StudentSocialLinkInitialValue = {
+  id: string;
+  platform: "LINKEDIN" | "FACEBOOK" | "GITHUB" | "TWITTER";
+  url: string;
+};
+
 type StudentPersonalInfoFormProps = {
   userId: string;
   initialValues?: StudentPersonalInfoInitialValues;
+  initialSocialLinks?: StudentSocialLinkInitialValue[];
   onCancel?: () => void;
   onSave?: (values: StudentPersonalInfoFormValues) => void;
 };
@@ -101,6 +112,35 @@ function hasPersonalInfo(values: StudentPersonalInfoFormValues) {
     values.phoneNumber.trim() ||
     values.designation.trim(),
   );
+}
+function mapPrismaPlatformToUi(
+  platform: StudentSocialLinkInitialValue["platform"],
+): StudentSocialLink["platform"] {
+  switch (platform) {
+    case "LINKEDIN":
+      return "linkedin";
+    case "FACEBOOK":
+      return "facebook";
+    case "GITHUB":
+      return "github";
+    case "TWITTER":
+      return "twitter";
+  }
+}
+
+function mapUiPlatformToPrisma(
+  platform: StudentSocialLink["platform"],
+): StudentSocialLinkInitialValue["platform"] {
+  switch (platform) {
+    case "linkedin":
+      return "LINKEDIN";
+    case "facebook":
+      return "FACEBOOK";
+    case "github":
+      return "GITHUB";
+    case "twitter":
+      return "TWITTER";
+  }
 }
 
 function hasAddressInfo(values: StudentPersonalInfoFormValues) {
@@ -200,6 +240,7 @@ function EmptyStateCard({
 export default function StudentPersonalInfoForm({
   userId,
   initialValues,
+  initialSocialLinks = [],
   onCancel,
   onSave,
 }: StudentPersonalInfoFormProps) {
@@ -214,6 +255,16 @@ export default function StudentPersonalInfoForm({
         : null,
     }),
     [initialValues],
+  );
+
+  const mappedInitialSocialLinks = React.useMemo<StudentSocialLink[]>(
+    () =>
+      initialSocialLinks.map((link) => ({
+        id: link.id,
+        platform: mapPrismaPlatformToUi(link.platform),
+        url: link.url,
+      })),
+    [initialSocialLinks],
   );
 
   const [values, setValues] =
@@ -785,6 +836,19 @@ export default function StudentPersonalInfoForm({
               )}
             </>
           )}
+
+          <StudentSocialLinksSection
+            value={mappedInitialSocialLinks}
+            onSave={async (links) => {
+              await saveStudentSocialLinksAction({
+                userId,
+                links: links.map((link) => ({
+                  platform: mapUiPlatformToPrisma(link.platform),
+                  url: link.url,
+                })),
+              });
+            }}
+          />
         </CardContent>
       </Card>
     </LocalizationProvider>
