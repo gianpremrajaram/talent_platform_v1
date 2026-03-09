@@ -1,0 +1,87 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import {
+  addWorkExperience,
+  addStudentProject,
+  deleteWorkExperience,
+  deleteStudentProject,
+  addStudentSkill,
+  deleteStudentSkill,
+} from "@/lib/services/student-services";
+
+export async function addWorkExperienceAction(
+  userId: string,
+  data: {
+    company: string;
+    title: string;
+    description?: string;
+    startDate?: string; // format: yyyy-mm
+    endDate?: string; // format: yyyy-mm
+    isCurrent?: boolean;
+    location?: string;
+  },
+) {
+  const created = await addWorkExperience(userId, {
+    company: data.company,
+    title: data.title,
+    description: data.description || undefined,
+    startDate: data.startDate ? new Date(`${data.startDate}-01`) : undefined,
+    endDate: data.endDate ? new Date(`${data.endDate}-01`) : undefined,
+    isCurrent: data.isCurrent ?? false,
+    location: data.location || undefined,
+  });
+
+  revalidatePath("/talent-discovery-standalone/student-skills-experience");
+
+  return {
+    id: created.id,
+    role: created.title,
+    company: created.company,
+    startDate: created.startDate ? created.startDate.toISOString() : "",
+    endDate: created.endDate ? created.endDate.toISOString() : "",
+    description: created.description ?? "",
+  };
+}
+
+export async function addStudentProjectAction(
+  userId: string,
+  data: {
+    title: string;
+    description?: string;
+    startDate?: string;
+    endDate?: string;
+    projectLink?: string;
+  },
+) {
+  const created = await addStudentProject(userId, {
+    title: data.title,
+    description: data.description || undefined,
+    startDate: data.startDate ? new Date(`${data.startDate}-01`) : undefined,
+    endDate: data.endDate ? new Date(`${data.endDate}-01`) : undefined,
+    projectLink: data.projectLink || undefined,
+  });
+  revalidatePath("/talent-discovery-standalone/student-skills-experience");
+  return created;
+}
+
+export async function addStudentSkillAction(userId: string, name: string) {
+  const created = await addStudentSkill(userId, name);
+  revalidatePath("/talent-discovery-standalone/student-skills-experience");
+  return created;
+}
+
+export async function deleteWorkExperienceAction(id: string) {
+  await deleteWorkExperience(id);
+  revalidatePath("/talent-discovery-standalone/student-skills-experience");
+}
+
+export async function deleteProjectAction(id: string) {
+  await deleteStudentProject(id);
+  revalidatePath("/talent-discovery-standalone/student-skills-experience");
+}
+
+export async function deleteStudentSkillAction(id: string) {
+  await deleteStudentSkill(id);
+  revalidatePath("/talent-discovery-standalone/student-skills-experience");
+}

@@ -1,13 +1,58 @@
-"use client";
-
 import { Box, Stack } from "@mui/material";
+import { redirect } from "next/navigation";
 import StudentSideBar from "@/components/talent-discovery/student-components/StudentSideBar";
 import DashboardTopBar from "@/components/talent-discovery/student-components/StudentTopNavBar";
 import StudentProfileSideCard from "@/components/talent-discovery/student-components/StudentProfileSideCard";
 import StudentWorkExperience from "@/components/talent-discovery/student-components/StudentWorkExperience";
 import StudentTechnicalSkills from "@/components/talent-discovery/student-components/StudentTechnicalSkills";
 import StudentProjectsSection from "@/components/talent-discovery/student-components/StudentProjectSection";
-export default function StudentCVFunctionsPage() {
+import { getServerAuthSession } from "@/lib/getServerAuthSession";
+import {
+  getStudentWorkExperiences,
+  getStudentProjects,
+  getStudentTechnicalSkills,
+} from "@/lib/services/student-services";
+import { get } from "node:http";
+
+//TODO: add location field in the work expereince dialog box.
+function mapExperience(exp: any) {
+  return {
+    id: exp.id,
+    role: exp.title,
+    company: exp.company,
+    startDate: exp.startDate ? exp.startDate.toISOString() : "",
+    endDate: exp.endDate ? exp.endDate.toISOString() : "",
+    description: exp.description ?? "",
+  };
+}
+
+function mapProject(project: any) {
+  return {
+    id: project.id,
+    title: project.title,
+    startDate: project.startDate,
+    endDate: project.endDate,
+    description: project.description ?? "",
+    projectLink: project.projectLink ?? undefined,
+  };
+}
+
+export default async function StudentCVFunctionsPage() {
+  const session = await getServerAuthSession();
+  const sessionUser = session?.user as any | undefined;
+  if (!sessionUser?.id) redirect("/sign-in");
+
+  const userId = sessionUser.id as string;
+
+  //find the intial data for the student from the DB.
+  const experiences = await getStudentWorkExperiences(userId);
+  const projects = await getStudentProjects(userId);
+  const studentTechnicalSkills = await getStudentTechnicalSkills(userId);
+
+  console.log(sessionUser);
+  const userName = sessionUser.name;
+  const roleName = sessionUser.roleKeys[0] === "STUDENT" ? "Student" : "User";
+
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <StudentSideBar />
@@ -35,15 +80,24 @@ export default function StudentCVFunctionsPage() {
             }}
           >
             <StudentProfileSideCard
-              name="Sadhana"
-              role="Student"
+              name={userName}
+              role={roleName}
               projectCount={3}
             />
 
             <Stack spacing={3}>
-              <StudentWorkExperience />
-              <StudentTechnicalSkills />
-              <StudentProjectsSection />
+              <StudentWorkExperience
+                userId={userId}
+                initialExperiences={experiences.map(mapExperience)}
+              />
+              <StudentTechnicalSkills
+                userId={userId}
+                initialTechnicalSkills={studentTechnicalSkills}
+              />
+              <StudentProjectsSection
+                userId={userId}
+                initialStudentProjects={projects.map(mapProject)}
+              />
             </Stack>
           </Box>
         </Box>

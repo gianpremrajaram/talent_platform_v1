@@ -16,32 +16,34 @@ import {
   Typography,
 } from "@mui/material";
 import { Add, Close } from "@mui/icons-material";
+import {
+  addStudentSkillAction,
+  deleteStudentSkillAction,
+} from "@/app/talent-discovery-standalone/student-skills-experience/action";
 
-export default function StudentTechnicalSkills() {
-  const [skills, setSkills] = useState<string[]>([
-    "UI/UX",
-    "CSS",
-    "HTML",
-    "JS",
-    "Figma",
-    "Angular",
-    "Jquery",
-    "Adobe XD",
-    "Adobe Photoshop",
-    "Animation",
-    "SVG",
-    "React",
-  ]);
+type SkillItem = {
+  id: string;
+  name: string;
+};
 
+export default function StudentTechnicalSkills({
+  userId,
+  initialTechnicalSkills,
+}: {
+  userId: string;
+  initialTechnicalSkills: SkillItem[];
+}) {
+  const [skills, setSkills] = useState<SkillItem[]>(initialTechnicalSkills);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newSkill, setNewSkill] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const addSkill = () => {
+  const addSkill = async () => {
     const trimmed = newSkill.trim();
-    if (!trimmed) return;
+    if (!trimmed || isSubmitting) return;
 
     const exists = skills.some(
-      (skill) => skill.toLowerCase() === trimmed.toLowerCase(),
+      (skill) => skill.name.toLowerCase() === trimmed.toLowerCase(),
     );
     if (exists) {
       setNewSkill("");
@@ -49,13 +51,30 @@ export default function StudentTechnicalSkills() {
       return;
     }
 
-    setSkills((prev) => [...prev, trimmed]);
-    setNewSkill("");
-    setDialogOpen(false);
+    setIsSubmitting(true);
+    try {
+      const created = await addStudentSkillAction(userId, trimmed);
+      setSkills((prev) => [...prev, created]);
+      setNewSkill("");
+      setDialogOpen(false);
+    } catch (error) {
+      console.error("Failed to add skill:", error);
+      // Keep dialog open on error so user can retry
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const removeSkill = (skillToDelete: string) => {
-    setSkills((prev) => prev.filter((skill) => skill !== skillToDelete));
+  const removeSkill = async (skillToDelete: SkillItem) => {
+    setSkills((prev) => prev.filter((skill) => skill.id !== skillToDelete.id));
+
+    try {
+      await deleteStudentSkillAction(skillToDelete.id);
+    } catch (error) {
+      console.error("Failed to delete skill:", error);
+      //if it errors restore the skill and preserve it.
+      setSkills((prev) => [...prev, skillToDelete]);
+    }
   };
 
   return (
@@ -105,8 +124,8 @@ export default function StudentTechnicalSkills() {
           <Stack direction="row" spacing={2} useFlexGap flexWrap="wrap">
             {skills.map((skill) => (
               <Chip
-                key={skill}
-                label={skill}
+                key={skill.id}
+                label={skill.name}
                 onDelete={() => removeSkill(skill)}
                 deleteIcon={<Close fontSize="small" />}
                 sx={{
@@ -156,11 +175,19 @@ export default function StudentTechnicalSkills() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDialogOpen(false)} color="inherit">
+          <Button
+            onClick={() => setDialogOpen(false)}
+            color="inherit"
+            disabled={isSubmitting}
+          >
             Cancel
           </Button>
-          <Button onClick={addSkill} variant="contained">
-            Add
+          <Button
+            onClick={addSkill}
+            variant="contained"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Adding..." : "Add"}
           </Button>
         </DialogActions>
       </Dialog>

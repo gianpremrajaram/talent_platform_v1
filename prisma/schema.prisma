@@ -40,7 +40,10 @@ model User {
   membershipDashboardMember MembershipDashboardMember? @relation("UserDashboardMember")
 
   // Audit log relation (actor)
-  auditLogs AuditLog[] @relation("AuditActor")
+  auditLogs       AuditLog[]              @relation("AuditActor")
+  workExperiences StudentWorkExperience[] @relation("UserWorkExperiences")
+  studentProjects StudentProjects[]       @relation("StudentProjects")
+  studentSkills   StudentSkill[]          @relation("StudentSkills")
 }
 
 model Organisation {
@@ -236,4 +239,49 @@ model AuditLog {
 
   @@index([entityType, entityId])
   @@index([actorId])
+}
+
+model StudentWorkExperience {
+  id     String @id @default(cuid())
+  userId String // ← Direct link to User instead of StudentProfile
+
+  company     String
+  title       String
+  description String?
+  startDate   DateTime?
+  endDate     DateTime?
+  isCurrent   Boolean   @default(false)
+  location    String?
+
+  user User @relation("UserWorkExperiences", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model StudentProjects {
+  id     String @id @default(cuid())
+  userId String
+
+  title       String
+  description String?
+  projectLink String?
+  startDate   DateTime?
+  endDate     DateTime?
+
+  user User @relation("StudentProjects", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model StudentSkill {
+  id     String @id @default(cuid())
+  userId String
+
+  name      String
+  createdAt DateTime @default(now())
+
+  user User @relation("StudentSkills", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
+  @@index([userId])
 }

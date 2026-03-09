@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useTransition } from "react";
 import {
   Box,
   Typography,
@@ -16,9 +16,13 @@ import {
   IconButton,
 } from "@mui/material";
 import { Add, Delete } from "@mui/icons-material";
-
+import {
+  addWorkExperienceAction,
+  deleteWorkExperienceAction,
+} from "../../../app/talent-discovery-standalone/student-skills-experience/action";
+//TODO: show confirmation for delete action!
 type WorkExperience = {
-  id: number;
+  id: string;
   role: string;
   company: string;
   startDate: string;
@@ -26,58 +30,69 @@ type WorkExperience = {
   description: string;
 };
 
-export default function StudentWorkExperience() {
-  const [experiences, setExperiences] = useState<WorkExperience[]>([
-    {
-      id: 1,
-      role: "Software Engineering Intern",
-      company: "Cisco Systems",
-      startDate: "Aug 2023",
-      endDate: "Aug 2025",
-      description:
-        "Developed RESTful APIs and implemented frontend features using React. Collaborated with the team on agile development practices.",
-    },
-    {
-      id: 2,
-      role: "Software Engineering II",
-      company: "Microsoft",
-      startDate: "Aug 2023",
-      endDate: "Aug 2025",
-      description:
-        "Assisted in NLP research projects, processing and analyzing large datasets for sentiment analysis and machine learning workflows.",
-    },
-  ]);
+type Props = {
+  userId: string;
+  initialExperiences?: WorkExperience[];
+};
+
+function formatMonth(dateString: string) {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+  });
+}
+
+export default function StudentWorkExperience({
+  userId,
+  initialExperiences = [],
+}: Props) {
+  const [experiences, setExperiences] =
+    useState<WorkExperience[]>(initialExperiences);
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
-  const [newExp, setNewExp] = useState<WorkExperience>({
-    id: 0,
+  const [newExp, setNewExp] = useState({
     role: "",
     company: "",
-    startDate: "",
-    endDate: "",
+    startDate: "", // yyyy-mm
+    endDate: "", // yyyy-mm
     description: "",
   });
 
   const handleAdd = () => {
-    if (!newExp.role.trim()) return;
+    if (!newExp.role.trim() || !newExp.company.trim()) return;
 
-    setExperiences((prev) => [...prev, { ...newExp, id: Date.now() }]);
+    startTransition(async () => {
+      const created = await addWorkExperienceAction(userId, {
+        title: newExp.role,
+        company: newExp.company,
+        description: newExp.description || undefined,
+        startDate: newExp.startDate || undefined,
+        endDate: newExp.endDate || undefined,
+      });
 
-    setNewExp({
-      id: 0,
-      role: "",
-      company: "",
-      startDate: "",
-      endDate: "",
-      description: "",
+      setExperiences((prev) => [created, ...prev]);
+
+      setNewExp({
+        role: "",
+        company: "",
+        startDate: "",
+        endDate: "",
+        description: "",
+      });
+
+      setDialogOpen(false);
     });
-
-    setDialogOpen(false);
   };
 
-  const removeExp = (id: number) => {
-    setExperiences((prev) => prev.filter((e) => e.id !== id));
+  const handleRemoveExperience = (id: string) => {
+    startTransition(async () => {
+      await deleteWorkExperienceAction(id);
+      setExperiences((prev) => prev.filter((exp) => exp.id !== id));
+    });
   };
 
   return (
@@ -164,7 +179,8 @@ export default function StudentWorkExperience() {
                         color="text.secondary"
                         sx={{ mb: 1.5 }}
                       >
-                        {exp.startDate} — {exp.endDate}
+                        {formatMonth(exp.startDate)}
+                        {exp.endDate ? ` — ${formatMonth(exp.endDate)}` : ""}
                       </Typography>
 
                       <Typography
@@ -178,7 +194,11 @@ export default function StudentWorkExperience() {
                       </Typography>
                     </Box>
 
-                    <IconButton color="error" onClick={() => removeExp(exp.id)}>
+                    <IconButton
+                      color="error"
+                      onClick={() => handleRemoveExperience(exp.id)}
+                      disabled={isPending}
+                    >
                       <Delete />
                     </IconButton>
                   </Stack>
@@ -217,8 +237,9 @@ export default function StudentWorkExperience() {
 
             <TextField
               label="Start Date"
-              placeholder="Aug 2023"
+              type="month"
               fullWidth
+              InputLabelProps={{ shrink: true }}
               value={newExp.startDate}
               onChange={(e) =>
                 setNewExp({ ...newExp, startDate: e.target.value })
@@ -227,8 +248,9 @@ export default function StudentWorkExperience() {
 
             <TextField
               label="End Date"
-              placeholder="Aug 2025"
+              type="month"
               fullWidth
+              InputLabelProps={{ shrink: true }}
               value={newExp.endDate}
               onChange={(e) =>
                 setNewExp({ ...newExp, endDate: e.target.value })
@@ -253,8 +275,8 @@ export default function StudentWorkExperience() {
             Cancel
           </Button>
 
-          <Button variant="contained" onClick={handleAdd}>
-            Add Experience
+          <Button variant="contained" onClick={handleAdd} disabled={isPending}>
+            {isPending ? "Saving..." : "Add Experience"}
           </Button>
         </DialogActions>
       </Dialog>
