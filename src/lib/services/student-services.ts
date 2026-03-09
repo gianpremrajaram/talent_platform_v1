@@ -16,6 +16,12 @@ export async function getStudentProjects(userId: string) {
   });
 }
 
+export async function getStudentTechnicalSkills(userId: string) {
+  return prisma.studentSkill.findMany({
+    where: { userId },
+  });
+}
+
 export async function addWorkExperience(
   userId: string,
   data: {
@@ -33,6 +39,21 @@ export async function addWorkExperience(
       userId,
       ...data,
     },
+  });
+}
+
+export async function addStudentSkill(userId: string, name: string) {
+  return prisma.studentSkill.create({
+    data: {
+      userId,
+      name,
+    },
+  });
+}
+
+export async function deleteStudentSkill(id: string) {
+  return prisma.studentSkill.delete({
+    where: { id },
   });
 }
 

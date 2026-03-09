@@ -43,6 +43,7 @@ model User {
   auditLogs       AuditLog[]              @relation("AuditActor")
   workExperiences StudentWorkExperience[] @relation("UserWorkExperiences")
   studentProjects StudentProjects[]       @relation("StudentProjects")
+  studentSkills   StudentSkill[]          @relation("StudentSkills")
 }
 
 model Organisation {
@@ -269,5 +270,18 @@ model StudentProjects {
 
   user User @relation("StudentProjects", fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
+}
+
+model StudentSkill {
+  id     String @id @default(cuid())
+  userId String
+
+  name      String
+  createdAt DateTime @default(now())
+
+  user User @relation("StudentSkills", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
   @@index([userId])
 }

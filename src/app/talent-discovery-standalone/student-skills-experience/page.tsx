@@ -10,7 +10,9 @@ import { getServerAuthSession } from "@/lib/getServerAuthSession";
 import {
   getStudentWorkExperiences,
   getStudentProjects,
+  getStudentTechnicalSkills,
 } from "@/lib/services/student-services";
+import { get } from "node:http";
 
 //TODO: add location field in the work expereince dialog box.
 function mapExperience(exp: any) {
@@ -41,8 +43,12 @@ export default async function StudentCVFunctionsPage() {
   if (!sessionUser?.id) redirect("/sign-in");
 
   const userId = sessionUser.id as string;
+
+  //find the intial data for the student from the DB.
   const experiences = await getStudentWorkExperiences(userId);
   const projects = await getStudentProjects(userId);
+  const studentTechnicalSkills = await getStudentTechnicalSkills(userId);
+
   console.log(sessionUser);
   const userName = sessionUser.name;
   const roleName = sessionUser.roleKeys[0] === "STUDENT" ? "Student" : "User";
@@ -84,7 +90,10 @@ export default async function StudentCVFunctionsPage() {
                 userId={userId}
                 initialExperiences={experiences.map(mapExperience)}
               />
-              <StudentTechnicalSkills />
+              <StudentTechnicalSkills
+                userId={userId}
+                initialTechnicalSkills={studentTechnicalSkills}
+              />
               <StudentProjectsSection
                 userId={userId}
                 initialStudentProjects={projects.map(mapProject)}

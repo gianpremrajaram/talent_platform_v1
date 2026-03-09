@@ -6,6 +6,8 @@ import {
   addStudentProject,
   deleteWorkExperience,
   deleteStudentProject,
+  addStudentSkill,
+  deleteStudentSkill,
 } from "@/lib/services/student-services";
 
 export async function addWorkExperienceAction(
@@ -63,6 +65,12 @@ export async function addStudentProjectAction(
   return created;
 }
 
+export async function addStudentSkillAction(userId: string, name: string) {
+  const created = await addStudentSkill(userId, name);
+  revalidatePath("/talent-discovery-standalone/student-skills-experience");
+  return created;
+}
+
 export async function deleteWorkExperienceAction(id: string) {
   await deleteWorkExperience(id);
   revalidatePath("/talent-discovery-standalone/student-skills-experience");
@@ -70,5 +78,10 @@ export async function deleteWorkExperienceAction(id: string) {
 
 export async function deleteProjectAction(id: string) {
   await deleteStudentProject(id);
+  revalidatePath("/talent-discovery-standalone/student-skills-experience");
+}
+
+export async function deleteStudentSkillAction(id: string) {
+  await deleteStudentSkill(id);
   revalidatePath("/talent-discovery-standalone/student-skills-experience");
 }
