@@ -311,9 +311,6 @@ export default function AdminUserManagementPage() {
             sx={{ mb: 2.5 }}
           >
             <Box>
-              <Typography sx={{ fontSize: 12, color: "#8a8f98", mb: 0.75 }}>
-                Home / Admin / User Management
-              </Typography>
               <Typography sx={{ fontSize: 18, fontWeight: 600, color: "#1f2937" }}>
                 User access management
               </Typography>
@@ -355,7 +352,7 @@ export default function AdminUserManagementPage() {
                 <NotificationsNoneRoundedIcon />
               </IconButton>
 
-              <Avatar sx={{ width: 36, height: 36, bgcolor: "#2f7df6" }}>A</Avatar>
+              <Avatar sx={{ width: 36, height: 36, bgcolor: "#6b7f96" }}>A</Avatar>
             </Stack>
           </Stack>
 
@@ -370,24 +367,24 @@ export default function AdminUserManagementPage() {
               borderRadius: "10px",
               overflow: "hidden",
               mb: 2.5,
-              border: "1px solid #d8e7ff",
+              border: "1px solid #dbe4ef",
               boxShadow: "none",
               background:
-                "linear-gradient(90deg, #0b63d7 0%, #2d8df5 55%, #8fd0ff 100%)",
+                "linear-gradient(120deg, #f7f9fc 0%, #eef3f8 62%, #e7edf5 100%)",
             }}
           >
             <CardContent
               sx={{
                 px: 3,
-                py: 3,
+                py: 3.1,
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
                 gap: 3,
               }}
             >
-              <Box sx={{ color: "#fff", maxWidth: 620 }}>
-                <Typography sx={{ fontSize: 12, opacity: 0.95, mb: 1 }}>
+              <Box sx={{ color: "#334155", maxWidth: 620 }}>
+                <Typography sx={{ fontSize: 12, color: "#64748b", mb: 1 }}>
                   App-specific enforcement
                 </Typography>
 
@@ -397,12 +394,13 @@ export default function AdminUserManagementPage() {
                     fontWeight: 700,
                     lineHeight: 1.35,
                     mb: 1,
+                    color: "#1f2937",
                   }}
                 >
                   Enforce platform rules without cross-app side effects
                 </Typography>
 
-                <Typography sx={{ opacity: 0.95 }}>
+                <Typography sx={{ color: "#4b5563" }}>
                   Suspensions on this page are scoped to the Talent Platform
                   only. Use suspend for temporary restriction, lift to restore
                   access, and ban for permanent removal.
@@ -412,17 +410,17 @@ export default function AdminUserManagementPage() {
                   <Chip
                     label="Per-app suspension"
                     sx={{
-                      color: "#fff",
-                      backgroundColor: "rgba(255,255,255,0.16)",
-                      border: "1px solid rgba(255,255,255,0.24)",
+                      color: "#516074",
+                      backgroundColor: "#edf2f8",
+                      border: "1px solid #ced9e6",
                     }}
                   />
                   <Chip
                     label="History retained for audit"
                     sx={{
-                      color: "#fff",
-                      backgroundColor: "rgba(255,255,255,0.16)",
-                      border: "1px solid rgba(255,255,255,0.24)",
+                      color: "#516074",
+                      backgroundColor: "#edf2f8",
+                      border: "1px solid #ced9e6",
                     }}
                   />
                 </Stack>
@@ -433,19 +431,19 @@ export default function AdminUserManagementPage() {
                   minWidth: 230,
                   borderRadius: 3,
                   p: 2.2,
-                  backgroundColor: "rgba(255,255,255,0.14)",
-                  border: "1px solid rgba(255,255,255,0.18)",
+                  backgroundColor: "#eff4f9",
+                  border: "1px solid #d3deea",
                 }}
               >
-                <Typography sx={{ color: "#fff", opacity: 0.92, fontSize: 13 }}>
+                <Typography sx={{ color: "#64748b", fontSize: 13 }}>
                   Current scope
                 </Typography>
                 <Typography
-                  sx={{ color: "#fff", fontSize: 28, fontWeight: 800, my: 0.75 }}
+                  sx={{ color: "#334155", fontSize: 28, fontWeight: 800, my: 0.75 }}
                 >
                   Talent Platform
                 </Typography>
-                <Typography sx={{ color: "#fff", opacity: 0.92, fontSize: 13 }}>
+                <Typography sx={{ color: "#64748b", fontSize: 13 }}>
                   Suspension checks should happen inside app-specific access control
                 </Typography>
               </Box>
@@ -466,32 +464,32 @@ export default function AdminUserManagementPage() {
                 value: activeCount,
                 note: "Access currently allowed",
                 icon: <VerifiedUserRoundedIcon />,
-                bg: "#eef7ee",
-                color: "#2e7d32",
+                bg: "#eef2ef",
+                color: "#557564",
               },
               {
                 title: "Suspended users",
                 value: suspendedCount,
                 note: "Temporary app restriction",
                 icon: <LockPersonRoundedIcon />,
-                bg: "#fff7e8",
-                color: "#b26a00",
+                bg: "#f3efe8",
+                color: "#8a7448",
               },
               {
                 title: "Banned users",
                 value: bannedCount,
                 note: "Permanent restriction",
                 icon: <GppBadRoundedIcon />,
-                bg: "#fdeeee",
-                color: "#c62828",
+                bg: "#f4ecec",
+                color: "#865e62",
               },
               {
                 title: "Company accounts",
                 value: users.filter((user) => user.userType === "Company").length,
                 note: "Managed in this scope",
                 icon: <DomainDisabledRoundedIcon />,
-                bg: "#eef4ff",
-                color: "#0b63d7",
+                bg: "#edf1f5",
+                color: "#55667c",
               },
             ].map((card) => (
               <Card
@@ -535,19 +533,23 @@ export default function AdminUserManagementPage() {
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: "minmax(0, 1.55fr) minmax(320px, 0.85fr)",
+              gridTemplateColumns: "minmax(0, 1fr)",
               gap: 2.5,
               alignItems: "start",
             }}
           >
-            <UserManagementTable
-              rows={filteredUsers}
-              selectedUserId={selectedUserId}
-              onSelectUser={(userId) => setSelectedUserId(userId)}
-              onOpenAction={openActionModal}
-            />
+            <Box sx={{ width: "100%" }}>
+              <UserManagementTable
+                rows={filteredUsers}
+                selectedUserId={selectedUserId}
+                onSelectUser={(userId) => setSelectedUserId(userId)}
+                onOpenAction={openActionModal}
+              />
+            </Box>
 
-            <SuspensionHistoryPanel user={selectedUser} />
+            <Box sx={{ width: "100%" }}>
+              <SuspensionHistoryPanel user={selectedUser} />
+            </Box>
           </Box>
         </Box>
       </Box>

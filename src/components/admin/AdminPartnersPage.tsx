@@ -1,30 +1,64 @@
+"use client";
+
 import {
   Avatar,
   Box,
-  Button,
   Card,
+  CardContent,
+  Chip,
+  IconButton,
+  InputAdornment,
   Stack,
   TextField,
   Typography,
-  InputAdornment,
-  IconButton,
 } from "@mui/material";
-import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import NotificationsNoneRoundedIcon from "@mui/icons-material/NotificationsNoneRounded";
-import GridViewRoundedIcon from "@mui/icons-material/GridViewRounded";
-import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
+import AssignmentTurnedInRoundedIcon from "@mui/icons-material/AssignmentTurnedInRounded";
+import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
+import TaskAltRoundedIcon from "@mui/icons-material/TaskAltRounded";
+import BlockRoundedIcon from "@mui/icons-material/BlockRounded";
 import AdminSidebar from "./AdminSidebar";
-import AdminStatsCards from "./AdminStatsCards";
 import PartnersTable from "./PartnersTable";
 
-export default function AdminPartnersPage() {
+type AdminPartnersPageProps = {
+  showPartnersTable?: boolean;
+  showTopToolbar?: boolean;
+};
+
+export default function AdminPartnersPage({
+  showPartnersTable = true,
+  showTopToolbar = true,
+}: AdminPartnersPageProps) {
+  const statCards = [
+    {
+      title: "Pending partner projects",
+      value: "8",
+      note: "Awaiting admin decision",
+      icon: <AssignmentTurnedInRoundedIcon />,
+    },
+    {
+      title: "Approved today",
+      value: "3",
+      note: "Ready for partner visibility",
+      icon: <TaskAltRoundedIcon />,
+    },
+    {
+      title: "Rejected today",
+      value: "1",
+      note: "Not published to partner feed",
+      icon: <BlockRoundedIcon />,
+    },
+    {
+      title: "Active partner companies",
+      value: "18",
+      note: "Submitting project opportunities",
+      icon: <BusinessRoundedIcon />,
+    },
+  ];
+
   return (
-    <Box
-      sx={{
-        py: 2,
-        width: "100%",
-      }}
-    >
+    <Box data-admin-page="partners" sx={{ py: 2, width: "100%" }}>
       <Box
         sx={{
           display: "grid",
@@ -36,132 +70,83 @@ export default function AdminPartnersPage() {
         <AdminSidebar />
 
         <Box>
-          <Box
-            sx={{
-              backgroundColor: "#fff",
-              border: "1px solid #e6e8ec",
-              borderRadius: "10px",
-              px: 2,
-              py: 1.25,
-              mb: 2.5,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 2,
-            }}
-          >
-            <Stack direction="row" spacing={1.25} alignItems="center">
-              <IconButton size="small">
-                <GridViewRoundedIcon fontSize="small" />
-              </IconButton>
-
-              <Box
-                sx={{
-                  px: 1.2,
-                  py: 0.5,
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "8px",
-                  fontSize: "12px",
-                  color: "#374151",
-                  backgroundColor: "#fff",
-                }}
-              >
-                Acme Corp
+          {showTopToolbar ? (
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              spacing={2}
+              sx={{ mb: 2.5 }}
+            >
+              <Box>
+                <Typography sx={{ fontSize: 18, fontWeight: 600, color: "#1f2937" }}>
+                  Partner Project Approvals
+                </Typography>
+                <Typography sx={{ mt: 0.75, color: "#6b7280", maxWidth: 760 }}>
+                  Review partner-submitted projects, validate listing quality, and approve
+                  or reject publication in the platform.
+                </Typography>
               </Box>
 
-              <Box
-                sx={{
-                  px: 0.9,
-                  py: 0.3,
-                  borderRadius: "999px",
-                  fontSize: "11px",
-                  color: "#6b7280",
-                  backgroundColor: "#f3f4f6",
-                }}
-              >
-                Free
-              </Box>
+              <Stack direction="row" spacing={1.2} alignItems="center">
+                <TextField
+                  size="small"
+                  placeholder="Search partner projects"
+                  sx={{
+                    width: 230,
+                    "& .MuiOutlinedInput-root": {
+                      height: 38,
+                      backgroundColor: "#fff",
+                    },
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchRoundedIcon fontSize="small" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
 
-              <TextField
-                size="small"
-                placeholder="⌘ K"
-                sx={{
-                  width: 100,
-                  "& .MuiOutlinedInput-root": {
-                    height: 34,
-                    fontSize: 13,
+                <IconButton
+                  aria-label="Notifications"
+                  sx={{
+                    border: "1px solid #d9dde3",
                     backgroundColor: "#fff",
-                  },
-                }}
-              />
+                  }}
+                >
+                  <NotificationsNoneRoundedIcon />
+                </IconButton>
+
+                <Avatar sx={{ width: 36, height: 36, bgcolor: "#6b7f96" }}>A</Avatar>
+              </Stack>
             </Stack>
-
-            <Stack direction="row" spacing={1.2} alignItems="center">
-              <IconButton size="small">
-                <GridViewRoundedIcon fontSize="small" />
-              </IconButton>
-              <IconButton size="small">
-                <NotificationsNoneRoundedIcon fontSize="small" />
-              </IconButton>
-              <IconButton size="small">
-                <SettingsRoundedIcon fontSize="small" />
-              </IconButton>
-              <Avatar sx={{ width: 34, height: 34, bgcolor: "#44a6ff" }}>A</Avatar>
-            </Stack>
-          </Box>
-
-          <Typography
-            sx={{
-              fontSize: 12,
-              color: "#8a8f98",
-              mb: 0.75,
-            }}
-          >
-            Home / Dashboard / Partners
-          </Typography>
-
-          <Typography
-            sx={{
-              fontSize: 18,
-              fontWeight: 600,
-              color: "#1f2937",
-              mb: 2.5,
-            }}
-          >
-            Analytics
-          </Typography>
+          ) : null}
 
           <Card
             sx={{
               borderRadius: "10px",
               overflow: "hidden",
               mb: 2.5,
-              border: "1px solid #d8e7ff",
+              border: "1px solid #dbe4ef",
               boxShadow: "none",
               background:
-                "linear-gradient(90deg, #0b63d7 0%, #2d8df5 55%, #8fd0ff 100%)",
+                "linear-gradient(120deg, #f7f9fc 0%, #eef3f8 62%, #e7edf5 100%)",
             }}
           >
-            <Box
+            <CardContent
               sx={{
-                px: 4,
-                py: 4,
-                minHeight: 220,
+                px: 3,
+                py: 3.1,
                 display: "flex",
-                alignItems: "center",
                 justifyContent: "space-between",
+                alignItems: "center",
                 gap: 3,
               }}
             >
-              <Box sx={{ color: "#fff", maxWidth: 430 }}>
-                <Typography
-                  sx={{
-                    fontSize: 12,
-                    opacity: 0.95,
-                    mb: 1,
-                  }}
-                >
-                  Welcome back Admin
+              <Box sx={{ color: "#334155", maxWidth: 620 }}>
+                <Typography sx={{ fontSize: 12, color: "#64748b", mb: 1 }}>
+                  Partner review workflow
                 </Typography>
 
                 <Typography
@@ -170,95 +155,109 @@ export default function AdminPartnersPage() {
                     fontWeight: 700,
                     lineHeight: 1.35,
                     mb: 1,
+                    color: "#1f2937",
                   }}
                 >
-                  Here is the latest activity overview of the Alliances Platform
+                  Validate partner project postings before publishing them to talent
                 </Typography>
 
-                <Button
-                  variant="outlined"
-                  sx={{
-                    mt: 2,
-                    color: "#fff",
-                    borderColor: "rgba(255,255,255,0.7)",
-                    textTransform: "none",
-                    fontSize: 12,
-                    px: 2,
-                    py: 0.75,
-                    "&:hover": {
-                      borderColor: "#fff",
-                      backgroundColor: "rgba(255,255,255,0.08)",
-                    },
-                  }}
-                >
-                  Download Report
-                </Button>
+                <Typography sx={{ color: "#4b5563" }}>
+                  Approved projects become discoverable to eligible users. Rejected
+                  projects remain hidden until the partner submits a revised version.
+                </Typography>
+
+                <Stack direction="row" spacing={1} sx={{ mt: 2, flexWrap: "wrap" }}>
+                  <Chip
+                    label="Silver / Gold / Platinum partner tiers"
+                    sx={{
+                      color: "#516074",
+                      backgroundColor: "#edf2f8",
+                      border: "1px solid #ced9e6",
+                    }}
+                  />
+                  <Chip
+                    label="Pending projects hidden by default"
+                    sx={{
+                      color: "#516074",
+                      backgroundColor: "#edf2f8",
+                      border: "1px solid #ced9e6",
+                    }}
+                  />
+                </Stack>
               </Box>
 
               <Box
                 sx={{
-                  flexShrink: 0,
-                  width: 250,
-                  height: 150,
-                  borderRadius: "18px",
-                  position: "relative",
-                  background:
-                    "radial-gradient(circle at 30% 30%, rgba(255,255,255,0.35), rgba(255,255,255,0.08))",
+                  minWidth: 230,
+                  borderRadius: 3,
+                  p: 2.2,
+                  backgroundColor: "#eff4f9",
+                  border: "1px solid #d3deea",
                 }}
               >
-                <Box
-                  sx={{
-                    position: "absolute",
-                    top: 25,
-                    left: 45,
-                    width: 150,
-                    height: 90,
-                    borderRadius: "18px",
-                    background: "rgba(255,255,255,0.22)",
-                    border: "2px solid rgba(255,255,255,0.55)",
-                  }}
-                />
-                <Box
-                  sx={{
-                    position: "absolute",
-                    top: 48,
-                    left: 70,
-                    width: 100,
-                    height: 44,
-                    borderTop: "2px solid rgba(255,255,255,0.8)",
-                    borderLeft: "2px solid rgba(255,255,255,0.8)",
-                    borderRight: "2px solid rgba(255,255,255,0.8)",
-                  }}
-                />
-                <Box
-                  sx={{
-                    position: "absolute",
-                    top: 48,
-                    left: 118,
-                    width: 2,
-                    height: 44,
-                    backgroundColor: "rgba(255,255,255,0.8)",
-                  }}
-                />
-                <Box
-                  sx={{
-                    position: "absolute",
-                    top: 70,
-                    left: 70,
-                    width: 100,
-                    height: 2,
-                    backgroundColor: "rgba(255,255,255,0.8)",
-                  }}
-                />
+                <Typography sx={{ color: "#64748b", fontSize: 13 }}>
+                  Publishing rule
+                </Typography>
+                <Typography
+                  sx={{ color: "#334155", fontSize: 28, fontWeight: 800, my: 0.75 }}
+                >
+                  PARTNER LIVE
+                </Typography>
+                <Typography sx={{ color: "#64748b", fontSize: 13 }}>
+                  Applied only after admin approval of the submitted project listing
+                </Typography>
               </Box>
-            </Box>
+            </CardContent>
           </Card>
 
-          <AdminStatsCards />
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+              gap: 1.8,
+              mb: 2.5,
+            }}
+          >
+            {statCards.map((card) => (
+              <Card
+                key={card.title}
+                sx={{
+                  borderRadius: "8px",
+                  border: "1px solid #e8eaef",
+                  boxShadow: "none",
+                }}
+              >
+                <CardContent sx={{ px: 2, py: 2 }}>
+                  <Box
+                    sx={{
+                      width: 38,
+                      height: 38,
+                      borderRadius: "10px",
+                      display: "grid",
+                      placeItems: "center",
+                      backgroundColor: "#edf1f5",
+                      color: "#55667c",
+                      mb: 1.5,
+                    }}
+                  >
+                    {card.icon}
+                  </Box>
 
-          <Box sx={{ mt: 2.5 }}>
-            <PartnersTable />
+                  <Typography sx={{ fontSize: 12, color: "#8a8f98" }}>
+                    {card.title}
+                  </Typography>
+                  <Typography sx={{ fontSize: 28, fontWeight: 700, mt: 0.5 }}>
+                    {card.value}
+                  </Typography>
+                  <Typography sx={{ fontSize: 12, color: "#6b7280", mt: 0.5 }}>
+                    {card.note}
+                  </Typography>
+                </CardContent>
+              </Card>
+            ))}
           </Box>
+
+          {showPartnersTable ? <PartnersTable /> : null}
         </Box>
       </Box>
     </Box>

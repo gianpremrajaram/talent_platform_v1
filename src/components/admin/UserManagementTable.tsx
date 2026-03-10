@@ -1,19 +1,7 @@
 "use client";
 
-import {
-  Box,
-  Button,
-  Card,
-  Chip,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Card, Stack, Typography } from "@mui/material";
+import AdminDataTable, { AdminTableColumn } from "./AdminDataTable";
 
 export type AppScope = "Talent Platform";
 export type UserType = "Student" | "Company";
@@ -49,24 +37,58 @@ type Props = {
   onOpenAction: (userId: string, action: SuspensionActionType) => void;
 };
 
-function getStatusChipStyles(status: AccessStatus) {
-  if (status === "active") {
-    return {
-      backgroundColor: "#e8f5e9",
-      color: "#2e7d32",
-    };
+const columns: AdminTableColumn[] = [
+  { key: "name", label: "NAME", width: "15%" },
+  { key: "userType", label: "TYPE", width: "8%" },
+  { key: "email", label: "EMAIL", width: "24%" },
+  { key: "appScope", label: "APP SCOPE", width: "12%" },
+  { key: "status", label: "STATUS", width: "8%" },
+  { key: "suspendedAt", label: "SUSPENDED AT", width: "13%" },
+  { key: "liftedAt", label: "LIFTED AT", width: "10%" },
+  { key: "action", label: "ACTION", width: "10%" },
+];
+
+function statusTextColor(status: AccessStatus) {
+  if (status === "active") return "#1f6a4f";
+  if (status === "suspended") return "#8a6b2f";
+  return "#a23b45";
+}
+
+function formatDateOnly(value: string | null) {
+  if (!value) return "--";
+  const trimmed = value.trim();
+  const commaIndex = trimmed.indexOf(",");
+  if (commaIndex > 0) {
+    return trimmed.slice(0, commaIndex);
   }
 
-  if (status === "suspended") {
-    return {
-      backgroundColor: "#fff4e5",
-      color: "#b26a00",
-    };
+  const parsed = new Date(trimmed);
+  if (Number.isNaN(parsed.getTime())) {
+    return trimmed;
   }
 
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(parsed);
+}
+
+function textActionButtonSx(color: string) {
   return {
-    backgroundColor: "#fdecea",
-    color: "#c62828",
+    minWidth: 0,
+    height: "auto",
+    px: 0,
+    py: 0.15,
+    textTransform: "none",
+    fontSize: 12,
+    fontWeight: 600,
+    color,
+    backgroundColor: "transparent",
+    "&:hover": {
+      backgroundColor: "transparent",
+      textDecoration: "underline",
+    },
   };
 }
 
@@ -94,221 +116,147 @@ export default function UserManagementTable({
         </Typography>
       </Box>
 
-      <TableContainer sx={{ overflowX: "auto" }}>
-        <Table sx={{ minWidth: 1080 }}>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: "#111111" }}>
-              {[
-                "NAME",
-                "TYPE",
-                "EMAIL",
-                "APP SCOPE",
-                "STATUS",
-                "SUSPENDED AT",
-                "LIFTED AT",
-                "ACTION",
-              ].map((head) => (
-                <TableCell
-                  key={head}
+      <AdminDataTable
+        columns={columns}
+        rows={rows}
+        getRowKey={(row) => row.id}
+        onRowClick={(row) => onSelectUser(row.id)}
+        getRowSx={(row) => {
+          const isSelected = row.id === selectedUserId;
+          if (!isSelected) return {};
+
+          return {
+            backgroundColor: "#edf3fa",
+            "&:hover": {
+              backgroundColor: "#edf3fa",
+            },
+          };
+        }}
+        getCells={(row) => {
+          const showSuspend = row.status === "active";
+          const showLift = row.status === "suspended";
+          const showBan = row.status === "active" || row.status === "suspended";
+
+          return [
+            {
+              key: "name",
+              content: <Typography sx={{ fontSize: 12, fontWeight: 600 }}>{row.name}</Typography>,
+            },
+            { key: "userType", content: row.userType },
+            {
+              key: "email",
+              content: row.email,
+              sx: {
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              },
+            },
+            { key: "appScope", content: row.appScope },
+            {
+              key: "status",
+              content: (
+                <Typography
                   sx={{
-                    color: "#fff",
-                    fontSize: 10,
+                    fontSize: 12,
                     fontWeight: 600,
-                    borderBottom: "none",
-                    py: 1.5,
+                    textTransform: "capitalize",
+                    color: statusTextColor(row.status),
                   }}
                 >
-                  {head}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
-            {rows.map((row) => {
-              const isSelected = row.id === selectedUserId;
-
-              return (
-                <TableRow
-                  key={row.id}
-                  hover
-                  onClick={() => onSelectUser(row.id)}
-                  sx={{
-                    cursor: "pointer",
-                    backgroundColor: isSelected ? "#f8fbff" : undefined,
-                  }}
-                >
-                  <TableCell sx={{ py: 1.8 }}>
-                    <Typography sx={{ fontSize: 12, fontWeight: 600 }}>
-                      {row.name}
-                    </Typography>
-                  </TableCell>
-
-                  <TableCell sx={{ py: 1.8, fontSize: 12 }}>{row.userType}</TableCell>
-
-                  <TableCell sx={{ py: 1.8, fontSize: 12 }}>{row.email}</TableCell>
-
-                  <TableCell sx={{ py: 1.8, fontSize: 12 }}>{row.appScope}</TableCell>
-
-                  <TableCell sx={{ py: 1.8 }}>
-                    <Chip
-                      label={row.status}
+                  {row.status}
+                </Typography>
+              ),
+            },
+            {
+              key: "suspendedAt",
+              content: formatDateOnly(row.suspendedAt),
+              sx: {
+                whiteSpace: "nowrap",
+              },
+            },
+            {
+              key: "liftedAt",
+              content: formatDateOnly(row.liftedAt),
+              sx: {
+                whiteSpace: "nowrap",
+              },
+            },
+            {
+              key: "action",
+              content: (
+                <Stack direction="column" spacing={0.1} alignItems="flex-start">
+                  {showSuspend ? (
+                    <Button
                       size="small"
-                      sx={{
-                        ...getStatusChipStyles(row.status),
-                        fontWeight: 600,
-                        textTransform: "capitalize",
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenAction(row.id, "suspend");
                       }}
-                    />
-                  </TableCell>
+                      sx={textActionButtonSx("#8a6b2f")}
+                    >
+                      Suspend
+                    </Button>
+                  ) : null}
 
-                  <TableCell sx={{ py: 1.8, fontSize: 12 }}>
-                    {row.suspendedAt ?? "—"}
-                  </TableCell>
+                  {showLift ? (
+                    <Button
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenAction(row.id, "lift");
+                      }}
+                      sx={textActionButtonSx("#1f6a4f")}
+                    >
+                      Lift
+                    </Button>
+                  ) : null}
 
-                  <TableCell sx={{ py: 1.8, fontSize: 12 }}>
-                    {row.liftedAt ?? "—"}
-                  </TableCell>
+                  {showBan ? (
+                    <Button
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenAction(row.id, "ban");
+                      }}
+                      sx={textActionButtonSx("#a23b45")}
+                    >
+                      Ban
+                    </Button>
+                  ) : null}
 
-                  <TableCell sx={{ py: 1.8 }}>
-                    <Stack direction="row" spacing={1} flexWrap="wrap">
-                      {row.status === "active" ? (
-                        <>
-                          <Button
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onOpenAction(row.id, "suspend");
-                            }}
-                            sx={{
-                              minWidth: 80,
-                              height: 28,
-                              borderRadius: "999px",
-                              textTransform: "none",
-                              fontSize: 11,
-                              color: "#fff",
-                              backgroundColor: "#f0a500",
-                              "&:hover": { backgroundColor: "#d99100" },
-                            }}
-                          >
-                            Suspend
-                          </Button>
+                  {row.status === "banned" ? (
+                    <Typography sx={{ fontSize: 12, fontWeight: 600, color: "#a23b45" }}>
+                      Permanent
+                    </Typography>
+                  ) : null}
 
-                          <Button
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onOpenAction(row.id, "ban");
-                            }}
-                            sx={{
-                              minWidth: 64,
-                              height: 28,
-                              borderRadius: "999px",
-                              textTransform: "none",
-                              fontSize: 11,
-                              color: "#fff",
-                              backgroundColor: "#ff2b2b",
-                              "&:hover": { backgroundColor: "#e62121" },
-                            }}
-                          >
-                            Ban
-                          </Button>
-                        </>
-                      ) : null}
-
-                      {row.status === "suspended" ? (
-                        <>
-                          <Button
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onOpenAction(row.id, "lift");
-                            }}
-                            sx={{
-                              minWidth: 64,
-                              height: 28,
-                              borderRadius: "999px",
-                              textTransform: "none",
-                              fontSize: 11,
-                              color: "#fff",
-                              backgroundColor: "#18a957",
-                              "&:hover": { backgroundColor: "#148948" },
-                            }}
-                          >
-                            Lift
-                          </Button>
-
-                          <Button
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onOpenAction(row.id, "ban");
-                            }}
-                            sx={{
-                              minWidth: 64,
-                              height: 28,
-                              borderRadius: "999px",
-                              textTransform: "none",
-                              fontSize: 11,
-                              color: "#fff",
-                              backgroundColor: "#ff2b2b",
-                              "&:hover": { backgroundColor: "#e62121" },
-                            }}
-                          >
-                            Ban
-                          </Button>
-                        </>
-                      ) : null}
-
-                      {row.status === "banned" ? (
-                        <Chip
-                          label="Permanent"
-                          size="small"
-                          sx={{
-                            backgroundColor: "#fdecea",
-                            color: "#c62828",
-                            fontWeight: 600,
-                          }}
-                        />
-                      ) : null}
-
-                      <Button
-                        size="small"
-                        variant="text"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onSelectUser(row.id);
-                        }}
-                        sx={{
-                          minWidth: 88,
-                          height: 28,
-                          textTransform: "none",
-                          fontSize: 11,
-                        }}
-                      >
-                        View history
-                      </Button>
-                    </Stack>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-
-            {!rows.length ? (
-              <TableRow>
-                <TableCell colSpan={8} sx={{ py: 5, textAlign: "center" }}>
-                  <Typography sx={{ fontWeight: 600, color: "#374151" }}>
-                    No users found
-                  </Typography>
-                  <Typography sx={{ fontSize: 13, color: "#6b7280", mt: 0.75 }}>
-                    Try another search term or clear the current filter.
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            ) : null}
-          </TableBody>
-        </Table>
-      </TableContainer>
+                  <Button
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectUser(row.id);
+                    }}
+                    sx={textActionButtonSx("#4b6078")}
+                  >
+                    View history
+                  </Button>
+                </Stack>
+              ),
+            },
+          ];
+        }}
+        emptyState={
+          <>
+            <Typography sx={{ fontWeight: 600, color: "#374151" }}>
+              No users found
+            </Typography>
+            <Typography sx={{ fontSize: 13, color: "#6b7280", mt: 0.75 }}>
+              Try another search term or clear the current filter.
+            </Typography>
+          </>
+        }
+      />
     </Card>
   );
 }

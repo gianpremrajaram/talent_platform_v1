@@ -1,5 +1,5 @@
-import AdminPartnersPage from "@/components/admin/AdminPartnersPage";
+import { redirect } from "next/navigation";
 
 export default function PartnersPage() {
-  return <AdminPartnersPage />;
+  redirect("/admin/project");
 }

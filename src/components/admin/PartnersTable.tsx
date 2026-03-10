@@ -1,69 +1,159 @@
+"use client";
+
+import { useMemo, useState } from "react";
 import {
+  Alert,
   Box,
   Button,
   Card,
+  Chip,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
   Typography,
 } from "@mui/material";
+import AdminDataTable, { AdminTableColumn } from "./AdminDataTable";
 
-type PartnerRow = {
-  company: string;
-  project: string;
+type MembershipTier = "silver" | "gold" | "platinum";
+type PartnerProjectStatus = "pending" | "approved" | "rejected";
+
+type PartnerProjectRow = {
+  id: string;
+  companyName: string;
+  projectName: string;
   dateApplied: string;
-  tier: string;
-  status: "Pending" | "Active";
+  tier: MembershipTier;
+  status: PartnerProjectStatus;
 };
 
-const rows: PartnerRow[] = [
+const initialRows: PartnerProjectRow[] = [
   {
-    company: "Google DeepMind",
-    project: "UI/UX Designer",
-    dateApplied: "Feb 07, 2026",
-    tier: "Platinum",
-    status: "Pending",
+    id: "partner-001",
+    companyName: "Google DeepMind",
+    projectName: "Applied AI Fellowships",
+    dateApplied: "07 Mar 2026",
+    tier: "platinum",
+    status: "pending",
   },
   {
-    company: "Microsoft Research",
-    project: "Research Analyst",
-    dateApplied: "Feb 07, 2026",
-    tier: "Gold",
-    status: "Active",
+    id: "partner-002",
+    companyName: "Microsoft Research",
+    projectName: "Research Analyst Track",
+    dateApplied: "08 Mar 2026",
+    tier: "gold",
+    status: "pending",
   },
   {
-    company: "Spotify",
-    project: "Product Designer",
-    dateApplied: "Feb 07, 2026",
-    tier: "Gold",
-    status: "Active",
+    id: "partner-003",
+    companyName: "Spotify",
+    projectName: "Product Design Rotation",
+    dateApplied: "08 Mar 2026",
+    tier: "gold",
+    status: "pending",
   },
   {
-    company: "Tencent",
-    project: "Data Scientist",
-    dateApplied: "Feb 07, 2026",
-    tier: "Silver",
-    status: "Active",
+    id: "partner-004",
+    companyName: "Tencent",
+    projectName: "Data Science Internship",
+    dateApplied: "09 Mar 2026",
+    tier: "silver",
+    status: "rejected",
   },
   {
-    company: "BBC News",
-    project: "Frontend Developer",
-    dateApplied: "Feb 07, 2026",
-    tier: "Gold",
-    status: "Active",
+    id: "partner-005",
+    companyName: "BBC News",
+    projectName: "Frontend Engineering Project",
+    dateApplied: "09 Mar 2026",
+    tier: "gold",
+    status: "approved",
   },
 ];
 
-function statusColor(status: PartnerRow["status"]) {
-  return status === "Pending" ? "#d29a00" : "#18a957";
+const columns: AdminTableColumn[] = [
+  { key: "companyName", label: "COMPANY NAME", width: "25%" },
+  { key: "projectName", label: "PROJECT NAME", width: "22%" },
+  { key: "dateApplied", label: "DATE APPLIED", width: "15%" },
+  { key: "tier", label: "TIER", width: "11%" },
+  { key: "status", label: "STATUS", width: "13%" },
+  { key: "action", label: "ACTION", width: "14%" },
+];
+
+function statusTextColor(status: PartnerProjectStatus) {
+  if (status === "approved") {
+    return "#1f6a4f";
+  }
+
+  if (status === "rejected") {
+    return "#a23b45";
+  }
+
+  return "#8a6b2f";
+}
+
+function actionTextButtonSx(color: string) {
+  return {
+    minWidth: 0,
+    height: "auto",
+    px: 0,
+    py: 0.15,
+    textTransform: "none",
+    fontSize: 12,
+    fontWeight: 600,
+    color,
+    backgroundColor: "transparent",
+    "&:hover": {
+      backgroundColor: "transparent",
+      textDecoration: "underline",
+    },
+  };
 }
 
 export default function PartnersTable() {
+  const [rows, setRows] = useState<PartnerProjectRow[]>(initialRows);
+  const [bannerMessage, setBannerMessage] = useState("");
+
+  const pendingCount = useMemo(
+    () => rows.filter((row) => row.status === "pending").length,
+    [rows]
+  );
+
+  async function handleApprove(row: PartnerProjectRow) {
+    // TODO: replace with partner endpoint call.
+    // Example:
+    // await fetch(`/api/admin/partners/projects/${row.id}/approve`, {
+    //   method: "POST",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify({ tier: row.tier }),
+    // });
+
+    setRows((prev) =>
+      prev.map((item) =>
+        item.id === row.id ? { ...item, status: "approved" } : item
+      )
+    );
+
+    setBannerMessage(
+      `${row.companyName} project "${row.projectName}" approved for partner listing.`
+    );
+  }
+
+  async function handleReject(row: PartnerProjectRow) {
+    // TODO: replace with partner endpoint call.
+    // Example:
+    // await fetch(`/api/admin/partners/projects/${row.id}/reject`, {
+    //   method: "POST",
+    //   headers: { "Content-Type": "application/json" },
+    // });
+
+    setRows((prev) =>
+      prev.map((item) =>
+        item.id === row.id ? { ...item, status: "rejected" } : item
+      )
+    );
+
+    setBannerMessage(
+      `${row.companyName} project "${row.projectName}" rejected and hidden from partner feed.`
+    );
+  }
+
   return (
     <Card
       sx={{
@@ -74,161 +164,125 @@ export default function PartnersTable() {
       }}
     >
       <Box sx={{ px: 2, py: 1.6, borderBottom: "1px solid #eceef2" }}>
-        <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>
-          Partner Table
+        <Typography sx={{ fontSize: 15, fontWeight: 600, color: "#111827" }}>
+          Partner Project Approvals
+        </Typography>
+        <Typography sx={{ fontSize: 12, color: "#6b7280", mt: 0.5 }}>
+          Review each partner project submission and approve or reject.
         </Typography>
       </Box>
 
+      {bannerMessage ? (
+        <Box sx={{ px: 2, pt: 2 }}>
+          <Alert severity="success">{bannerMessage}</Alert>
+        </Box>
+      ) : null}
+
       <Box
         sx={{
           px: 2,
-          py: 1.5,
+          py: 1.4,
           display: "flex",
+          justifyContent: "space-between",
           alignItems: "center",
-          gap: 1.2,
+          borderBottom: "1px solid #eceef2",
         }}
       >
-        <TextField
-          size="small"
-          placeholder="Search 2000 records..."
-          sx={{
-            width: 180,
-            "& .MuiOutlinedInput-root": {
-              height: 34,
-              fontSize: 12,
-              backgroundColor: "#fff",
-            },
-          }}
-        />
+        <Typography sx={{ fontSize: 12, color: "#6b7280" }}>
+          {pendingCount} pending partner project{pendingCount === 1 ? "" : "s"}
+        </Typography>
 
-        <Button
-          variant="contained"
-          sx={{
-            minWidth: 96,
-            height: 34,
-            borderRadius: "2px",
-            boxShadow: "none",
-            textTransform: "none",
-            backgroundColor: "#1479e9",
-          }}
-        >
-          Search
-        </Button>
+        <Stack direction="row" spacing={1}>
+          <Chip
+            label="Silver"
+            size="small"
+            sx={{ backgroundColor: "#f1f3f5", color: "#4b5563" }}
+          />
+          <Chip
+            label="Gold"
+            size="small"
+            sx={{ backgroundColor: "#f4efe4", color: "#8a7240" }}
+          />
+          <Chip
+            label="Platinum"
+            size="small"
+            sx={{ backgroundColor: "#eaf0f6", color: "#4b6078" }}
+          />
+        </Stack>
       </Box>
 
-      <TableContainer sx={{ overflowX: "auto" }}>
-        <Table sx={{ minWidth: 900 }}>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: "#111111" }}>
-              {[
-                "COMPANY NAME",
-                "PROJECT NAME",
-                "DATE APPLIED",
-                "TIER",
-                "STATUS",
-                "ACTION",
-              ].map((head) => (
-                <TableCell
-                  key={head}
+      <AdminDataTable
+        columns={columns}
+        rows={rows}
+        getRowKey={(row) => row.id}
+        getCells={(row) => {
+          const isPending = row.status === "pending";
+
+          return [
+            {
+              key: "companyName",
+              content: row.companyName,
+              sx: {
+                fontWeight: 600,
+                color: "#111827",
+              },
+            },
+            { key: "projectName", content: row.projectName },
+            { key: "dateApplied", content: row.dateApplied },
+            {
+              key: "tier",
+              content: (
+                <Typography sx={{ fontSize: 12, color: "#1f2937", textTransform: "capitalize" }}>
+                  {row.tier}
+                </Typography>
+              ),
+            },
+            {
+              key: "status",
+              content: (
+                <Typography
                   sx={{
-                    color: "#fff",
-                    fontSize: 10,
+                    fontSize: 12,
                     fontWeight: 600,
-                    borderBottom: "none",
-                    py: 1.5,
+                    textTransform: "capitalize",
+                    color: statusTextColor(row.status),
                   }}
                 >
-                  {head}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
-            {rows.map((row) => (
-              <TableRow key={`${row.company}-${row.project}`}>
-                <TableCell sx={{ py: 1.8, fontSize: 12 }}>{row.company}</TableCell>
-                <TableCell sx={{ py: 1.8, fontSize: 12 }}>{row.project}</TableCell>
-                <TableCell sx={{ py: 1.8, fontSize: 12 }}>{row.dateApplied}</TableCell>
-                <TableCell sx={{ py: 1.8, fontSize: 12 }}>{row.tier}</TableCell>
-                <TableCell sx={{ py: 1.8, fontSize: 12, color: statusColor(row.status) }}>
                   {row.status}
-                </TableCell>
-                <TableCell sx={{ py: 1.8 }}>
-                  {row.status === "Pending" ? (
-                    <Stack direction="row" spacing={1}>
-                      <Button
-                        size="small"
-                        sx={{
-                          minWidth: 72,
-                          height: 24,
-                          borderRadius: "999px",
-                          textTransform: "none",
-                          fontSize: 11,
-                          color: "#fff",
-                          backgroundColor: "#46c338",
-                          "&:hover": { backgroundColor: "#38aa2d" },
-                        }}
-                      >
-                        Approve
-                      </Button>
+                </Typography>
+              ),
+            },
+            {
+              key: "action",
+              content: isPending ? (
+                <Stack direction="column" spacing={0.1} alignItems="flex-start">
+                  <Button
+                    size="small"
+                    onClick={() => handleApprove(row)}
+                    sx={actionTextButtonSx("#1f6a4f")}
+                  >
+                    Approve
+                  </Button>
 
-                      <Button
-                        size="small"
-                        sx={{
-                          minWidth: 64,
-                          height: 24,
-                          borderRadius: "999px",
-                          textTransform: "none",
-                          fontSize: 11,
-                          color: "#fff",
-                          backgroundColor: "#ff2b2b",
-                          "&:hover": { backgroundColor: "#e62121" },
-                        }}
-                      >
-                        Reject
-                      </Button>
-                    </Stack>
-                  ) : (
-                    <Button
-                      size="small"
-                      sx={{
-                        minWidth: 64,
-                        height: 24,
-                        borderRadius: "999px",
-                        textTransform: "none",
-                        fontSize: 11,
-                        color: "#fff",
-                        backgroundColor: "#1d39ff",
-                        "&:hover": { backgroundColor: "#1630df" },
-                      }}
-                    >
-                      Edit
-                    </Button>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      <Box
-        sx={{
-          px: 2,
-          py: 1.2,
-          display: "flex",
-          justifyContent: "flex-end",
-          alignItems: "center",
-          gap: 2,
-          fontSize: 12,
-          color: "#6b7280",
+                  <Button
+                    size="small"
+                    onClick={() => handleReject(row)}
+                    sx={actionTextButtonSx("#a23b45")}
+                  >
+                    Reject
+                  </Button>
+                </Stack>
+              ) : (
+                <Typography sx={{ fontSize: 11, color: "#6b7280" }}>
+                  {row.status === "approved"
+                    ? "Published to partner listings"
+                    : "Hidden from partner listings"}
+                </Typography>
+              ),
+            },
+          ];
         }}
-      >
-        <Typography sx={{ fontSize: 12 }}>Row per page 5</Typography>
-        <Typography sx={{ fontSize: 12 }}>1-5 of 13</Typography>
-        <Typography sx={{ fontSize: 12 }}>{`<  >`}</Typography>
-      </Box>
+      />
     </Card>
   );
 }
