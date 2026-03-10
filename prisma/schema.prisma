@@ -49,10 +49,7 @@ model User {
   // so i create two model and make those models relate to user model
   studentProfile StudentProfile?
   consents       Consent[]
-  auditLogs                  AuditLog[]                  @relation("AuditActor")
-  workExperiences            StudentWorkExperience[]     @relation("UserWorkExperiences")
-  studentProjects            StudentProjects[]           @relation("StudentProjects")
-  studentSkills              StudentSkill[]              @relation("StudentSkills")
+
   studentUniversities        StudentUniversity[]         @relation("StudentUniversity")
   studentAcheivementTags     StudentAcheivementTag[]     @relation("StudentAcheivementTag")
   studentPersonalInformation StudentPersonalInformation?
