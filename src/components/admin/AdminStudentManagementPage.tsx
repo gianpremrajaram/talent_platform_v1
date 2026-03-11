@@ -19,9 +19,7 @@ import NotificationsNoneRoundedIcon from "@mui/icons-material/NotificationsNoneR
 import GppBadRoundedIcon from "@mui/icons-material/GppBadRounded";
 import LockPersonRoundedIcon from "@mui/icons-material/LockPersonRounded";
 import VerifiedUserRoundedIcon from "@mui/icons-material/VerifiedUserRounded";
-import DomainDisabledRoundedIcon from "@mui/icons-material/DomainDisabledRounded";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
-import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
 
 import AdminSidebar from "./AdminSidebar";
 import UserManagementTable, {
@@ -46,7 +44,7 @@ function nowLabel() {
   }).format(new Date());
 }
 
-const initialUsers: ManagedUser[] = [
+const initialStudents: ManagedUser[] = [
   {
     id: "user-001",
     name: "Alice Zhang",
@@ -57,27 +55,6 @@ const initialUsers: ManagedUser[] = [
     suspendedAt: null,
     liftedAt: null,
     history: [],
-  },
-  {
-    id: "user-002",
-    name: "Northbridge Analytics",
-    userType: "Company",
-    email: "careers@northbridge-analytics.com",
-    appScope: "Talent Platform",
-    status: "suspended",
-    suspendedAt: "08 Mar 2026, 14:30",
-    liftedAt: null,
-    history: [
-      {
-        id: "hist-001",
-        action: "suspend",
-        appScope: "Talent Platform",
-        createdAt: "08 Mar 2026, 14:30",
-        suspendedAt: "08 Mar 2026, 14:30",
-        liftedAt: null,
-        reason: "Repeated violation of partner messaging guidelines.",
-      },
-    ],
   },
   {
     id: "user-003",
@@ -101,36 +78,6 @@ const initialUsers: ManagedUser[] = [
     ],
   },
   {
-    id: "user-004",
-    name: "MedAxis Research",
-    userType: "Company",
-    email: "talent@medaxisresearch.com",
-    appScope: "Talent Platform",
-    status: "active",
-    suspendedAt: null,
-    history: [
-      {
-        id: "hist-003",
-        action: "suspend",
-        appScope: "Talent Platform",
-        createdAt: "02 Mar 2026, 11:20",
-        suspendedAt: "02 Mar 2026, 11:20",
-        liftedAt: null,
-        reason: "Temporary suspension during verification review.",
-      },
-      {
-        id: "hist-004",
-        action: "lift",
-        appScope: "Talent Platform",
-        createdAt: "03 Mar 2026, 10:10",
-        suspendedAt: null,
-        liftedAt: "03 Mar 2026, 10:10",
-        reason: "Verification completed and access restored.",
-      },
-    ],
-    liftedAt: "03 Mar 2026, 10:10",
-  },
-  {
     id: "user-005",
     name: "Priya Menon",
     userType: "Student",
@@ -143,61 +90,40 @@ const initialUsers: ManagedUser[] = [
   },
 ];
 
-type UserTypeFilter = "Student" | "Company";
-
-export default function AdminUserManagementPage({
-  userTypeFilter,
-}: {
-  userTypeFilter?: UserTypeFilter;
-}) {
-  const baseUsers = userTypeFilter
-    ? initialUsers.filter((u) => u.userType === userTypeFilter)
-    : initialUsers;
-  const [users, setUsers] = useState<ManagedUser[]>(baseUsers);
+export default function AdminStudentManagementPage() {
+  const [users, setUsers] = useState<ManagedUser[]>(initialStudents);
   const [search, setSearch] = useState("");
   const [bannerMessage, setBannerMessage] = useState("");
-  const [selectedUserId, setSelectedUserId] = useState<string>(baseUsers[0]?.id ?? "");
+  const [selectedUserId, setSelectedUserId] = useState<string>(initialStudents[0]?.id ?? "");
   const [modalState, setModalState] = useState<ModalState>({
     isOpen: false,
     action: null,
     userId: null,
   });
 
-  const selectedUser =
-    users.find((user) => user.id === selectedUserId) ?? null;
+  const selectedUser = users.find((user) => user.id === selectedUserId) ?? null;
 
   const filteredUsers = useMemo(() => {
     const keyword = search.trim().toLowerCase();
     if (!keyword) return users;
-
-    return users.filter((user) => {
-      return (
+    return users.filter(
+      (user) =>
         user.name.toLowerCase().includes(keyword) ||
         user.email.toLowerCase().includes(keyword) ||
-        user.userType.toLowerCase().includes(keyword) ||
         user.status.toLowerCase().includes(keyword)
-      );
-    });
+    );
   }, [users, search]);
 
-  const activeCount = users.filter((user) => user.status === "active").length;
-  const suspendedCount = users.filter((user) => user.status === "suspended").length;
-  const bannedCount = users.filter((user) => user.status === "banned").length;
+  const activeCount = users.filter((u) => u.status === "active").length;
+  const suspendedCount = users.filter((u) => u.status === "suspended").length;
+  const bannedCount = users.filter((u) => u.status === "banned").length;
 
   function openActionModal(userId: string, action: SuspensionActionType) {
-    setModalState({
-      isOpen: true,
-      action,
-      userId,
-    });
+    setModalState({ isOpen: true, action, userId });
   }
 
   function closeActionModal() {
-    setModalState({
-      isOpen: false,
-      action: null,
-      userId: null,
-    });
+    setModalState({ isOpen: false, action: null, userId: null });
   }
 
   function handleConfirmAction(payload: {
@@ -224,7 +150,6 @@ export default function AdminUserManagementPage({
             liftedAt: null,
             reason: payload.reason,
           };
-
           return {
             ...user,
             status: "suspended",
@@ -245,7 +170,6 @@ export default function AdminUserManagementPage({
             liftedAt: timestamp,
             reason: payload.reason,
           };
-
           return {
             ...user,
             status: "active",
@@ -265,7 +189,6 @@ export default function AdminUserManagementPage({
           liftedAt: null,
           reason: payload.reason,
         };
-
         return {
           ...user,
           status: "banned",
@@ -277,8 +200,7 @@ export default function AdminUserManagementPage({
       })
     );
 
-    const target = users.find((user) => user.id === payload.userId);
-
+    const target = users.find((u) => u.id === payload.userId);
     if (target) {
       if (payload.action === "suspend") {
         setBannerMessage(
@@ -298,11 +220,10 @@ export default function AdminUserManagementPage({
     closeActionModal();
   }
 
-  const modalUser =
-    users.find((user) => user.id === modalState.userId) ?? null;
+  const modalUser = users.find((u) => u.id === modalState.userId) ?? null;
 
   return (
-    <Box data-admin-page="user-management" sx={{ py: 2, width: "100%" }}>
+    <Box data-admin-page="student-management" sx={{ py: 2, width: "100%" }}>
       <Box
         sx={{
           display: "grid",
@@ -323,18 +244,11 @@ export default function AdminUserManagementPage({
           >
             <Box>
               <Typography sx={{ fontSize: 18, fontWeight: 600, color: "#1f2937" }}>
-                {userTypeFilter === "Student"
-                  ? "Student access management"
-                  : userTypeFilter === "Company"
-                  ? "Partner access management"
-                  : "User access management"}
+                Student access management
               </Typography>
               <Typography sx={{ mt: 0.75, color: "#6b7280", maxWidth: 760 }}>
-                {userTypeFilter === "Student"
-                  ? "Suspend, lift, or permanently ban student access to the Talent Platform without affecting other apps."
-                  : userTypeFilter === "Company"
-                  ? "Suspend, lift, or permanently ban partner access to the Talent Platform without affecting other apps."
-                  : "Suspend, lift, or permanently ban access to the Talent Platform without affecting access to other apps."}
+                Suspend, lift, or permanently ban student access to the Talent
+                Platform without affecting other apps.
               </Typography>
             </Box>
 
@@ -343,7 +257,7 @@ export default function AdminUserManagementPage({
                 size="small"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search users"
+                placeholder="Search students"
                 sx={{
                   width: 240,
                   "& .MuiOutlinedInput-root": {
@@ -362,10 +276,7 @@ export default function AdminUserManagementPage({
 
               <IconButton
                 aria-label="Notifications"
-                sx={{
-                  border: "1px solid #d9dde3",
-                  backgroundColor: "#fff",
-                }}
+                sx={{ border: "1px solid #d9dde3", backgroundColor: "#fff" }}
               >
                 <NotificationsNoneRoundedIcon />
               </IconButton>
@@ -478,7 +389,7 @@ export default function AdminUserManagementPage({
           >
             {[
               {
-                title: "Active users",
+                title: "Active students",
                 value: activeCount,
                 note: "Access currently allowed",
                 icon: <VerifiedUserRoundedIcon />,
@@ -486,7 +397,7 @@ export default function AdminUserManagementPage({
                 color: "#557564",
               },
               {
-                title: "Suspended users",
+                title: "Suspended students",
                 value: suspendedCount,
                 note: "Temporary app restriction",
                 icon: <LockPersonRoundedIcon />,
@@ -494,39 +405,21 @@ export default function AdminUserManagementPage({
                 color: "#8a7448",
               },
               {
-                title: "Banned users",
+                title: "Banned students",
                 value: bannedCount,
                 note: "Permanent restriction",
                 icon: <GppBadRoundedIcon />,
                 bg: "#f4ecec",
                 color: "#865e62",
               },
-              userTypeFilter === "Student"
-                ? {
-                    title: "Student accounts",
-                    value: users.filter((u) => u.userType === "Student").length,
-                    note: "Managed in this scope",
-                    icon: <SchoolRoundedIcon />,
-                    bg: "#edf1f5",
-                    color: "#55667c",
-                  }
-                : userTypeFilter === "Company"
-                ? {
-                    title: "Partner accounts",
-                    value: users.filter((u) => u.userType === "Company").length,
-                    note: "Managed in this scope",
-                    icon: <BusinessRoundedIcon />,
-                    bg: "#edf1f5",
-                    color: "#55667c",
-                  }
-                : {
-                    title: "Company accounts",
-                    value: users.filter((u) => u.userType === "Company").length,
-                    note: "Managed in this scope",
-                    icon: <DomainDisabledRoundedIcon />,
-                    bg: "#edf1f5",
-                    color: "#55667c",
-                  },
+              {
+                title: "Student accounts",
+                value: users.length,
+                note: "Managed in this scope",
+                icon: <SchoolRoundedIcon />,
+                bg: "#edf1f5",
+                color: "#55667c",
+              },
             ].map((card) => (
               <Card
                 key={card.title}

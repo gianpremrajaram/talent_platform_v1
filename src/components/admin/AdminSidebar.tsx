@@ -14,6 +14,8 @@ import {
 import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
 import HandshakeRoundedIcon from "@mui/icons-material/HandshakeRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
+import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
+import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
 import type { ReactNode } from "react";
 
 type SidebarItem = {
@@ -36,8 +38,19 @@ const sidebarItems: SidebarItem[] = [
   },
   {
     label: "User",
-    href: "/admin/user-management",
     icon: <PersonRoundedIcon fontSize="small" />,
+    children: [
+      {
+        label: "Partners",
+        href: "/admin/partner-users",
+        icon: <BusinessRoundedIcon fontSize="small" />,
+      },
+      {
+        label: "Students",
+        href: "/admin/student-users",
+        icon: <SchoolRoundedIcon fontSize="small" />,
+      },
+    ],
   },
 ];
 
