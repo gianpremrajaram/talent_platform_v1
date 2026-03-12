@@ -54,6 +54,14 @@ model User {
   studentAcheivementTags     StudentAcheivementTag[]     @relation("StudentAcheivementTag")
   studentPersonalInformation StudentPersonalInformation?
   studentSocialLinks         StudentSocialLink[]
+
+  // Talent platform relations (Issue #13)
+  studentCompanyConsents     StudentCompanyConsent[]      @relation("StudentConsents")
+  jobPostings                JobPosting[]                 @relation("JobPostingCreator")
+  adminRecsAsStudent         AdminRecommendation[]        @relation("RecommendedStudent")
+  adminRecsAsAdmin           AdminRecommendation[]        @relation("RecommendingAdmin")
+  appSuspensions             AppSuspension[]
+  studentCVs                 StudentCV[]
 }
 
 model Organisation {
@@ -61,8 +69,23 @@ model Organisation {
   name        String
   slug        String           @unique
   type        OrganisationType
+  status      CompanyStatus    @default(APPROVED)
   users       User[]
   memberships Membership[]
+
+  // Talent platform relations
+  studentCompanyConsents StudentCompanyConsent[]
+  jobPostings            JobPosting[]
+  adminRecommendations   AdminRecommendation[]
+}
+
+/// Company lifecycle status — controls recruiter access gating.
+/// PENDING blocks access until admin approves. SUSPENDED/BANNED for moderation.
+enum CompanyStatus {
+  PENDING
+  APPROVED
+  SUSPENDED
+  BANNED
 }
 
 enum OrganisationType {
@@ -387,5 +410,100 @@ model StudentSocialLink {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, platform])
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────
+// TALENT PLATFORM MODELS (Issue #13 — complete)
+// ─────────────────────────────────────────────
+
+/// Per-company visibility consent. A student grants or revokes consent
+/// for a specific company to view their profile. Recruiters only see
+/// students who have consented to their organisation.
+model StudentCompanyConsent {
+  id        String   @id @default(cuid())
+  studentId String
+  companyId Int
+  consented Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+
+  student User         @relation("StudentConsents", fields: [studentId], references: [id], onDelete: Cascade)
+  company Organisation @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, companyId])
+  @@index([companyId])
+}
+
+/// A job posted by a recruiter on behalf of their organisation.
+/// Visible to students based on tier-gated access rules.
+model JobPosting {
+  id               String    @id @default(cuid())
+  organisationId   Int
+  createdByUserId  String
+  title            String
+  description      String
+  location         String
+  salaryBand       String?
+  roleType         String
+  postedAt         DateTime  @default(now())
+  expiresAt        DateTime?
+  isActive         Boolean   @default(true)
+
+  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("JobPostingCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
+
+  @@index([organisationId])
+  @@index([createdByUserId])
+  @@index([isActive, postedAt])
+}
+
+/// Admin-curated recommendation linking a student to a firm.
+/// Each firm sees only their own recommended students. Revocable
+/// by setting revokedAt — no unique constraint; dedup in service layer.
+model AdminRecommendation {
+  id        String    @id @default(cuid())
+  studentId String
+  firmId    Int
+  adminId   String
+  createdAt DateTime  @default(now())
+  revokedAt DateTime?
+
+  student User         @relation("RecommendedStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  firm    Organisation @relation(fields: [firmId], references: [id], onDelete: Cascade)
+  admin   User         @relation("RecommendingAdmin", fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([firmId, revokedAt])
+  @@index([studentId])
+  @@index([adminId])
+}
+
+/// Per-app suspension record. Scoped to a single app key so that
+/// suspending a user from talent-discovery does not affect their
+/// membership dashboard access.
+model AppSuspension {
+  id          String    @id @default(cuid())
+  userId      String
+  appKey      String
+  reason      String
+  suspendedAt DateTime  @default(now())
+  liftedAt    DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, appKey])
+}
+
+/// A CV document uploaded by a student. Storage backend is abstracted
+/// behind CVStorageService — fileUrl may point to S3, GDrive, or any
+/// future provider. Multiple CVs per student are supported.
+model StudentCV {
+  id         String   @id @default(cuid())
+  userId     String
+  label      String
+  fileUrl    String
+  uploadedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
 }
