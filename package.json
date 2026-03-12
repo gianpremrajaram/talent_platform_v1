@@ -35,9 +35,6 @@
     "remark-html": "^16.0.1",
     "yaml": "^2.8.1"
   },
-  "prisma": {
-    "seed": "ts-node prisma/seed.ts"
-  },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
