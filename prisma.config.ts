@@ -7,7 +7,7 @@ export default defineConfig({
   migrations: {
     path: "prisma/migrations",
     // 👇 seed command goes here, as a string
-    seed: "ts-node prisma/seed.ts",
+    seed: "tsx prisma/seed.ts",
   },
   engine: "classic",
   datasource: {
