@@ -334,7 +334,7 @@ const isAdmin = roleKeys.includes("ADMIN");
                     role="menuitem"
                     onClick={() => {
                       closeAllMenus();
-                      signOut();
+                      signOut({ callbackUrl: "/" });
                     }}
                   >
                     Sign out

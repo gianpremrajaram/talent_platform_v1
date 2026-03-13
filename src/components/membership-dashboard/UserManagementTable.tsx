@@ -1,6 +1,15 @@
 "use client";
 
-import { Box, Button, Card, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Card,
+  InputAdornment,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import AdminDataTable, { AdminTableColumn } from "./AdminDataTable";
 
 export type AppScope = "Talent Platform";
@@ -33,7 +42,9 @@ type Props = {
   rows: ManagedUser[];
   selectedUserId: string | null;
   onSelectUser: (userId: string) => void;
-  onOpenAction: (userId: string, action: SuspensionActionType) => void;
+  search: string;
+  onSearchChange: (value: string) => void;
+  searchPlaceholder?: string;
 };
 
 const columns: AdminTableColumn[] = [
@@ -59,7 +70,7 @@ function textActionButtonSx(color: string) {
     px: 0,
     py: 0.15,
     textTransform: "none",
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 600,
     color,
     backgroundColor: "transparent",
@@ -74,7 +85,9 @@ export default function UserManagementTable({
   rows,
   selectedUserId,
   onSelectUser,
-  onOpenAction,
+  search,
+  onSearchChange,
+  searchPlaceholder = "Search users",
 }: Props) {
   return (
     <Card
@@ -85,14 +98,36 @@ export default function UserManagementTable({
         overflow: "hidden",
       }}
     >
-      <Box sx={{ px: 2, py: 1.6, borderBottom: "1px solid #eceef2" }}>
-        <Typography sx={{ fontSize: 15, fontWeight: 600, color: "#111827" }}>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        sx={{ px: 2, py: 1.4, borderBottom: "1px solid #eceef2" }}
+      >
+        <Typography sx={{ fontSize: 17, fontWeight: 600, color: "#111827" }}>
           User management panel
         </Typography>
-        <Typography sx={{ fontSize: 12, color: "#6b7280", mt: 0.5 }}>
-          Suspend or ban access to the Talent Platform without impacting other applications.
-        </Typography>
-      </Box>
+        <TextField
+          size="small"
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder={searchPlaceholder}
+          sx={{
+            width: 220,
+            "& .MuiOutlinedInput-root": {
+              height: 34,
+              backgroundColor: "#f9fafb",
+            },
+          }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchRoundedIcon fontSize="small" sx={{ color: "#9ca3af" }} />
+              </InputAdornment>
+            ),
+          }}
+        />
+      </Stack>
 
       <AdminDataTable
         columns={columns}
@@ -111,14 +146,10 @@ export default function UserManagementTable({
           };
         }}
         getCells={(row) => {
-          const showSuspend = row.status === "active";
-          const showLift = row.status === "suspended";
-          const showBan = row.status === "active" || row.status === "suspended";
-
           return [
             {
               key: "name",
-              content: <Typography sx={{ fontSize: 12, fontWeight: 600 }}>{row.name}</Typography>,
+              content: <Typography sx={{ fontSize: 14, fontWeight: 600 }}>{row.name}</Typography>,
             },
             { key: "userType", content: row.tierLabel ?? row.userType },
             {
@@ -136,7 +167,7 @@ export default function UserManagementTable({
               content: (
                 <Typography
                   sx={{
-                    fontSize: 12,
+                    fontSize: 14,
                     fontWeight: 600,
                     textTransform: "capitalize",
                     color: statusTextColor(row.status),
@@ -149,63 +180,19 @@ export default function UserManagementTable({
             {
               key: "action",
               content: (
-                <Stack direction="column" spacing={0.1} alignItems="flex-start">
-                  {showSuspend ? (
-                    <Button
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onOpenAction(row.id, "suspend");
-                      }}
-                      sx={textActionButtonSx("#8a6b2f")}
-                    >
-                      Suspend
-                    </Button>
-                  ) : null}
-
-                  {showLift ? (
-                    <Button
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onOpenAction(row.id, "lift");
-                      }}
-                      sx={textActionButtonSx("#1f6a4f")}
-                    >
-                      Lift
-                    </Button>
-                  ) : null}
-
-                  {showBan ? (
-                    <Button
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onOpenAction(row.id, "ban");
-                      }}
-                      sx={textActionButtonSx("#a23b45")}
-                    >
-                      Ban
-                    </Button>
-                  ) : null}
-
-                  {row.status === "banned" ? (
-                    <Typography sx={{ fontSize: 12, fontWeight: 600, color: "#a23b45" }}>
-                      Permanent
-                    </Typography>
-                  ) : null}
-
-                  <Button
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      window.location.href = "/account";
-                    }}
-                    sx={textActionButtonSx("#4b6078")}
-                  >
-                    Edit
-                  </Button>
-                </Stack>
+                <Button
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.location.href =
+                      row.userType === "Student"
+                        ? `/membership-dashboard/student-users/${row.id}/edit`
+                        : "/account";
+                  }}
+                  sx={textActionButtonSx("#4b6078")}
+                >
+                  Edit
+                </Button>
               ),
             },
           ];
@@ -215,7 +202,7 @@ export default function UserManagementTable({
             <Typography sx={{ fontWeight: 600, color: "#374151" }}>
               No users found
             </Typography>
-            <Typography sx={{ fontSize: 13, color: "#6b7280", mt: 0.75 }}>
+            <Typography sx={{ fontSize: 15, color: "#6b7280", mt: 0.75 }}>
               Try another search term or clear the current filter.
             </Typography>
           </>

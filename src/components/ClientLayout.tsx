@@ -3,11 +3,15 @@
 
 import { ReactNode } from "react";
 import { SessionProvider } from "next-auth/react";
+import { usePathname } from "next/navigation";
 import MuiThemeProvider from "@/components/MuiThemeProvider";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export default function ClientLayout({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const isFullWidth = pathname?.startsWith("/membership-dashboard");
+
   return (
     <SessionProvider>
       <MuiThemeProvider>
@@ -17,7 +21,11 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
 
         <Header />
 
-        <main id="main" className="site-main" role="main">
+        <main
+          id="main"
+          className={isFullWidth ? "site-main site-main--full" : "site-main"}
+          role="main"
+        >
           {children}
         </main>
 

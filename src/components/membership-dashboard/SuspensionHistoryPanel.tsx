@@ -69,7 +69,7 @@ export default function SuspensionHistoryPanel({ user }: Props) {
         <Typography sx={{ fontWeight: 600, color: "#111827" }}>
           Suspension history
         </Typography>
-        <Typography sx={{ mt: 1, fontSize: 13, color: "#6b7280" }}>
+        <Typography sx={{ mt: 1, fontSize: 14, color: "#6b7280" }}>
           Select a user from the table to view suspension history and audit records.
         </Typography>
       </Card>
@@ -86,10 +86,10 @@ export default function SuspensionHistoryPanel({ user }: Props) {
       }}
     >
       <Box sx={{ px: 2, py: 1.6, borderBottom: "1px solid #eceef2" }}>
-        <Typography sx={{ fontSize: 15, fontWeight: 600, color: "#111827" }}>
+        <Typography sx={{ fontSize: 17, fontWeight: 600, color: "#111827" }}>
           Suspension history
         </Typography>
-        <Typography sx={{ fontSize: 12, color: "#6b7280", mt: 0.5 }}>
+        <Typography sx={{ fontSize: 14, color: "#6b7280", mt: 0.5 }}>
           Audit trail is retained even when access is restored.
         </Typography>
       </Box>
@@ -104,10 +104,10 @@ export default function SuspensionHistoryPanel({ user }: Props) {
             mb: 2,
           }}
         >
-          <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>
+          <Typography sx={{ fontSize: 16, fontWeight: 600, color: "#111827" }}>
             {user.name}
           </Typography>
-          <Typography sx={{ fontSize: 12, color: "#6b7280", mt: 0.5 }}>
+          <Typography sx={{ fontSize: 14, color: "#6b7280", mt: 0.5 }}>
             {user.userType} · {user.email}
           </Typography>
 
@@ -142,10 +142,10 @@ export default function SuspensionHistoryPanel({ user }: Props) {
               backgroundColor: "#fff",
             }}
           >
-            <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>
+            <Typography sx={{ fontSize: 15, fontWeight: 600, color: "#374151" }}>
               No history yet
             </Typography>
-            <Typography sx={{ fontSize: 12, color: "#6b7280", mt: 0.5 }}>
+            <Typography sx={{ fontSize: 14, color: "#6b7280", mt: 0.5 }}>
               This user has not been suspended or banned in the current mock data.
             </Typography>
           </Box>
@@ -184,15 +184,15 @@ export default function SuspensionHistoryPanel({ user }: Props) {
                           mb: 1,
                         }}
                       />
-                      <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#111827" }}>
+                      <Typography sx={{ fontSize: 15, fontWeight: 600, color: "#111827" }}>
                         {record.appScope}
                       </Typography>
-                      <Typography sx={{ fontSize: 12, color: "#6b7280", mt: 0.4 }}>
+                      <Typography sx={{ fontSize: 13, color: "#6b7280", mt: 0.4 }}>
                         Logged at {record.createdAt}
                       </Typography>
                     </Box>
 
-                    <Typography sx={{ fontSize: 12, color: "#6b7280" }}>
+                    <Typography sx={{ fontSize: 13, color: "#6b7280" }}>
                       Record {user.history.length - index}
                     </Typography>
                   </Box>
@@ -200,15 +200,15 @@ export default function SuspensionHistoryPanel({ user }: Props) {
                   <Divider sx={{ my: 1.25 }} />
 
                   <Box sx={{ display: "grid", gap: 0.75 }}>
-                    <Typography sx={{ fontSize: 12, color: "#374151" }}>
+                    <Typography sx={{ fontSize: 14, color: "#374151" }}>
                       <strong>Reason:</strong> {record.reason}
                     </Typography>
 
-                    <Typography sx={{ fontSize: 12, color: "#374151" }}>
+                    <Typography sx={{ fontSize: 14, color: "#374151" }}>
                       <strong>Suspended at:</strong> {record.suspendedAt ?? "—"}
                     </Typography>
 
-                    <Typography sx={{ fontSize: 12, color: "#374151" }}>
+                    <Typography sx={{ fontSize: 14, color: "#374151" }}>
                       <strong>Lifted at:</strong> {record.liftedAt ?? "—"}
                     </Typography>
                   </Box>

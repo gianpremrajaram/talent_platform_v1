@@ -165,6 +165,13 @@ export async function deleteStudentUniversity(id: string) {
   });
 }
 
+export async function getStudentUserById(userId: string) {
+  return prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, firstName: true, lastName: true, email: true },
+  });
+}
+
 export async function getStudentPersonalInfo(userId: string) {
   //it will be unique for every user
   return prisma.studentPersonalInformation.findUnique({

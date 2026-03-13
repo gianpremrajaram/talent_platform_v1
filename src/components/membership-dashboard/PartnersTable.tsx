@@ -7,9 +7,12 @@ import {
   Button,
   Card,
   Chip,
+  InputAdornment,
   Stack,
+  TextField,
   Typography,
 } from "@mui/material";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import AdminDataTable, { AdminTableColumn } from "./AdminDataTable";
 
 type MembershipTier = "silver" | "gold" | "platinum";
@@ -109,6 +112,19 @@ function actionTextButtonSx(color: string) {
 export default function PartnersTable() {
   const [rows, setRows] = useState<PartnerProjectRow[]>(initialRows);
   const [bannerMessage, setBannerMessage] = useState("");
+  const [search, setSearch] = useState("");
+
+  const filteredRows = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+    if (!keyword) return rows;
+    return rows.filter(
+      (row) =>
+        row.companyName.toLowerCase().includes(keyword) ||
+        row.projectName.toLowerCase().includes(keyword) ||
+        row.tier.toLowerCase().includes(keyword) ||
+        row.status.toLowerCase().includes(keyword)
+    );
+  }, [rows, search]);
 
   const pendingCount = useMemo(
     () => rows.filter((row) => row.status === "pending").length,
@@ -163,14 +179,36 @@ export default function PartnersTable() {
         overflow: "hidden",
       }}
     >
-      <Box sx={{ px: 2, py: 1.6, borderBottom: "1px solid #eceef2" }}>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        sx={{ px: 2, py: 1.4, borderBottom: "1px solid #eceef2" }}
+      >
         <Typography sx={{ fontSize: 15, fontWeight: 600, color: "#111827" }}>
           Partner Project Approvals
         </Typography>
-        <Typography sx={{ fontSize: 12, color: "#6b7280", mt: 0.5 }}>
-          Review each partner project submission and approve or reject.
-        </Typography>
-      </Box>
+        <TextField
+          size="small"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search partner projects"
+          sx={{
+            width: 220,
+            "& .MuiOutlinedInput-root": {
+              height: 34,
+              backgroundColor: "#f9fafb",
+            },
+          }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchRoundedIcon fontSize="small" sx={{ color: "#9ca3af" }} />
+              </InputAdornment>
+            ),
+          }}
+        />
+      </Stack>
 
       {bannerMessage ? (
         <Box sx={{ px: 2, pt: 2 }}>
@@ -213,7 +251,7 @@ export default function PartnersTable() {
 
       <AdminDataTable
         columns={columns}
-        rows={rows}
+        rows={filteredRows}
         getRowKey={(row) => row.id}
         getCells={(row) => {
           const isPending = row.status === "pending";

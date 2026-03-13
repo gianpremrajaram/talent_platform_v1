@@ -23,7 +23,6 @@ import DomainDisabledRoundedIcon from "@mui/icons-material/DomainDisabledRounded
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
 
-import AdminSidebar from "./AdminSidebar";
 import UserManagementTable, {
   type ManagedUser,
   type SuspensionActionType,
@@ -302,18 +301,7 @@ export default function AdminUserManagementPage({
     users.find((user) => user.id === modalState.userId) ?? null;
 
   return (
-    <Box data-admin-page="user-management" sx={{ py: 2, width: "100%" }}>
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: "230px minmax(0, 1fr)",
-          gap: 3,
-          alignItems: "start",
-        }}
-      >
-        <AdminSidebar />
-
-        <Box>
+    <Box data-admin-page="user-management">
           <Stack
             direction="row"
             justifyContent="space-between"
@@ -537,29 +525,28 @@ export default function AdminUserManagementPage({
                 }}
               >
                 <CardContent sx={{ px: 2, py: 2 }}>
-                  <Box
-                    sx={{
-                      width: 38,
-                      height: 38,
-                      borderRadius: "10px",
-                      display: "grid",
-                      placeItems: "center",
-                      backgroundColor: card.bg,
-                      color: card.color,
-                      mb: 1.5,
-                    }}
-                  >
-                    {card.icon}
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.2, mb: 1.5 }}>
+                    <Box
+                      sx={{
+                        width: 38,
+                        height: 38,
+                        borderRadius: "10px",
+                        display: "grid",
+                        placeItems: "center",
+                        backgroundColor: card.bg,
+                        color: card.color,
+                        flexShrink: 0,
+                      }}
+                    >
+                      {card.icon}
+                    </Box>
+                    <Typography sx={{ fontSize: 20, fontWeight: 700, lineHeight: 1 }}>
+                      {card.value}
+                    </Typography>
                   </Box>
 
                   <Typography sx={{ fontSize: 12, color: "#8a8f98" }}>
                     {card.title}
-                  </Typography>
-                  <Typography sx={{ fontSize: 28, fontWeight: 700, mt: 0.5 }}>
-                    {card.value}
-                  </Typography>
-                  <Typography sx={{ fontSize: 12, color: "#6b7280", mt: 0.5 }}>
-                    {card.note}
                   </Typography>
                 </CardContent>
               </Card>
@@ -587,8 +574,6 @@ export default function AdminUserManagementPage({
               <SuspensionHistoryPanel user={selectedUser} />
             </Box>
           </Box>
-        </Box>
-      </Box>
 
       <SuspensionActionModal
         isOpen={modalState.isOpen}
