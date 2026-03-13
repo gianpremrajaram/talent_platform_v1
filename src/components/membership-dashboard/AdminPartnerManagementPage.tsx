@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Avatar,
@@ -44,65 +44,20 @@ function nowLabel() {
   }).format(new Date());
 }
 
-const initialPartners: ManagedUser[] = [
-  {
-    id: "user-002",
-    name: "Northbridge Analytics",
-    userType: "Company",
-    email: "careers@northbridge-analytics.com",
-    appScope: "Talent Platform",
-    status: "suspended",
-    suspendedAt: "08 Mar 2026, 14:30",
-    liftedAt: null,
-    history: [
-      {
-        id: "hist-001",
-        action: "suspend",
-        appScope: "Talent Platform",
-        createdAt: "08 Mar 2026, 14:30",
-        suspendedAt: "08 Mar 2026, 14:30",
-        liftedAt: null,
-        reason: "Repeated violation of partner messaging guidelines.",
-      },
-    ],
-  },
-  {
-    id: "user-004",
-    name: "MedAxis Research",
-    userType: "Company",
-    email: "talent@medaxisresearch.com",
-    appScope: "Talent Platform",
-    status: "active",
-    suspendedAt: null,
-    history: [
-      {
-        id: "hist-003",
-        action: "suspend",
-        appScope: "Talent Platform",
-        createdAt: "02 Mar 2026, 11:20",
-        suspendedAt: "02 Mar 2026, 11:20",
-        liftedAt: null,
-        reason: "Temporary suspension during verification review.",
-      },
-      {
-        id: "hist-004",
-        action: "lift",
-        appScope: "Talent Platform",
-        createdAt: "03 Mar 2026, 10:10",
-        suspendedAt: null,
-        liftedAt: "03 Mar 2026, 10:10",
-        reason: "Verification completed and access restored.",
-      },
-    ],
-    liftedAt: "03 Mar 2026, 10:10",
-  },
-];
-
 export default function AdminPartnerManagementPage() {
-  const [users, setUsers] = useState<ManagedUser[]>(initialPartners);
+  const [users, setUsers] = useState<ManagedUser[]>([]);
   const [search, setSearch] = useState("");
   const [bannerMessage, setBannerMessage] = useState("");
-  const [selectedUserId, setSelectedUserId] = useState<string>(initialPartners[0]?.id ?? "");
+  const [selectedUserId, setSelectedUserId] = useState<string>("");
+
+  useEffect(() => {
+    fetch("/api/admin/partners")
+      .then((res) => res.json())
+      .then((data: ManagedUser[]) => {
+        setUsers(data);
+        setSelectedUserId(data[0]?.id ?? "");
+      });
+  }, []);
   const [modalState, setModalState] = useState<ModalState>({
     isOpen: false,
     action: null,
@@ -162,8 +117,6 @@ export default function AdminPartnerManagementPage() {
             ...user,
             status: "suspended",
             appScope: payload.appScope,
-            suspendedAt: timestamp,
-            liftedAt: null,
             history: [nextHistoryRecord, ...user.history],
           };
         }
@@ -182,8 +135,6 @@ export default function AdminPartnerManagementPage() {
             ...user,
             status: "active",
             appScope: payload.appScope,
-            suspendedAt: null,
-            liftedAt: timestamp,
             history: [nextHistoryRecord, ...user.history],
           };
         }
@@ -201,8 +152,6 @@ export default function AdminPartnerManagementPage() {
           ...user,
           status: "banned",
           appScope: payload.appScope,
-          suspendedAt: timestamp,
-          liftedAt: null,
           history: [nextHistoryRecord, ...user.history],
         };
       })
