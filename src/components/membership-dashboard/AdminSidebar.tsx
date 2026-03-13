@@ -5,77 +5,65 @@ import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
   Box,
-  Card,
+  Divider,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Toolbar,
   Typography,
 } from "@mui/material";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import HandshakeRoundedIcon from "@mui/icons-material/HandshakeRounded";
-import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
 import type { ReactNode } from "react";
 
-type SidebarItem = {
+type NavItem = {
   label: string;
-  href?: string;
+  href: string;
   exact?: boolean;
   icon: ReactNode;
-  children?: SidebarItem[];
 };
 
-const sidebarItems: SidebarItem[] = [
+type NavSection = {
+  title: string;
+  items: NavItem[];
+};
+
+const navSections: NavSection[] = [
   {
-    label: "Home",
-    href: "/membership-dashboard",
-    exact: true,
-    icon: <HomeRoundedIcon fontSize="small" />,
+    title: "Navigation",
+    items: [
+      {
+        label: "Home",
+        href: "/membership-dashboard",
+        exact: true,
+        icon: <HomeRoundedIcon />,
+      },
+      {
+        label: "Project",
+        href: "/membership-dashboard/project",
+        icon: <HandshakeRoundedIcon />,
+      },
+    ],
   },
   {
-    label: "Project",
-    href: "/membership-dashboard/project",
-    icon: <HandshakeRoundedIcon fontSize="small" />,
-  },
-  {
-    label: "User",
-    icon: <PersonRoundedIcon fontSize="small" />,
-    children: [
+    title: "Users",
+    items: [
       {
         label: "Partners",
         href: "/membership-dashboard/partner-users",
-        icon: <BusinessRoundedIcon fontSize="small" />,
+        icon: <BusinessRoundedIcon />,
       },
       {
         label: "Students",
         href: "/membership-dashboard/student-users",
-        icon: <SchoolRoundedIcon fontSize="small" />,
+        icon: <SchoolRoundedIcon />,
       },
     ],
   },
 ];
-
-function normalizePath(path: string) {
-  if (path.length > 1 && path.endsWith("/")) {
-    return path.slice(0, -1);
-  }
-  return path;
-}
-
-function isPathActive(pathname: string, href?: string, exact?: boolean) {
-  if (!href) return false;
-  const current = normalizePath(pathname);
-  const target = normalizePath(href);
-  if (exact) return current === target;
-  return current === target || current.startsWith(`${target}/`);
-}
-
-function isItemActive(pathname: string, item: SidebarItem): boolean {
-  if (isPathActive(pathname, item.href, item.exact)) return true;
-  return item.children?.some((child) => isItemActive(pathname, child)) ?? false;
-}
 
 const roleLabel: Record<string, string> = {
   ADMIN: "Administrator",
@@ -84,8 +72,75 @@ const roleLabel: Record<string, string> = {
   MODULE_LEADER: "Module Leader",
 };
 
-export default function AdminSidebar() {
+function normalizePath(path: string) {
+  return path.length > 1 && path.endsWith("/") ? path.slice(0, -1) : path;
+}
+
+function isActive(pathname: string, href: string, exact?: boolean) {
+  const current = normalizePath(pathname);
+  const target = normalizePath(href);
+  if (exact) return current === target;
+  return current === target || current.startsWith(`${target}/`);
+}
+
+function SectionTitle({ children }: { children: ReactNode }) {
+  return (
+    <Typography
+      variant="caption"
+      sx={{
+        px: 3,
+        pt: 2,
+        pb: 1,
+        display: "block",
+        color: "text.secondary",
+        fontSize: 13,
+        fontWeight: 600,
+        textTransform: "none",
+      }}
+    >
+      {children}
+    </Typography>
+  );
+}
+
+function NavSectionList({ items }: { items: NavItem[] }) {
   const pathname = usePathname();
+
+  return (
+    <List disablePadding sx={{ px: 2 }}>
+      {items.map((item) => {
+        const selected = isActive(pathname, item.href, item.exact);
+        return (
+          <ListItemButton
+            key={item.href}
+            component={Link}
+            href={item.href}
+            selected={selected}
+            sx={{
+              minHeight: 48,
+              borderRadius: 2,
+              mb: 0.5,
+              "&.Mui-selected": {
+                bgcolor: "primary.lighter",
+                color: "primary.main",
+                "& .MuiListItemIcon-root": {
+                  color: "primary.main",
+                },
+              },
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: 40, color: "text.secondary" }}>
+              {item.icon}
+            </ListItemIcon>
+            <ListItemText primary={item.label} />
+          </ListItemButton>
+        );
+      })}
+    </List>
+  );
+}
+
+export default function AdminSidebar() {
   const { data: session } = useSession();
 
   const name = session?.user?.name ?? "";
@@ -93,112 +148,39 @@ export default function AdminSidebar() {
   const displayRole = roleKeys.map((k) => roleLabel[k] ?? k).join(", ") || "Member";
   const initial = name.trim().charAt(0).toUpperCase();
 
-  const renderItems = (items: SidebarItem[], level = 0) =>
-    items.map((item) => {
-      const selected = isPathActive(pathname, item.href, item.exact);
-      const hasActiveChild = item.children?.some((child) => isItemActive(pathname, child)) ?? false;
-      const hasChildren = (item.children?.length ?? 0) > 0;
-      const isParentWithActiveChild = hasChildren && !selected && hasActiveChild;
-
-      return (
-        <Box key={`${item.label}-${item.href ?? "group"}`}>
-          {item.href ? (
-            <ListItemButton
-              component={Link}
-              href={item.href}
-              selected={selected}
-              sx={{
-                minHeight: 38,
-                borderRadius: "8px",
-                px: 1.25,
-                pl: level === 0 ? 1.25 : 4,
-                "&.Mui-selected": {
-                  backgroundColor: "#eaf3ff",
-                  color: "#0b63d7",
-                  borderRight: "2px solid #0b63d7",
-                },
-                "&.Mui-selected:hover": {
-                  backgroundColor: "#eaf3ff",
-                },
-              }}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: level === 0 ? 28 : 24,
-                  color: selected || isParentWithActiveChild ? "#0b63d7" : "#6b7280",
-                }}
-              >
-                {item.icon}
-              </ListItemIcon>
-
-              <ListItemText
-                primary={item.label}
-                primaryTypographyProps={{
-                  fontSize: 13,
-                  fontWeight: selected || isParentWithActiveChild ? 600 : 500,
-                  color: isParentWithActiveChild ? "#0b63d7" : undefined,
-                }}
-              />
-            </ListItemButton>
-          ) : (
-            <ListItemButton
-              component="button"
-              disableRipple
-              sx={{
-                minHeight: 38,
-                borderRadius: "8px",
-                px: 1.25,
-                pl: level === 0 ? 1.25 : 4,
-              }}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: level === 0 ? 28 : 24,
-                  color: hasActiveChild ? "#0b63d7" : "#6b7280",
-                }}
-              >
-                {item.icon}
-              </ListItemIcon>
-
-              <ListItemText
-                primary={item.label}
-                primaryTypographyProps={{
-                  fontSize: 13,
-                  fontWeight: hasActiveChild ? 600 : 500,
-                  color: hasActiveChild ? "#0b63d7" : undefined,
-                }}
-              />
-            </ListItemButton>
-          )}
-
-          {hasChildren ? <List sx={{ px: 1, py: 0 }}>{renderItems(item.children!, level + 1)}</List> : null}
-        </Box>
-      );
-    });
-
   return (
-    <Card
+    <Box
       sx={{
-        borderRadius: "10px",
-        border: "1px solid #e5e7eb",
-        boxShadow: "none",
-        overflow: "hidden",
+        width: 280,
+        height: "100vh",
+        borderRight: "1px solid",
+        borderColor: "divider",
+        bgcolor: "background.paper",
+        overflowY: "auto",
+        flexShrink: 0,
       }}
     >
-      <Box sx={{ px: 2, py: 1.5, borderBottom: "1px solid #eef0f3" }}>
-        <Typography sx={{ fontSize: 11, color: "#9ca3af" }}>Dashboard</Typography>
-      </Box>
+      <Toolbar>
+        <Typography variant="h6" fontWeight={700}>
+          Membership
+        </Typography>
+      </Toolbar>
 
-      <Box sx={{ py: 1 }}>
-        <List sx={{ px: 1, py: 0 }}>{renderItems(sidebarItems)}</List>
-      </Box>
+      <Divider />
+
+      {navSections.map((section) => (
+        <Box key={section.title}>
+          <SectionTitle>{section.title}</SectionTitle>
+          <NavSectionList items={section.items} />
+        </Box>
+      ))}
+
+      <Divider sx={{ mt: 1 }} />
 
       <Box
         sx={{
-          mt: 2,
           px: 2,
           py: 1.5,
-          borderTop: "1px solid #eef0f3",
           display: "flex",
           alignItems: "center",
           gap: 1.2,
@@ -215,6 +197,7 @@ export default function AdminSidebar() {
             fontWeight: 700,
             fontSize: 13,
             color: "#fff",
+            flexShrink: 0,
           }}
         >
           {initial}
@@ -229,6 +212,6 @@ export default function AdminSidebar() {
           </Typography>
         </Box>
       </Box>
-    </Card>
+    </Box>
   );
 }

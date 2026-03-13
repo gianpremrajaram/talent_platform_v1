@@ -1,6 +1,5 @@
 // src/components/membership-dashboard/AdminDashboard.tsx
 import AdminDashboardClient from "./AdminDashboardClient";
-import AdminSidebar from "./AdminSidebar";
 import type { AdminDashboardSummary } from "@/lib/membership-dashboard";
 import type {
   AdminBenefitRedemptionStat,
@@ -50,40 +49,32 @@ export default function AdminDashboard({
   handbook,
 }: AdminDashboardProps) {
   return (
-    <div style={{ paddingTop: "16px", paddingBottom: "16px", width: "100%" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "230px minmax(0, 1fr)", gap: "24px", alignItems: "start" }}>
-        <div style={{ position: "sticky", top: "16px" }}>
-          <AdminSidebar />
-        </div>
+    <div className="admin-dashboard">
+      <header className="content-header">
+        <h1>{title}</h1>
+        {intro && <p>{intro}</p>}
+      </header>
 
-        <div className="admin-dashboard">
-          <header className="content-header">
-            <h1>{title}</h1>
-            {intro && <p>{intro}</p>}
-          </header>
+      <section className="admin-section">
+        <h2 style={{ marginTop: 0 }}>Overview</h2>
 
-          <section className="admin-section">
-            <h2 style={{ marginTop: 0 }}>Overview</h2>
+        <p>
+          The platform has <strong>{totalUsers}</strong> registered users, of
+          which <strong>{totalMembers}</strong> are members of the Friends of
+          UCL Computer Science programme. Paying members bring in{" "}
+          <strong>{gbp(payingRevenue)}</strong> revenue. The most utilised
+          benefit is <strong>{mostUtilisedBenefitLabel}</strong>.
+        </p>
+      </section>
 
-            <p>
-              The platform has <strong>{totalUsers}</strong> registered users, of
-              which <strong>{totalMembers}</strong> are members of the Friends of
-              UCL Computer Science programme. Paying members bring in{" "}
-              <strong>{gbp(payingRevenue)}</strong> revenue. The most utilised
-              benefit is <strong>{mostUtilisedBenefitLabel}</strong>.
-            </p>
-          </section>
-
-          <AdminDashboardClient
-            members={members}
-            selectedUserId={selectedUserId}
-            selectedMember={selectedMember}
-            benefitStats={benefitStats}
-            initialTab={initialTab}
-            handbook={handbook}
-          />
-        </div>
-      </div>
+      <AdminDashboardClient
+        members={members}
+        selectedUserId={selectedUserId}
+        selectedMember={selectedMember}
+        benefitStats={benefitStats}
+        initialTab={initialTab}
+        handbook={handbook}
+      />
     </div>
   );
 }

@@ -42,7 +42,7 @@ const DEFAULT_ROWS_PER_PAGE = 5;
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 25];
 
 const defaultBodyCellSx: SxProps<Theme> = {
-  py: 1.1,
+  py: 2,
   px: 1.2,
   fontSize: 12,
   color: "#1f2937",

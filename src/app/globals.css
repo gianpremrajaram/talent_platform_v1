@@ -352,6 +352,12 @@ img {
   padding: 0 1rem;
 }
 
+.site-main--full {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
 .release-notes-home,
 .release {
   max-width: 1100px;

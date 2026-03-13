@@ -11,7 +11,6 @@ import {
 } from "@/content/benefits";
 import SecondaryNav from "@/components/membership-dashboard/SecondaryNav";
 import BenefitsFilterToolbar from "@/components/membership-dashboard/BenefitsFilterToolbar";
-import AdminSidebar from "@/components/membership-dashboard/AdminSidebar";
 
 type MemberDashboardProps = {
   firstName: string;
@@ -126,16 +125,7 @@ export default function MemberDashboard(props: MemberDashboardProps) {
   }, [benefitRows, filter]);
 
   return (
-    <section
-      className="content-section stack"
-      style={{ "--stack-gap": "1.25rem" } as CSSProperties}
-    >
-      <div style={{ display: "grid", gridTemplateColumns: "230px minmax(0, 1fr)", gap: "24px", alignItems: "start" }}>
-        <div style={{ position: "sticky", top: "1.5rem" }}>
-          <AdminSidebar />
-        </div>
-
-        <div className="stack" style={{ "--stack-gap": "1.25rem" } as CSSProperties}>
+    <div className="stack" style={{ "--stack-gap": "1.25rem" } as CSSProperties}>
           <header className="content-header">
             <h1>Membership Dashboard</h1>
           </header>
@@ -203,8 +193,6 @@ export default function MemberDashboard(props: MemberDashboardProps) {
               ))}
             </ul>
           </section>
-        </div>
-      </div>
-    </section>
+    </div>
   );
 }
