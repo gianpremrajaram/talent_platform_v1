@@ -15,7 +15,10 @@ type PageProps = {
 
 type BenefitStatus = "REDEEMED" | "HAS_ACCESS" | "NO_ACCESS";
 
-function determineStatus(hasAccess: boolean, isRedeemed: boolean): BenefitStatus {
+function determineStatus(
+  hasAccess: boolean,
+  isRedeemed: boolean,
+): BenefitStatus {
   if (!hasAccess) return "NO_ACCESS";
   if (isRedeemed) return "REDEEMED";
   return "HAS_ACCESS";
@@ -66,10 +69,8 @@ export default async function BenefitPage({ params }: PageProps) {
   let isRedeemed = false;
 
   const session = await getServerAuthSession();
-
-  if (session?.user?.id) {
-    const userId = (session.user as any).id;
-
+  const userId = (session?.user as { id?: string } | undefined)?.id;
+  if (userId) {
     const memberData = await getMemberDashboardData(userId);
     if (memberData) {
       const tierKey = normaliseTierKey(memberData.membershipTierKey);
@@ -181,8 +182,12 @@ export default async function BenefitPage({ params }: PageProps) {
       {status === "HAS_ACCESS" && (
         <>
           {/* Process */}
-          {(processAsObject || (processAsArray && processAsArray.length > 0)) && (
-            <section className="benefit-process" style={{ marginTop: "1.5rem" }}>
+          {(processAsObject ||
+            (processAsArray && processAsArray.length > 0)) && (
+            <section
+              className="benefit-process"
+              style={{ marginTop: "1.5rem" }}
+            >
               <h2>How this benefit works</h2>
               <p>To redeem this benefit, follow the process outlined below.</p>
 
@@ -198,7 +203,7 @@ export default async function BenefitPage({ params }: PageProps) {
                         className="button-link button-link--primary"
                         disabled
                         aria-disabled="true"
-title="This action will be enabled in a future release."
+                        title="This action will be enabled in a future release."
                         style={{ marginTop: "0.5rem" }}
                       >
                         Redeem benefit now
@@ -206,16 +211,17 @@ title="This action will be enabled in a future release."
                     </section>
                   )}
 
-                  {processAsObject.actions && processAsObject.actions.length > 0 && (
-                    <section style={{ marginTop: "1.25rem" }}>
-                      <h3>Actions</h3>
-                      <ul>
-                        {processAsObject.actions.map((step, idx) => (
-                          <li key={idx}>{step}</li>
-                        ))}
-                      </ul>
-                    </section>
-                  )}
+                  {processAsObject.actions &&
+                    processAsObject.actions.length > 0 && (
+                      <section style={{ marginTop: "1.25rem" }}>
+                        <h3>Actions</h3>
+                        <ul>
+                          {processAsObject.actions.map((step, idx) => (
+                            <li key={idx}>{step}</li>
+                          ))}
+                        </ul>
+                      </section>
+                    )}
 
                   {processAsObject.outcome && (
                     <section style={{ marginTop: "1.25rem" }}>
@@ -226,7 +232,7 @@ title="This action will be enabled in a future release."
                         className="button-link button-link--primary"
                         disabled
                         aria-disabled="true"
-title="This action will be enabled in a future release."
+                        title="This action will be enabled in a future release."
                         style={{ marginTop: "0.5rem" }}
                       >
                         Launch partner satisfaction survey
