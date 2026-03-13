@@ -11,6 +11,7 @@ import {
 } from "@/content/benefits";
 import SecondaryNav from "@/components/membership-dashboard/SecondaryNav";
 import BenefitsFilterToolbar from "@/components/membership-dashboard/BenefitsFilterToolbar";
+import AdminSidebar from "@/components/membership-dashboard/AdminSidebar";
 
 type MemberDashboardProps = {
   firstName: string;
@@ -129,73 +130,81 @@ export default function MemberDashboard(props: MemberDashboardProps) {
       className="content-section stack"
       style={{ "--stack-gap": "1.25rem" } as CSSProperties}
     >
-      <header className="content-header">
-        <h1>Membership Dashboard</h1>
-      </header>
+      <div style={{ display: "grid", gridTemplateColumns: "230px minmax(0, 1fr)", gap: "24px", alignItems: "start" }}>
+        <div style={{ position: "sticky", top: "1.5rem" }}>
+          <AdminSidebar />
+        </div>
 
-      <p>
-        Hello <strong>{firstName}</strong>, welcome back to your UCL Computer
-        Science Alliances dashboard.
-      </p>
+        <div className="stack" style={{ "--stack-gap": "1.25rem" } as CSSProperties}>
+          <header className="content-header">
+            <h1>Membership Dashboard</h1>
+          </header>
 
-      {/* Secondary navigation */}
-      <SecondaryNav />
+          <p style={{ margin: 0 }}>
+            Hello <strong>{firstName}</strong>, welcome back to your UCL Computer
+            Science Alliances dashboard.
+          </p>
 
-      {/* Membership summary */}
-      <section className="tile" style={{ padding: "0.75rem 1rem" }}>
-        <h2 style={{ marginTop: 0, marginBottom: "0.75rem" }}>Membership</h2>
+          {/* Secondary navigation */}
+          <SecondaryNav />
 
-        <dl className="membership-meta">
-          <div>
-            <dt>Organisation</dt>
-            <dd>{organisationName ?? "Unknown"}</dd>
-          </div>
-          <div>
-            <dt>Level</dt>
-            <dd>{membershipTierLabel}</dd>
-          </div>
-          <div>
-            <dt>Expires</dt>
-            <dd>{formattedExpiry}</dd>
-          </div>
-          <div>
-            <dt>Client experience manager</dt>
-            <dd>{manager}</dd>
-          </div>
-        </dl>
-      </section>
+          {/* Membership summary */}
+          <section className="tile" style={{ padding: "0.75rem 1rem" }}>
+            <h2 style={{ marginTop: 0, marginBottom: "0.75rem" }}>Membership</h2>
 
-      {/* Benefits list */}
-      <section
-        className="stack"
-        style={{ "--stack-gap": ".75rem" } as CSSProperties}
-      >
-        <h2>Benefits</h2>
-
-        {/* Filter toolbar (right-aligned) */}
-        <BenefitsFilterToolbar value={filter} onChange={setFilter} counts={counts} />
-
-        <ul
-          className="list-plain stack"
-          style={{ "--stack-gap": ".5rem" } as CSSProperties}
-        >
-          {visibleRows.map(({ benefit: b, symbol }) => (
-            <li key={b.id}>
-              <div className="tile" style={{ padding: ".5rem .75rem" }}>
-                <div className="benefit">
-                  <span className="benefit-state">{symbol}</span>
-                  <Link
-                    href={`/membership-dashboard/benefits/${b.id}`}
-                    className="benefit-link"
-                  >
-                    <strong>{b.label}</strong>
-                  </Link>
-                </div>
+            <dl className="membership-meta">
+              <div>
+                <dt>Organisation</dt>
+                <dd>{organisationName ?? "Unknown"}</dd>
               </div>
-            </li>
-          ))}
-        </ul>
-      </section>
+              <div>
+                <dt>Level</dt>
+                <dd>{membershipTierLabel}</dd>
+              </div>
+              <div>
+                <dt>Expires</dt>
+                <dd>{formattedExpiry}</dd>
+              </div>
+              <div>
+                <dt>Client experience manager</dt>
+                <dd>{manager}</dd>
+              </div>
+            </dl>
+          </section>
+
+          {/* Benefits list */}
+          <section
+            className="stack"
+            style={{ "--stack-gap": ".75rem" } as CSSProperties}
+          >
+            <h2>Benefits</h2>
+
+            {/* Filter toolbar (right-aligned) */}
+            <BenefitsFilterToolbar value={filter} onChange={setFilter} counts={counts} />
+
+            <ul
+              className="list-plain stack"
+              style={{ "--stack-gap": ".5rem" } as CSSProperties}
+            >
+              {visibleRows.map(({ benefit: b, symbol }) => (
+                <li key={b.id}>
+                  <div className="tile" style={{ padding: ".5rem .75rem" }}>
+                    <div className="benefit">
+                      <span className="benefit-state">{symbol}</span>
+                      <Link
+                        href={`/membership-dashboard/benefits/${b.id}`}
+                        className="benefit-link"
+                      >
+                        <strong>{b.label}</strong>
+                      </Link>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </div>
+      </div>
     </section>
   );
 }

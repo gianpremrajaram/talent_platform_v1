@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import {
   Box,
   Card,
@@ -11,7 +12,7 @@ import {
   ListItemText,
   Typography,
 } from "@mui/material";
-import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
+import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import HandshakeRoundedIcon from "@mui/icons-material/HandshakeRounded";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
@@ -21,19 +22,21 @@ import type { ReactNode } from "react";
 type SidebarItem = {
   label: string;
   href?: string;
+  exact?: boolean;
   icon: ReactNode;
   children?: SidebarItem[];
 };
 
 const sidebarItems: SidebarItem[] = [
   {
-    label: "Dashboard",
-    href: "/admin/dashboard",
-    icon: <DashboardRoundedIcon fontSize="small" />,
+    label: "Home",
+    href: "/membership-dashboard",
+    exact: true,
+    icon: <HomeRoundedIcon fontSize="small" />,
   },
   {
     label: "Project",
-    href: "/admin/project",
+    href: "/membership-dashboard/project",
     icon: <HandshakeRoundedIcon fontSize="small" />,
   },
   {
@@ -42,12 +45,12 @@ const sidebarItems: SidebarItem[] = [
     children: [
       {
         label: "Partners",
-        href: "/admin/partner-users",
+        href: "/membership-dashboard/partner-users",
         icon: <BusinessRoundedIcon fontSize="small" />,
       },
       {
         label: "Students",
-        href: "/admin/student-users",
+        href: "/membership-dashboard/student-users",
         icon: <SchoolRoundedIcon fontSize="small" />,
       },
     ],
@@ -61,24 +64,38 @@ function normalizePath(path: string) {
   return path;
 }
 
-function isPathActive(pathname: string, href?: string) {
+function isPathActive(pathname: string, href?: string, exact?: boolean) {
   if (!href) return false;
   const current = normalizePath(pathname);
   const target = normalizePath(href);
+  if (exact) return current === target;
   return current === target || current.startsWith(`${target}/`);
 }
 
 function isItemActive(pathname: string, item: SidebarItem): boolean {
-  if (isPathActive(pathname, item.href)) return true;
+  if (isPathActive(pathname, item.href, item.exact)) return true;
   return item.children?.some((child) => isItemActive(pathname, child)) ?? false;
 }
 
+const roleLabel: Record<string, string> = {
+  ADMIN: "Administrator",
+  RECRUITER: "Recruiter",
+  STUDENT: "Student",
+  MODULE_LEADER: "Module Leader",
+};
+
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
+
+  const name = session?.user?.name ?? "";
+  const roleKeys: string[] = (session?.user as any)?.roleKeys ?? [];
+  const displayRole = roleKeys.map((k) => roleLabel[k] ?? k).join(", ") || "Member";
+  const initial = name.trim().charAt(0).toUpperCase();
 
   const renderItems = (items: SidebarItem[], level = 0) =>
     items.map((item) => {
-      const selected = isPathActive(pathname, item.href);
+      const selected = isPathActive(pathname, item.href, item.exact);
       const hasActiveChild = item.children?.some((child) => isItemActive(pathname, child)) ?? false;
       const hasChildren = (item.children?.length ?? 0) > 0;
       const isParentWithActiveChild = hasChildren && !selected && hasActiveChild;
@@ -200,15 +217,15 @@ export default function AdminSidebar() {
             color: "#fff",
           }}
         >
-          S
+          {initial}
         </Box>
 
         <Box>
           <Typography sx={{ fontSize: 12, fontWeight: 600, lineHeight: 1.2 }}>
-            Stein Ben
+            {name}
           </Typography>
           <Typography sx={{ fontSize: 11, color: "#9ca3af" }}>
-            Administrator
+            {displayRole}
           </Typography>
         </Box>
       </Box>

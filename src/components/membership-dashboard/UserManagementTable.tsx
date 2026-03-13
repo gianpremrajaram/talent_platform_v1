@@ -22,11 +22,10 @@ export type ManagedUser = {
   id: string;
   name: string;
   userType: UserType;
+  tierLabel?: string;
   email: string;
   appScope: AppScope;
   status: AccessStatus;
-  suspendedAt: string | null;
-  liftedAt: string | null;
   history: SuspensionRecord[];
 };
 
@@ -38,14 +37,12 @@ type Props = {
 };
 
 const columns: AdminTableColumn[] = [
-  { key: "name", label: "NAME", width: "15%" },
-  { key: "userType", label: "TYPE", width: "8%" },
-  { key: "email", label: "EMAIL", width: "24%" },
-  { key: "appScope", label: "APP SCOPE", width: "12%" },
-  { key: "status", label: "STATUS", width: "8%" },
-  { key: "suspendedAt", label: "SUSPENDED AT", width: "13%" },
-  { key: "liftedAt", label: "LIFTED AT", width: "10%" },
-  { key: "action", label: "ACTION", width: "10%" },
+  { key: "name", label: "NAME", width: "18%" },
+  { key: "userType", label: "TYPE", width: "10%" },
+  { key: "email", label: "EMAIL", width: "30%" },
+  { key: "appScope", label: "APP SCOPE", width: "15%" },
+  { key: "status", label: "STATUS", width: "10%" },
+  { key: "action", label: "ACTION", width: "17%" },
 ];
 
 function statusTextColor(status: AccessStatus) {
@@ -54,25 +51,6 @@ function statusTextColor(status: AccessStatus) {
   return "#a23b45";
 }
 
-function formatDateOnly(value: string | null) {
-  if (!value) return "--";
-  const trimmed = value.trim();
-  const commaIndex = trimmed.indexOf(",");
-  if (commaIndex > 0) {
-    return trimmed.slice(0, commaIndex);
-  }
-
-  const parsed = new Date(trimmed);
-  if (Number.isNaN(parsed.getTime())) {
-    return trimmed;
-  }
-
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(parsed);
-}
 
 function textActionButtonSx(color: string) {
   return {
@@ -142,7 +120,7 @@ export default function UserManagementTable({
               key: "name",
               content: <Typography sx={{ fontSize: 12, fontWeight: 600 }}>{row.name}</Typography>,
             },
-            { key: "userType", content: row.userType },
+            { key: "userType", content: row.tierLabel ?? row.userType },
             {
               key: "email",
               content: row.email,
@@ -167,20 +145,6 @@ export default function UserManagementTable({
                   {row.status}
                 </Typography>
               ),
-            },
-            {
-              key: "suspendedAt",
-              content: formatDateOnly(row.suspendedAt),
-              sx: {
-                whiteSpace: "nowrap",
-              },
-            },
-            {
-              key: "liftedAt",
-              content: formatDateOnly(row.liftedAt),
-              sx: {
-                whiteSpace: "nowrap",
-              },
             },
             {
               key: "action",
@@ -235,11 +199,11 @@ export default function UserManagementTable({
                     size="small"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onSelectUser(row.id);
+                      window.location.href = "/account";
                     }}
                     sx={textActionButtonSx("#4b6078")}
                   >
-                    View history
+                    Edit
                   </Button>
                 </Stack>
               ),

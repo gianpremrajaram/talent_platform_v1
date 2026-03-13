@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Avatar,
@@ -44,57 +44,20 @@ function nowLabel() {
   }).format(new Date());
 }
 
-const initialStudents: ManagedUser[] = [
-  {
-    id: "user-001",
-    name: "Alice Zhang",
-    userType: "Student",
-    email: "alice.zhang@ucl.ac.uk",
-    appScope: "Talent Platform",
-    status: "active",
-    suspendedAt: null,
-    liftedAt: null,
-    history: [],
-  },
-  {
-    id: "user-003",
-    name: "Bob Chen",
-    userType: "Student",
-    email: "bob.chen@ucl.ac.uk",
-    appScope: "Talent Platform",
-    status: "banned",
-    suspendedAt: "05 Mar 2026, 09:05",
-    liftedAt: null,
-    history: [
-      {
-        id: "hist-002",
-        action: "ban",
-        appScope: "Talent Platform",
-        createdAt: "05 Mar 2026, 09:05",
-        suspendedAt: "05 Mar 2026, 09:05",
-        liftedAt: null,
-        reason: "Permanent ban after repeated abuse reports.",
-      },
-    ],
-  },
-  {
-    id: "user-005",
-    name: "Priya Menon",
-    userType: "Student",
-    email: "priya.menon@ucl.ac.uk",
-    appScope: "Talent Platform",
-    status: "active",
-    suspendedAt: null,
-    liftedAt: null,
-    history: [],
-  },
-];
-
 export default function AdminStudentManagementPage() {
-  const [users, setUsers] = useState<ManagedUser[]>(initialStudents);
+  const [users, setUsers] = useState<ManagedUser[]>([]);
   const [search, setSearch] = useState("");
   const [bannerMessage, setBannerMessage] = useState("");
-  const [selectedUserId, setSelectedUserId] = useState<string>(initialStudents[0]?.id ?? "");
+  const [selectedUserId, setSelectedUserId] = useState<string>("");
+
+  useEffect(() => {
+    fetch("/api/admin/students")
+      .then((res) => res.json())
+      .then((data: ManagedUser[]) => {
+        setUsers(data);
+        setSelectedUserId(data[0]?.id ?? "");
+      });
+  }, []);
   const [modalState, setModalState] = useState<ModalState>({
     isOpen: false,
     action: null,
@@ -154,8 +117,6 @@ export default function AdminStudentManagementPage() {
             ...user,
             status: "suspended",
             appScope: payload.appScope,
-            suspendedAt: timestamp,
-            liftedAt: null,
             history: [nextHistoryRecord, ...user.history],
           };
         }
@@ -174,8 +135,6 @@ export default function AdminStudentManagementPage() {
             ...user,
             status: "active",
             appScope: payload.appScope,
-            suspendedAt: null,
-            liftedAt: timestamp,
             history: [nextHistoryRecord, ...user.history],
           };
         }
@@ -193,8 +152,6 @@ export default function AdminStudentManagementPage() {
           ...user,
           status: "banned",
           appScope: payload.appScope,
-          suspendedAt: timestamp,
-          liftedAt: null,
           history: [nextHistoryRecord, ...user.history],
         };
       })
