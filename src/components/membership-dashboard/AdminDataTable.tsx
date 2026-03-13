@@ -44,7 +44,7 @@ const ROWS_PER_PAGE_OPTIONS = [5, 10, 25];
 const defaultBodyCellSx: SxProps<Theme> = {
   py: 2,
   px: 1.2,
-  fontSize: 12,
+  fontSize: 14,
   color: "#1f2937",
   verticalAlign: "middle",
   whiteSpace: "normal",
@@ -125,7 +125,7 @@ export default function AdminDataTable<T>({
                   key={column.key}
                   sx={{
                     color: "#fff",
-                    fontSize: 10,
+                    fontSize: 12,
                     fontWeight: 600,
                     borderBottom: "none",
                     py: 1.15,
@@ -219,14 +219,14 @@ export default function AdminDataTable<T>({
             },
             "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows, & .MuiTablePagination-input":
               {
-                fontSize: 12,
+                fontSize: 13,
                 color: "#6b7280",
               },
           }}
         />
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Typography sx={{ fontSize: 12, color: "#6b7280", whiteSpace: "nowrap" }}>
+          <Typography sx={{ fontSize: 13, color: "#6b7280", whiteSpace: "nowrap" }}>
             Go to page
           </Typography>
           <TextField
@@ -250,12 +250,12 @@ export default function AdminDataTable<T>({
               width: 72,
               "& .MuiOutlinedInput-root": {
                 height: 30,
-                fontSize: 12,
+                fontSize: 13,
                 backgroundColor: "#fff",
               },
             }}
           />
-          <Typography sx={{ fontSize: 12, color: "#6b7280", whiteSpace: "nowrap" }}>
+          <Typography sx={{ fontSize: 13, color: "#6b7280", whiteSpace: "nowrap" }}>
             / {totalPages}
           </Typography>
         </Box>

@@ -22,6 +22,7 @@ type MenuItem = {
   icon: React.ReactNode;
   active?: boolean;
   onClick?: () => void;
+  href?: string;
 };
 
 export type SocialLink = {
@@ -183,6 +184,8 @@ export default function StudentProfileSideCard({
             {menuItems.map((item, index) => (
               <Box
                 key={`${item.label}-${index}`}
+                component={item.href ? "a" : "div"}
+                href={item.href}
                 onClick={item.onClick}
                 sx={{
                   display: "flex",
@@ -191,9 +194,11 @@ export default function StudentProfileSideCard({
                   px: 1.5,
                   py: 1,
                   borderRadius: 1.5,
-                  cursor: item.onClick ? "pointer" : "default",
+                  cursor: item.onClick || item.href ? "pointer" : "default",
                   bgcolor: item.active ? "primary.lighter" : "transparent",
                   transition: "all 0.2s ease",
+                  textDecoration: "none",
+                  color: "inherit",
                   "&:hover": {
                     bgcolor: item.active ? "primary.lighter" : "action.hover",
                   },
