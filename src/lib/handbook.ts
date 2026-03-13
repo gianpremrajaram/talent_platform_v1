@@ -43,6 +43,8 @@ export async function getHandbookChapters(): Promise<HandbookChapter[]> {
   return chapters;
 }
 
+export type HandbookRenderResult = Awaited<ReturnType<typeof renderHandbookChapterBySlug>>;
+
 export async function renderHandbookChapterBySlug(slug: string) {
   const chapters = await getHandbookChapters();
   const idx = Math.max(0, chapters.findIndex((c) => c.slug === slug));

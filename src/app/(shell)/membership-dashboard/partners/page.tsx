@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function PartnersPage() {
-  redirect("/admin/project");
+  redirect("/membership-dashboard/project");
 }
