@@ -3,6 +3,7 @@ import Link from "next/link";
 import { services } from "@/content/services";
 import { getServerAuthSession } from "@/lib/getServerAuthSession";
 import prisma from "@/lib/prisma";
+import type { ReactNode } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -14,16 +15,14 @@ type AccessDeniedPageProps = {
   searchParams: Promise<SearchParamsObject>;
 };
 
-function getFirst(
-  value: string | string[] | undefined,
-): string | undefined {
+function getFirst(value: string | string[] | undefined): string | undefined {
   if (!value) return undefined;
   return Array.isArray(value) ? value[0] : value;
 }
 
-export default async function AccessDeniedPage(
-  { searchParams }: AccessDeniedPageProps,
-) {
+export default async function AccessDeniedPage({
+  searchParams,
+}: AccessDeniedPageProps) {
   // In Next 16, searchParams is a Promise of a plain object
   const sp = await searchParams;
 
@@ -53,16 +52,16 @@ export default async function AccessDeniedPage(
 
         <p>
           Thank you for contributing to our site analytics data. You tried to
-          access <strong>{label}</strong>. This service is currently
-          unavailable or has not yet been developed. If we see that many other
-          people show an interest in this service by clicking the link you just
-          did, we will prioritise deployment.
+          access <strong>{label}</strong>. This service is currently unavailable
+          or has not yet been developed. If we see that many other people show
+          an interest in this service by clicking the link you just did, we will
+          prioritise deployment.
         </p>
 
         <p>
           In the meantime, you can review our{" "}
-          <Link href="/release-notes">release notes</Link>{" "}
-          to see current progress and our roadmap.
+          <Link href="/release-notes">release notes</Link> to see current
+          progress and our roadmap.
         </p>
 
         {/* TEMP: Debug block – remove once everything works 
@@ -112,12 +111,12 @@ export default async function AccessDeniedPage(
       appLabel = app.name;
     }
 
-// DO NOT fall back to service titles for app-level access
-// App.name should be the authoritative label
-// If App.name is missing (should never happen), fallback to humanised appKey
-if (!appLabel || appLabel === appLabelFallback) {
-  appLabel = app?.name ?? appLabelFallback;
-}
+    // DO NOT fall back to service titles for app-level access
+    // App.name should be the authoritative label
+    // If App.name is missing (should never happen), fallback to humanised appKey
+    if (!appLabel || appLabel === appLabelFallback) {
+      appLabel = app?.name ?? appLabelFallback;
+    }
 
     if (app?.appAccessRules?.length) {
       const allowRules = app.appAccessRules.filter(
@@ -142,24 +141,24 @@ if (!appLabel || appLabel === appLabelFallback) {
 
   // Tailored reasons
   let heading = "Access denied";
-  let body: JSX.Element;
+  let body: ReactNode;
 
-if (reason === "register-admin-only") {
-  heading = "Register – admin access required";
-  body = (
-    <>
-      <p>
-        You selected <strong>Register</strong>, but this option is currently
-        restricted to <strong>admins</strong> for adding new users.
-      </p>
-      <p>
-        To continue, sign in using an admin account and select{" "}
-        <strong>Add user</strong> from the Account menu, or contact the
-        Alliances Team if you believe you should have admin access.
-      </p>
-    </>
-  );
-}
+  if (reason === "register-admin-only") {
+    heading = "Register – admin access required";
+    body = (
+      <>
+        <p>
+          You selected <strong>Register</strong>, but this option is currently
+          restricted to <strong>admins</strong> for adding new users.
+        </p>
+        <p>
+          To continue, sign in using an admin account and select{" "}
+          <strong>Add user</strong> from the Account menu, or contact the
+          Alliances Team if you believe you should have admin access.
+        </p>
+      </>
+    );
+  }
 
   if (reason === "student-view-role") {
     heading = "Student view – role restricted";
@@ -186,8 +185,8 @@ if (reason === "register-admin-only") {
       <>
         <p>
           You tried to access the <strong>CV Library</strong> within{" "}
-          <strong>{appLabel}</strong>, but your current membership tier does
-          not include this benefit.
+          <strong>{appLabel}</strong>, but your current membership tier does not
+          include this benefit.
         </p>
         <p>
           The CV Library is available to <strong>Gold</strong> and{" "}
@@ -220,8 +219,8 @@ if (reason === "register-admin-only") {
 
         {requiredTierLabel && (
           <p>
-            <strong>Required membership tier:</strong>{" "}
-            {requiredTierLabel} or higher.
+            <strong>Required membership tier:</strong> {requiredTierLabel} or
+            higher.
           </p>
         )}
       </>

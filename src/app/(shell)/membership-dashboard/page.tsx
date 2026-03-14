@@ -30,7 +30,9 @@ function pickFirst(v: string | string[] | undefined) {
   return Array.isArray(v) ? v[0] : v;
 }
 
-function computeRevenueFromTiers(tiers: { key: string; label: string; count: number }[]) {
+function computeRevenueFromTiers(
+  tiers: { key: string; label: string; count: number }[],
+) {
   const price = (tierKeyOrLabel: string) => {
     const k = tierKeyOrLabel.toLowerCase();
     if (k.includes("platinum")) return 30000;
@@ -86,17 +88,23 @@ export default async function MembershipDashboardPage(props: Props) {
     const tab = pickFirst(sp?.tab) ?? null; // "members" | "benefits" | "handbook"
     const chapter = pickFirst(sp?.chapter) ?? null;
 
-    const [summary, members, selectedMember, benefitStats, handbook, totalUsers] =
-      await Promise.all([
-        getAdminDashboardSummary(),
-        getAdminMemberList(),
-        selectedUserId
-          ? getAdminSelectedMember(selectedUserId)
-          : Promise.resolve(null),
-        getAdminBenefitRedemptionStats(),
-        renderHandbookChapterBySlug(chapter ?? undefined),
-        prisma.user.count(),
-      ]);
+    const [
+      summary,
+      members,
+      selectedMember,
+      benefitStats,
+      handbook,
+      totalUsers,
+    ] = await Promise.all([
+      getAdminDashboardSummary(),
+      getAdminMemberList(),
+      selectedUserId
+        ? getAdminSelectedMember(selectedUserId)
+        : Promise.resolve(null),
+      getAdminBenefitRedemptionStats(),
+      renderHandbookChapterBySlug(chapter ?? ""),
+      prisma.user.count(),
+    ]);
 
     const payingRevenue = computeRevenueFromTiers(summary.tiers);
 
@@ -111,10 +119,10 @@ export default async function MembershipDashboardPage(props: Props) {
         return b.redeemed - a.redeemed;
       })[0];
 
-    const topBenefitLabel =
-      top
-        ? BENEFITS.find((b) => b.id === top.benefitId)?.label ?? "Unknown benefit"
-        : "Unknown benefit";
+    const topBenefitLabel = top
+      ? (BENEFITS.find((b) => b.id === top.benefitId)?.label ??
+        "Unknown benefit")
+      : "Unknown benefit";
 
     return (
       <AdminDashboard

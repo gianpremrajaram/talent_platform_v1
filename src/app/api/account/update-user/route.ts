@@ -1,5 +1,6 @@
 // src/app/api/account/update-user/route.ts
 import { NextResponse } from "next/server";
+import { OrganisationType } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { getServerAuthSession } from "@/lib/getServerAuthSession";
 import { parseUkDateOrNull, uniqueOrganisationSlug } from "@/lib/admin-helpers";
@@ -20,7 +21,10 @@ export async function POST(req: Request) {
   const session = await getServerAuthSession();
   const me = session?.user as any | undefined;
   if (!me?.id) {
-    return NextResponse.json({ ok: false, error: "Not signed in." }, { status: 401 });
+    return NextResponse.json(
+      { ok: false, error: "Not signed in." },
+      { status: 401 },
+    );
   }
 
   const roleKeys: string[] = me.roleKeys ?? [];
@@ -28,12 +32,16 @@ export async function POST(req: Request) {
 
   const body = await req.json();
 
-  const targetUserId: string = isAdmin ? String(body.targetUserId ?? me.id) : String(me.id);
+  const targetUserId: string = isAdmin
+    ? String(body.targetUserId ?? me.id)
+    : String(me.id);
 
   const userInput = body.user ?? {};
   const firstName = String(userInput.firstName ?? "").trim();
   const lastName = String(userInput.lastName ?? "").trim();
-  const email = String(userInput.email ?? "").trim().toLowerCase();
+  const email = String(userInput.email ?? "")
+    .trim()
+    .toLowerCase();
 
   // NEW: allow defaultAppId for all users (self-edit)
   const userDefaultAppId = parseNullableNumber(userInput.defaultAppId);
@@ -58,7 +66,10 @@ export async function POST(req: Request) {
   });
   if (existing && existing.id !== targetUserId) {
     return NextResponse.json(
-      { ok: false, error: "This email is already associated with another account." },
+      {
+        ok: false,
+        error: "This email is already associated with another account.",
+      },
       { status: 400 },
     );
   }
@@ -87,13 +98,21 @@ export async function POST(req: Request) {
       if (isAdmin && admin?.pending?.organisations?.length) {
         for (const o of admin.pending.organisations) {
           const name = String(o.name ?? "").trim();
-          const type = String(o.type ?? "").trim();
+          const typeRaw = String(o.type ?? "")
+            .trim()
+            .toUpperCase();
           const clientId = String(o.clientId ?? "").trim();
 
-          if (!clientId || !name) throw new Error("Pending organisation is invalid.");
-          if (!["UNIVERSITY", "INDUSTRY", "OTHER"].includes(type)) {
+          if (!clientId || !name)
+            throw new Error("Pending organisation is invalid.");
+          if (
+            !Object.values(OrganisationType).includes(
+              typeRaw as OrganisationType,
+            )
+          ) {
             throw new Error("Organisation type is invalid.");
           }
+          const type = typeRaw as OrganisationType;
 
           const slug = await uniqueOrganisationSlug(name);
           const created = await tx.organisation.create({
@@ -107,13 +126,18 @@ export async function POST(req: Request) {
 
       if (isAdmin && admin?.pending?.roles?.length) {
         for (const r of admin.pending.roles) {
-          const key = String(r.key ?? "").trim().toUpperCase();
+          const key = String(r.key ?? "")
+            .trim()
+            .toUpperCase();
           const label = String(r.label ?? "").trim();
           const clientId = String(r.clientId ?? "").trim();
 
-          if (!clientId || !key || !label) throw new Error("Pending role is invalid.");
+          if (!clientId || !key || !label)
+            throw new Error("Pending role is invalid.");
           if (!/^[A-Z0-9_]+$/.test(key)) {
-            throw new Error("Role key must be uppercase alphanumeric with underscores.");
+            throw new Error(
+              "Role key must be uppercase alphanumeric with underscores.",
+            );
           }
 
           // If it already exists, do not create a duplicate; just re-use it
@@ -145,13 +169,16 @@ export async function POST(req: Request) {
           if (orgChoice.kind === "existing") {
             resolvedOrganisationId = Number(orgChoice.id);
           } else if (orgChoice.kind === "pending") {
-            resolvedOrganisationId = pendingOrgIdByClientId.get(String(orgChoice.clientId)) ?? null;
+            resolvedOrganisationId =
+              pendingOrgIdByClientId.get(String(orgChoice.clientId)) ?? null;
           }
         } else {
           resolvedOrganisationId = null;
         }
 
-        const choices = Array.isArray(admin.roleChoices) ? admin.roleChoices : [];
+        const choices = Array.isArray(admin.roleChoices)
+          ? admin.roleChoices
+          : [];
         const keys: string[] = [];
         for (const c of choices) {
           if (c.kind === "existing") keys.push(String(c.key));
@@ -224,7 +251,9 @@ export async function POST(req: Request) {
         });
 
         if (!targetUser?.organisationId) {
-          throw new Error("To assign a membership tier, the user must have an organisation set.");
+          throw new Error(
+            "To assign a membership tier, the user must have an organisation set.",
+          );
         }
 
         const existingMembership = await tx.membership.findFirst({
@@ -233,7 +262,9 @@ export async function POST(req: Request) {
         });
 
         const status = String(admin.membership.status ?? "active");
-        const managerName = admin.membership.managerName ? String(admin.membership.managerName) : null;
+        const managerName = admin.membership.managerName
+          ? String(admin.membership.managerName)
+          : null;
         const isActive = Boolean(admin.membership.isActive);
 
         if (existingMembership) {

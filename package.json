@@ -33,6 +33,7 @@
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.1",
     "remark-html": "^16.0.1",
+    "swr": "^2.4.1",
     "yaml": "^2.8.1"
   },
   "prisma": {
