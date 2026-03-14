@@ -60,7 +60,7 @@ export default function AdminPartnersPage({
               sx={{ mb: 2.5 }}
             >
               <Box>
-                <Typography sx={{ fontSize: 18, fontWeight: 600, color: "#1f2937" }}>
+                <Typography sx={{ fontSize: 21, fontWeight: 600, color: "#1f2937" }}>
                   Partner Project Approvals
                 </Typography>
               </Box>
@@ -101,12 +101,12 @@ export default function AdminPartnersPage({
                     >
                       {card.icon}
                     </Box>
-                    <Typography sx={{ fontSize: 20, fontWeight: 700, lineHeight: 1 }}>
+                    <Typography sx={{ fontSize: 24, fontWeight: 700, lineHeight: 1 }}>
                       {card.value}
                     </Typography>
                   </Box>
 
-                  <Typography sx={{ fontSize: 12, color: "#8a8f98" }}>
+                  <Typography sx={{ fontSize: 14, color: "#8a8f98" }}>
                     {card.title}
                   </Typography>
                 </CardContent>

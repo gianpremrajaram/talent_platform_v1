@@ -68,6 +68,12 @@ export default function AdminDataTable<T>({
   const maxPage = totalPages - 1;
 
   useEffect(() => {
+    setPage(0);
+    setPageInput("1");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rows]);
+
+  useEffect(() => {
     if (page > maxPage) {
       setPage(maxPage);
     }

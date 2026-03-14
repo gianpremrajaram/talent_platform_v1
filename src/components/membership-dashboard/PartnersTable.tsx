@@ -6,7 +6,6 @@ import {
   Box,
   Button,
   Card,
-  Chip,
   InputAdornment,
   Stack,
   TextField,
@@ -120,16 +119,9 @@ export default function PartnersTable() {
     return rows.filter(
       (row) =>
         row.companyName.toLowerCase().includes(keyword) ||
-        row.projectName.toLowerCase().includes(keyword) ||
-        row.tier.toLowerCase().includes(keyword) ||
-        row.status.toLowerCase().includes(keyword)
+        row.projectName.toLowerCase().includes(keyword)
     );
   }, [rows, search]);
-
-  const pendingCount = useMemo(
-    () => rows.filter((row) => row.status === "pending").length,
-    [rows]
-  );
 
   async function handleApprove(row: PartnerProjectRow) {
     // TODO: replace with partner endpoint call.
@@ -216,40 +208,7 @@ export default function PartnersTable() {
         </Box>
       ) : null}
 
-      <Box
-        sx={{
-          px: 2,
-          py: 1.4,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          borderBottom: "1px solid #eceef2",
-        }}
-      >
-        <Typography sx={{ fontSize: 12, color: "#6b7280" }}>
-          {pendingCount} pending partner project{pendingCount === 1 ? "" : "s"}
-        </Typography>
-
-        <Stack direction="row" spacing={1}>
-          <Chip
-            label="Silver"
-            size="small"
-            sx={{ backgroundColor: "#f1f3f5", color: "#4b5563" }}
-          />
-          <Chip
-            label="Gold"
-            size="small"
-            sx={{ backgroundColor: "#f4efe4", color: "#8a7240" }}
-          />
-          <Chip
-            label="Platinum"
-            size="small"
-            sx={{ backgroundColor: "#eaf0f6", color: "#4b6078" }}
-          />
-        </Stack>
-      </Box>
-
-      <AdminDataTable
+<AdminDataTable
         columns={columns}
         rows={filteredRows}
         getRowKey={(row) => row.id}

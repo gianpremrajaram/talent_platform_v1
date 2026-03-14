@@ -1,9 +1,9 @@
 "use client";
 
 import {
-  Box,
   Button,
   Card,
+  Chip,
   InputAdornment,
   Stack,
   TextField,
@@ -55,6 +55,15 @@ const columns: AdminTableColumn[] = [
   { key: "status", label: "STATUS", width: "10%" },
   { key: "action", label: "ACTION", width: "17%" },
 ];
+
+function tierChipSx(label: string) {
+  const key = label.toLowerCase();
+  if (key === "platinum") return { backgroundColor: "#dbeafe", color: "#1e3a8a" };
+  if (key === "gold")     return { backgroundColor: "#fef08a", color: "#713f12" };
+  if (key === "silver")   return { backgroundColor: "#e2e8f0", color: "#1e293b" };
+  if (key === "bronze")   return { backgroundColor: "#fed7aa", color: "#7c2d12" };
+  return { backgroundColor: "#f3f4f6", color: "#374151" };
+}
 
 function statusTextColor(status: AccessStatus) {
   if (status === "active") return "#1f6a4f";
@@ -151,7 +160,18 @@ export default function UserManagementTable({
               key: "name",
               content: <Typography sx={{ fontSize: 14, fontWeight: 600 }}>{row.name}</Typography>,
             },
-            { key: "userType", content: row.tierLabel ?? row.userType },
+            {
+              key: "userType",
+              content: row.tierLabel ? (
+                <Chip
+                  label={row.tierLabel}
+                  size="small"
+                  sx={{ fontWeight: 600, ...tierChipSx(row.tierLabel) }}
+                />
+              ) : (
+                row.userType
+              ),
+            },
             {
               key: "email",
               content: row.email,
