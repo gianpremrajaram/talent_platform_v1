@@ -1,6 +1,7 @@
 // Note: No longer in use. Moved to pending orgs and update-user workflow to make new orgs persistent. Keeping file for implementing org management later (e.g. edit or delete org).
 // src/app/api/admin/organisations/route.ts
 import { NextResponse } from "next/server";
+import { OrganisationType } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { getServerAuthSession } from "@/lib/getServerAuthSession";
 import { uniqueOrganisationSlug } from "@/lib/admin-helpers";
@@ -12,17 +13,30 @@ export async function POST(req: Request) {
   const me = session?.user as any | undefined;
   const roleKeys: string[] = me?.roleKeys ?? [];
   if (!me?.id || !roleKeys.includes("ADMIN")) {
-    return NextResponse.json({ ok: false, error: "Admin access required." }, { status: 403 });
+    return NextResponse.json(
+      { ok: false, error: "Admin access required." },
+      { status: 403 },
+    );
   }
 
   const body = await req.json();
   const name = String(body.name ?? "").trim();
-  const type = String(body.type ?? "").trim();
+  const typeRaw = String(body.type ?? "")
+    .trim()
+    .toUpperCase();
 
-  if (!name) return NextResponse.json({ ok: false, error: "Organisation name is required." }, { status: 400 });
-  if (!["UNIVERSITY", "INDUSTRY", "OTHER"].includes(type)) {
-    return NextResponse.json({ ok: false, error: "Organisation type is invalid." }, { status: 400 });
+  if (!name)
+    return NextResponse.json(
+      { ok: false, error: "Organisation name is required." },
+      { status: 400 },
+    );
+  if (!Object.values(OrganisationType).includes(typeRaw as OrganisationType)) {
+    return NextResponse.json(
+      { ok: false, error: "Organisation type is invalid." },
+      { status: 400 },
+    );
   }
+  const type = typeRaw as OrganisationType;
 
   const slug = await uniqueOrganisationSlug(name);
 

@@ -35,6 +35,8 @@ export type ManagedUser = {
   email: string;
   appScope: AppScope;
   status: AccessStatus;
+  suspendedAt: string | null;
+  liftedAt: string | null;
   history: SuspensionRecord[];
 };
 
@@ -42,8 +44,9 @@ type Props = {
   rows: ManagedUser[];
   selectedUserId: string | null;
   onSelectUser: (userId: string) => void;
-  search: string;
-  onSearchChange: (value: string) => void;
+  onOpenAction?: (userId: string, action: SuspensionActionType) => void;
+  search?: string;
+  onSearchChange?: (value: string) => void;
   searchPlaceholder?: string;
 };
 
@@ -61,7 +64,6 @@ function statusTextColor(status: AccessStatus) {
   if (status === "suspended") return "#8a6b2f";
   return "#a23b45";
 }
-
 
 function textActionButtonSx(color: string) {
   return {
@@ -85,7 +87,8 @@ export default function UserManagementTable({
   rows,
   selectedUserId,
   onSelectUser,
-  search,
+  onOpenAction,
+  search = "",
   onSearchChange,
   searchPlaceholder = "Search users",
 }: Props) {
@@ -110,7 +113,7 @@ export default function UserManagementTable({
         <TextField
           size="small"
           value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
+          onChange={(e) => onSearchChange?.(e.target.value)}
           placeholder={searchPlaceholder}
           sx={{
             width: 220,
@@ -149,7 +152,11 @@ export default function UserManagementTable({
           return [
             {
               key: "name",
-              content: <Typography sx={{ fontSize: 14, fontWeight: 600 }}>{row.name}</Typography>,
+              content: (
+                <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
+                  {row.name}
+                </Typography>
+              ),
             },
             { key: "userType", content: row.tierLabel ?? row.userType },
             {

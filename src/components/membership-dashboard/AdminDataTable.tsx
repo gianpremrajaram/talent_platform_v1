@@ -1,6 +1,13 @@
 "use client";
 
-import { ChangeEvent, KeyboardEvent, ReactNode, useEffect, useMemo, useState } from "react";
+import {
+  ChangeEvent,
+  KeyboardEvent,
+  ReactNode,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   Box,
   SxProps,
@@ -33,7 +40,7 @@ type AdminDataTableProps<T> = {
   rows: T[];
   getRowKey: (row: T, index: number) => string;
   getCells: (row: T, index: number) => AdminTableCell[];
-  getRowSx?: (row: T, index: number) => SxProps<Theme>;
+  getRowSx?: (row: T, index: number) => Record<string, unknown>;
   onRowClick?: (row: T, index: number) => void;
   emptyState?: ReactNode;
 };
@@ -41,7 +48,7 @@ type AdminDataTableProps<T> = {
 const DEFAULT_ROWS_PER_PAGE = 5;
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 25];
 
-const defaultBodyCellSx: SxProps<Theme> = {
+const defaultBodyCellSx = {
   py: 2,
   px: 1.2,
   fontSize: 14,
@@ -114,7 +121,10 @@ export default function AdminDataTable<T>({
         <Table sx={{ width: "100%", tableLayout: "fixed" }}>
           <colgroup>
             {columns.map((column) => (
-              <col key={column.key} style={column.width ? { width: column.width } : undefined} />
+              <col
+                key={column.key}
+                style={column.width ? { width: column.width } : undefined}
+              />
             ))}
           </colgroup>
 
@@ -149,7 +159,10 @@ export default function AdminDataTable<T>({
                   },
                 }}
               >
-                <TableCell colSpan={columns.length} sx={{ py: 5, textAlign: "center" }}>
+                <TableCell
+                  colSpan={columns.length}
+                  sx={{ py: 5, textAlign: "center" }}
+                >
                   {emptyState}
                 </TableCell>
               </TableRow>
@@ -158,28 +171,34 @@ export default function AdminDataTable<T>({
             {pagedRows.map((row, rowIndex) => {
               const absoluteIndex = page * rowsPerPage + rowIndex;
               const cells = getCells(row, absoluteIndex);
-              const rowSx = getRowSx?.(row, absoluteIndex);
+              const rowSx = getRowSx?.(row, absoluteIndex) ?? {};
               const isClickable = typeof onRowClick === "function";
 
               return (
                 <TableRow
                   key={getRowKey(row, absoluteIndex)}
                   hover={isClickable}
-                  onClick={isClickable ? () => onRowClick(row, absoluteIndex) : undefined}
-                  sx={[
-                    {
-                      backgroundColor: absoluteIndex % 2 === 0 ? "#ffffff" : "#f7f9fc",
-                      "& td": {
-                        borderBottom: "1px solid #ccd3dd",
-                        color: "#1f2937",
-                      },
+                  onClick={
+                    isClickable
+                      ? () => onRowClick(row, absoluteIndex)
+                      : undefined
+                  }
+                  sx={{
+                    backgroundColor:
+                      absoluteIndex % 2 === 0 ? "#ffffff" : "#f7f9fc",
+                    "& td": {
+                      borderBottom: "1px solid #ccd3dd",
+                      color: "#1f2937",
                     },
-                    isClickable ? { cursor: "pointer" } : {},
-                    rowSx,
-                  ]}
+                    ...(isClickable ? { cursor: "pointer" } : {}),
+                    ...rowSx,
+                  }}
                 >
                   {cells.map((cell) => (
-                    <TableCell key={cell.key} sx={{ ...defaultBodyCellSx, ...cell.sx }}>
+                    <TableCell
+                      key={cell.key}
+                      sx={[defaultBodyCellSx, cell.sx ?? {}] as SxProps<Theme>}
+                    >
                       {cell.content}
                     </TableCell>
                   ))}
@@ -226,7 +245,9 @@ export default function AdminDataTable<T>({
         />
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Typography sx={{ fontSize: 13, color: "#6b7280", whiteSpace: "nowrap" }}>
+          <Typography
+            sx={{ fontSize: 13, color: "#6b7280", whiteSpace: "nowrap" }}
+          >
             Go to page
           </Typography>
           <TextField
@@ -255,7 +276,9 @@ export default function AdminDataTable<T>({
               },
             }}
           />
-          <Typography sx={{ fontSize: 13, color: "#6b7280", whiteSpace: "nowrap" }}>
+          <Typography
+            sx={{ fontSize: 13, color: "#6b7280", whiteSpace: "nowrap" }}
+          >
             / {totalPages}
           </Typography>
         </Box>
