@@ -22,6 +22,7 @@ model User {
   passwordHash String
   firstName    String
   lastName     String
+  isActive     Boolean @default(true)
 
   organisation   Organisation? @relation(fields: [organisationId], references: [id])
   organisationId Int?
