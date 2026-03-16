@@ -1,0 +1,192 @@
+/* Header.module.css */
+
+.utilityBar {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  border-bottom: 1px solid #ececec;
+  background: #fff;
+}
+
+.utilityLeft,
+.utilityRight {
+  display: flex;
+  align-items: center;
+}
+
+.utilityLeft {
+  gap: 14px;
+}
+
+.utilityRight {
+  gap: 14px;
+}
+
+.iconButton {
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.workspacePill {
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid #e9e9e9;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.appHeader {
+  width: 100%;
+  background: #fff;
+  border-bottom: 1px solid #e9e9e9;
+}
+
+.utilityBar {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  background: #fff;
+}
+
+.utilityLeft,
+.utilityRight {
+  display: flex;
+  align-items: center;
+}
+
+.utilityLeft {
+  gap: 14px;
+}
+
+.utilityRight {
+  gap: 18px;
+}
+
+.iconButton {
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #222;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.iconButton:hover {
+  background: #f5f5f5;
+}
+
+.workspacePill {
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+}
+
+.workspaceIcon {
+  font-size: 14px;
+}
+
+.workspaceName {
+  font-size: 14px;
+  color: #222;
+}
+
+.workspaceBadge {
+  font-size: 12px;
+  color: #666;
+}
+
+.workspaceCaret {
+  font-size: 11px;
+  color: #666;
+}
+
+.utilityDivider {
+  width: 1px;
+  height: 28px;
+  background: #e5e5e5;
+}
+
+.searchPill {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  background: #fff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  cursor: pointer;
+}
+
+.searchIcon {
+  font-size: 26px;
+  color: #666;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-2.6px);
+}
+
+.notificationWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notificationBadge {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #2563eb;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
+.userAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1e3a8a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+}
