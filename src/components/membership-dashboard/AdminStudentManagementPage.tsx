@@ -35,11 +35,8 @@ export default function AdminStudentManagementPage() {
   const filteredUsers = useMemo(() => {
     const keyword = search.trim().toLowerCase();
     if (!keyword) return users;
-    return users.filter(
-      (user) =>
-        user.name.toLowerCase().includes(keyword) ||
-        user.email.toLowerCase().includes(keyword) ||
-        user.status.toLowerCase().includes(keyword)
+    return users.filter((user) =>
+      user.name.toLowerCase().includes(keyword)
     );
   }, [users, search]);
 
@@ -57,7 +54,7 @@ export default function AdminStudentManagementPage() {
             sx={{ mb: 2.5 }}
           >
             <Box>
-              <Typography sx={{ fontSize: 18, fontWeight: 600, color: "#1f2937" }}>
+              <Typography sx={{ fontSize: 21, fontWeight: 600, color: "#1f2937" }}>
                 Student access management
               </Typography>
             </Box>
@@ -130,12 +127,12 @@ export default function AdminStudentManagementPage() {
                     >
                       {card.icon}
                     </Box>
-                    <Typography sx={{ fontSize: 20, fontWeight: 700, lineHeight: 1 }}>
+                    <Typography sx={{ fontSize: 24, fontWeight: 700, lineHeight: 1 }}>
                       {card.value}
                     </Typography>
                   </Box>
 
-                  <Typography sx={{ fontSize: 12, color: "#8a8f98" }}>
+                  <Typography sx={{ fontSize: 14, color: "#8a8f98" }}>
                     {card.title}
                   </Typography>
                 </CardContent>

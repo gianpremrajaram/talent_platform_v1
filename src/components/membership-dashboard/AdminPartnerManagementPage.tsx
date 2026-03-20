@@ -35,11 +35,8 @@ export default function AdminPartnerManagementPage() {
   const filteredUsers = useMemo(() => {
     const keyword = search.trim().toLowerCase();
     if (!keyword) return users;
-    return users.filter(
-      (user) =>
-        user.name.toLowerCase().includes(keyword) ||
-        user.email.toLowerCase().includes(keyword) ||
-        user.status.toLowerCase().includes(keyword)
+    return users.filter((user) =>
+      user.name.toLowerCase().includes(keyword)
     );
   }, [users, search]);
 
