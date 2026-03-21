@@ -179,6 +179,42 @@ export default async function AccessDeniedPage({
         </p>
       </>
     );
+  } else if (reason === "middleware-admin-only") {
+    heading = "Admin access required";
+    body = (
+      <>
+        <p>
+          The page you tried to access is restricted to{" "}
+          <strong>administrators</strong>.
+        </p>
+        <p>
+          <strong>Your roles:</strong>{" "}
+          {userRoles.length ? userRoles.join(", ") : "none assigned"}
+        </p>
+      </>
+    );
+  } else if (reason === "middleware-job-board") {
+    heading = "Job Board – membership required";
+    body = (
+      <>
+        <p>
+          You tried to access the <strong>Job Board</strong> within{" "}
+          <strong>{appLabel}</strong>, but your current account does not meet
+          the access requirements.
+        </p>
+        <p>
+          The Job Board is available to <strong>Silver</strong> tier and above
+          members, or <strong>Student</strong> accounts.
+        </p>
+        <p>
+          <strong>Your roles:</strong>{" "}
+          {userRoles.length ? userRoles.join(", ") : "none assigned"}
+          <br />
+          <strong>Your membership tier:</strong>{" "}
+          {userTierKey ?? "no active tier"}
+        </p>
+      </>
+    );
   } else if (reason === "cv-library-tier") {
     heading = "CV Library – membership upgrade required";
     body = (
