@@ -1,163 +1,226 @@
 "use client";
 
-import React from "react";
-import { Box, Button, Card, Chip, Stack, Typography } from "@mui/material";
+import React, { useState } from "react";
+import {
+  Box,
+  Button,
+  Card,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  IconButton,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
-//TODO: create a dialog box for download and preview options when the user clicks on those buttons.
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { deleteStudentCVAction } from "@/app/talent-discovery-standalone/student-cv-functions/action";
+//TODO: there some formatting error while rendering it shows file name as id_name.pdf instead of name.pdf
 type StudentCVLibraryCardProps = {
+  id: string;
   title: string;
   fileName: string;
   fileSize?: string;
+  fileUrl: string;
   uploadedAt: string;
   tags?: string[];
-  isPrimary?: boolean;
-  onPreview?: () => void;
-  onDownload?: () => void;
+  onDeleted: (id: string) => void;
 };
 
 export default function StudentCVLibraryCard({
+  id,
   title,
   fileName,
-  fileSize = "312 KB",
+  fileSize,
+  fileUrl,
   uploadedAt,
   tags = [],
-  isPrimary = false,
-  onPreview,
-  onDownload,
+  onDeleted,
 }: StudentCVLibraryCardProps) {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handlePreview = () => {
+    window.open(fileUrl, "_blank");
+  };
+
+  const handleDownload = () => {
+    const link = document.createElement("a");
+    link.href = fileUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleDeleteConfirm = async () => {
+    setDeleting(true);
+    await deleteStudentCVAction(id);
+    setDeleting(false);
+    setConfirmOpen(false);
+    onDeleted(id);
+  };
+
   return (
-    <Card
-      elevation={0}
-      sx={{
-        borderRadius: 3,
-        border: "1px solid",
-        borderColor: "#f1f1f1",
-        backgroundColor: "#fff",
-        px: { xs: 2, md: 4 },
-        py: { xs: 2.5, md: 3.5 },
-      }}
-    >
-      <Box
+    <>
+      <Card
+        elevation={0}
         sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "1fr", md: "1fr auto" },
-          gap: 3,
-          alignItems: "center",
+          borderRadius: 3,
+          border: "1px solid",
+          borderColor: "#f1f1f1",
+          backgroundColor: "#fff",
+          px: { xs: 2, md: 4 },
+          py: { xs: 2.5, md: 3.5 },
         }}
       >
-        <Stack direction="row" spacing={2} alignItems="flex-start">
-          <Box
-            sx={{
-              mt: 0.5,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "text.primary",
-            }}
-          >
-            <DescriptionOutlinedIcon sx={{ fontSize: 40 }} />
-          </Box>
-
-          <Box>
-            <Stack
-              direction="row"
-              spacing={1}
-              alignItems="center"
-              flexWrap="wrap"
-              useFlexGap
-              sx={{ mb: 0.25 }}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "1fr auto" },
+            gap: 3,
+            alignItems: "center",
+          }}
+        >
+          <Stack direction="row" spacing={2} alignItems="flex-start">
+            <Box
+              sx={{
+                mt: 0.5,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "text.primary",
+              }}
             >
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              <DescriptionOutlinedIcon sx={{ fontSize: 40 }} />
+            </Box>
+
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 0.25 }}>
                 {title}
               </Typography>
 
-              {isPrimary && (
-                <Box
-                  sx={{
-                    px: 1,
-                    py: 0.3,
-                    borderRadius: 1,
-                    backgroundColor: "#ffe9e9",
-                    color: "#ff4d4f",
-                    fontSize: 11,
-                    fontWeight: 700,
-                    textTransform: "uppercase",
-                    lineHeight: 1.2,
-                  }}
-                >
-                  Primary CV
-                </Box>
-              )}
-            </Stack>
-
-            <Typography variant="body2" color="text.secondary">
-              {fileName} • {fileSize}
-            </Typography>
-
-            <Stack
-              direction="row"
-              spacing={0.75}
-              alignItems="center"
-              sx={{ mt: 0.5, mb: 1.75 }}
-            >
-              <AccessTimeOutlinedIcon
-                sx={{ fontSize: 16, color: "text.secondary" }}
-              />
               <Typography variant="body2" color="text.secondary">
-                Uploaded {uploadedAt}
+                {fileName}
+                {fileSize ? ` • ${fileSize}` : ""}
               </Typography>
-            </Stack>
 
-            <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-              {tags.map((tag) => (
-                <Chip
-                  key={tag}
-                  label={tag}
-                  variant="outlined"
-                  size="small"
-                  sx={{
-                    borderRadius: 1,
-                    backgroundColor: "#fff",
-                    borderColor: "#d9d9d9",
-                    "& .MuiChip-label": {
-                      px: 1,
-                    },
-                  }}
+              <Stack
+                direction="row"
+                spacing={0.75}
+                alignItems="center"
+                sx={{ mt: 0.5, mb: 1.75 }}
+              >
+                <AccessTimeOutlinedIcon
+                  sx={{ fontSize: 16, color: "text.secondary" }}
                 />
-              ))}
-            </Stack>
-          </Box>
-        </Stack>
+                <Typography variant="body2" color="text.secondary">
+                  Uploaded {uploadedAt}
+                </Typography>
+              </Stack>
 
-        <Stack direction="row" spacing={2}>
-          <Button
-            variant="contained"
-            onClick={onPreview}
-            sx={{
-              minWidth: 120,
-              textTransform: "none",
-              borderRadius: 1.5,
-              boxShadow: "none",
-            }}
-          >
-            Preview CV
-          </Button>
+              <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+                {tags.map((tag) => (
+                  <Chip
+                    key={tag}
+                    label={tag}
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                      borderRadius: 1,
+                      backgroundColor: "#fff",
+                      borderColor: "#d9d9d9",
+                      "& .MuiChip-label": { px: 1 },
+                    }}
+                  />
+                ))}
+              </Stack>
+            </Box>
+          </Stack>
 
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Button
+              variant="contained"
+              onClick={handlePreview}
+              sx={{
+                minWidth: 120,
+                textTransform: "none",
+                borderRadius: 1.5,
+                boxShadow: "none",
+              }}
+            >
+              Preview CV
+            </Button>
+
+            <Button
+              variant="contained"
+              onClick={handleDownload}
+              sx={{
+                minWidth: 130,
+                textTransform: "none",
+                borderRadius: 1.5,
+                boxShadow: "none",
+              }}
+            >
+              Download CV
+            </Button>
+
+            <Tooltip title="Delete CV">
+              <IconButton
+                onClick={() => setConfirmOpen(true)}
+                sx={{
+                  color: "error.main",
+                  "&:hover": { backgroundColor: "error.50" },
+                }}
+              >
+                <DeleteOutlineIcon />
+              </IconButton>
+            </Tooltip>
+          </Stack>
+        </Box>
+      </Card>
+
+      {/* ── Confirmation dialog ── */}
+      <Dialog
+        open={confirmOpen}
+        onClose={() => !deleting && setConfirmOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontWeight: 700 }}>Delete CV?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete <strong>{title}</strong>? This
+            action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button
-            variant="contained"
-            onClick={onDownload}
-            sx={{
-              minWidth: 130,
-              textTransform: "none",
-              borderRadius: 1.5,
-              boxShadow: "none",
-            }}
+            onClick={() => setConfirmOpen(false)}
+            color="inherit"
+            disabled={deleting}
           >
-            Download CV
+            Cancel
           </Button>
-        </Stack>
-      </Box>
-    </Card>
+          <Button
+            onClick={handleDeleteConfirm}
+            variant="contained"
+            color="error"
+            disabled={deleting}
+            startIcon={
+              deleting ? <CircularProgress size={16} color="inherit" /> : null
+            }
+          >
+            {deleting ? "Deleting..." : "Delete"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }

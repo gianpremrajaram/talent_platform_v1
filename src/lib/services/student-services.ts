@@ -270,3 +270,36 @@ export async function deleteStudentSocialLink(id: string) {
     where: { id },
   });
 }
+
+export async function createStudentCV(
+  userId: string,
+  data: {
+    label: string;
+    fileUrl: string;
+    notes?: string;
+    tags?: string[];
+  },
+) {
+  return prisma.studentCV.create({
+    data: {
+      userId,
+      label: data.label,
+      fileUrl: data.fileUrl,
+      notes: data.notes,
+      tags: data.tags ?? [],
+    },
+  });
+}
+
+export async function getStudentCVs(userId: string) {
+  return prisma.studentCV.findMany({
+    where: { userId },
+    orderBy: { uploadedAt: "desc" },
+  });
+}
+
+export async function deleteStudentCV(id: string) {
+  return prisma.studentCV.delete({
+    where: { id },
+  });
+}

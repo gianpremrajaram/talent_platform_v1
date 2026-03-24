@@ -2,8 +2,17 @@ import { Box } from "@mui/material";
 import StudentSideBar from "@/components/talent-discovery/student-components/StudentSideBar";
 import DashboardTopBar from "@/components/talent-discovery/student-components/StudentTopNavBar";
 import StudentCVUploadCard from "@/components/talent-discovery/student-components/StudentCVUploadCard";
+import { getServerAuthSession } from "@/lib/getServerAuthSession";
+import { redirect } from "next/navigation";
 
-export default function StudentCVFunctionsPage() {
+export default async function StudentCVFunctionsPage() {
+  const session = await getServerAuthSession();
+  const sessionUser = session?.user as any | undefined;
+  if (!sessionUser?.id) {
+    redirect("/sign-in");
+  }
+  const userId = sessionUser.id as string;
+
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <StudentSideBar />
@@ -19,7 +28,7 @@ export default function StudentCVFunctionsPage() {
             mx: "auto",
           }}
         >
-          <StudentCVUploadCard />
+          <StudentCVUploadCard userId={userId} />
         </Box>
       </Box>
     </Box>
