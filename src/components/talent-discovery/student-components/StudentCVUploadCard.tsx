@@ -7,6 +7,7 @@ import {
   Card,
   CardContent,
   Chip,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -14,12 +15,14 @@ import {
   Divider,
   Fade,
   Grow,
+  Alert,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
 import { Add, Close } from "@mui/icons-material";
 import UploadOutlined from "@ant-design/icons/UploadOutlined";
+import { uploadStudentCVAction } from "@/app/talent-discovery-standalone/student-cv-functions/action";
 
 const inputSx = {
   "& .MuiOutlinedInput-root": {
@@ -27,22 +30,24 @@ const inputSx = {
     backgroundColor: "#fff",
   },
 };
-//TODO: on successful file upload, show a success banner and reset the form.
 
-export default function StudentCVUploadCard() {
+type Props = {
+  userId: string;
+};
+
+export default function StudentCVUploadCard({ userId }: Props) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [cvName, setCvName] = useState("");
   const [versionNotes, setVersionNotes] = useState("");
-
-  const [tags, setTags] = useState<string[]>([
-    "Finance",
-    "Consulting",
-    "Summer 2026",
-  ]);
+  const [tags, setTags] = useState<string[]>([]);
   const [tagDialogOpen, setTagDialogOpen] = useState(false);
   const [newTag, setNewTag] = useState("");
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   const handleChooseFile = () => {
     fileInputRef.current?.click();
@@ -51,6 +56,8 @@ export default function StudentCVUploadCard() {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
     setSelectedFile(file);
+    setError(null);
+    setSuccess(false);
 
     if (file && !cvName) {
       const fileNameWithoutExtension = file.name.replace(/\.[^/.]+$/, "");
@@ -65,13 +72,9 @@ export default function StudentCVUploadCard() {
     const exists = tags.some(
       (tag) => tag.toLowerCase() === trimmed.toLowerCase(),
     );
-    if (exists) {
-      setNewTag("");
-      setTagDialogOpen(false);
-      return;
+    if (!exists) {
+      setTags((prev) => [...prev, trimmed]);
     }
-
-    setTags((prev) => [...prev, trimmed]);
     setNewTag("");
     setTagDialogOpen(false);
   };
@@ -80,13 +83,39 @@ export default function StudentCVUploadCard() {
     setTags((prev) => prev.filter((tag) => tag !== tagToDelete));
   };
 
-  const handleSave = () => {
-    console.log({
-      selectedFile,
-      cvName,
-      versionNotes,
-      tags,
-    });
+  const resetForm = () => {
+    setSelectedFile(null);
+    setCvName("");
+    setVersionNotes("");
+    setTags([]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleSave = async () => {
+    setError(null);
+    setSuccess(false);
+
+    if (!selectedFile) return setError("Please select a file to upload.");
+    if (!cvName.trim()) return setError("CV name is required.");
+
+    const formData = new FormData();
+    formData.append("userId", userId);
+    formData.append("file", selectedFile);
+    formData.append("label", cvName);
+    formData.append("notes", versionNotes);
+    formData.append("tags", JSON.stringify(tags));
+
+    setLoading(true);
+    const result = await uploadStudentCVAction(formData);
+    setLoading(false);
+
+    if (!result.success) {
+      setError(result.error ?? "Something went wrong. Please try again.");
+      return;
+    }
+
+    setSuccess(true);
+    resetForm();
   };
 
   return (
@@ -101,6 +130,7 @@ export default function StudentCVUploadCard() {
           backgroundColor: "#fff",
         }}
       >
+        {/* ── Upload zone ── */}
         <CardContent sx={{ p: { xs: 2.5, md: 3 } }}>
           <Typography variant="h5" sx={{ fontWeight: 600, mb: 0.5 }}>
             Upload your CV
@@ -171,6 +201,7 @@ export default function StudentCVUploadCard() {
 
         <Divider />
 
+        {/* ── CV Details ── */}
         <CardContent sx={{ p: { xs: 2.5, md: 3 } }}>
           <Typography variant="h5" sx={{ fontWeight: 600, mb: 0.5 }}>
             CV Details
@@ -222,6 +253,7 @@ export default function StudentCVUploadCard() {
               />
             </Box>
 
+            {/* ── Tags ── */}
             <Box sx={{ pt: 1 }}>
               <Stack
                 direction="row"
@@ -237,12 +269,7 @@ export default function StudentCVUploadCard() {
                   variant="outlined"
                   startIcon={<Add />}
                   onClick={() => setTagDialogOpen(true)}
-                  sx={{
-                    px: 2.25,
-                    py: 1,
-                    minWidth: 160,
-                    borderRadius: 1.5,
-                  }}
+                  sx={{ px: 2.25, py: 1, minWidth: 160, borderRadius: 1.5 }}
                 >
                   Add Tag
                 </Button>
@@ -280,15 +307,39 @@ export default function StudentCVUploadCard() {
               </Stack>
             </Box>
 
+            {/* ── Feedback banners ── */}
+            {error && (
+              <Alert severity="error" onClose={() => setError(null)}>
+                {error} Please try again.
+              </Alert>
+            )}
+
+            {success && (
+              <Alert severity="success" onClose={() => setSuccess(false)}>
+                CV uploaded successfully!
+              </Alert>
+            )}
+
+            {/* ── Save button ── */}
             <Box sx={{ display: "flex", justifyContent: "flex-end", pt: 1 }}>
-              <Button variant="contained" onClick={handleSave}>
-                Save CV
+              <Button
+                variant="contained"
+                onClick={handleSave}
+                disabled={loading}
+                startIcon={
+                  loading ? (
+                    <CircularProgress size={16} color="inherit" />
+                  ) : null
+                }
+              >
+                {loading ? "Saving..." : "Save CV"}
               </Button>
             </Box>
           </Stack>
         </CardContent>
       </Card>
 
+      {/* ── Add Tag dialog ── */}
       <Dialog
         open={tagDialogOpen}
         onClose={() => setTagDialogOpen(false)}

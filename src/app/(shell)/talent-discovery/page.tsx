@@ -1,12 +1,13 @@
 // src/app/talent-discovery/page.tsx
 import { redirect } from "next/navigation";
 import { getServerAuthSession } from "@/lib/getServerAuthSession";
-import { userCanAccessApp } from "@/lib/access-control";
+import {
+  userCanAccessApp,
+  userCanAccessFeature,
+} from "@/lib/access-control";
 import SignInForm from "@/components/SignInForm";
 import { pageCopy } from "@/content/pageCopy";
 
-// These are the three view components we created earlier
-import TalentDiscoveryStudentView from "@/components/talent-discovery/StudentView";
 import TalentDiscoveryPartnerJobBoardView from "@/components/talent-discovery/PartnerJobBoardView";
 import TalentDiscoveryPartnerFullView from "@/components/talent-discovery/PartnerFullView";
 
@@ -36,7 +37,6 @@ export default async function TalentDiscoveryPage({
 
   // 1) Not signed in → public description + sign-in form
   if (!session || !session.user) {
-    // Preserve the intended view after sign-in if present
     const redirectSuffix = view !== "default" ? `?view=${view}` : "";
     const defaultRedirect = `/talent-discovery${redirectSuffix}`;
 
@@ -58,33 +58,26 @@ export default async function TalentDiscoveryPage({
   const user = session.user as any;
   const userId = user.id as string;
   const roleKeys = (user.roleKeys ?? []) as string[];
-  const membershipTierRank = (user.membershipTierRank ?? null) as number | null;
 
   const hasStudentRole = roleKeys.includes("STUDENT");
   const hasAdminRole = roleKeys.includes("ADMIN");
-  const hasMemberRole = roleKeys.includes("MEMBER");
-
-  const SILVER_RANK = 2;
-  const GOLD_RANK = 3;
 
   // ─────────────────────────────────────────
   // 3) Student view: only STUDENT or ADMIN
   // ─────────────────────────────────────────
   if (view === "student") {
     if (!hasStudentRole && !hasAdminRole) {
-      // Logged-in but wrong role for student view
       redirect(
         "/access-denied?reason=student-view-role&appKey=TALENT_DISCOVERY",
       );
     }
-    redirect("/talent-discovery-standalone/student-dashboard"); //render the new student dashboard view
+    redirect("/talent-discovery-standalone/student-dashboard");
   }
 
   // ─────────────────────────────────────────
-  // 4) App-level gate for partner views (Silver+)
-  //    Applies to job-board, cv-library, and default entries
-  //
-  //    Admin bypass: admins can access all partner views regardless of tier.
+  // 4) App-level gate for partner views
+  //    Defence-in-depth: DB-backed check via userCanAccessApp.
+  //    Admin bypass is handled inside userCanAccessApp.
   // ─────────────────────────────────────────
   if (!hasAdminRole) {
     const canAccessApp = await userCanAccessApp(userId, "TALENT_DISCOVERY");
@@ -94,24 +87,16 @@ export default async function TalentDiscoveryPage({
   }
 
   // ─────────────────────────────────────────
-  // 5) CV Library entry: requires Gold+ tier
-  //    Admin bypass: admin can always access.
+  // 5) CV Library entry: requires Gold+ (via feature config)
   // ─────────────────────────────────────────
   if (view === "cv-library") {
-    if (!hasAdminRole) {
-      if (
-        membershipTierRank == null ||
-        membershipTierRank < GOLD_RANK ||
-        !hasMemberRole
-      ) {
-        // Member below Gold, or not a member at all
-        redirect(
-          "/access-denied?reason=cv-library-tier&appKey=TALENT_DISCOVERY",
-        );
-      }
+    const canAccess = await userCanAccessFeature(userId, "cv-library");
+    if (!canAccess) {
+      redirect(
+        "/access-denied?reason=cv-library-tier&appKey=TALENT_DISCOVERY",
+      );
     }
 
-    // Gold/Platinum member OR admin → full partner view (job board + CV Library)
     return (
       <TalentDiscoveryPartnerFullView
         title={copy.title}
@@ -122,7 +107,7 @@ export default async function TalentDiscoveryPage({
 
   // ─────────────────────────────────────────
   // 6) Job board or default entry for partners
-  //    Admin bypass: admin always sees full view (all partner capabilities).
+  //    Use centralised feature config for tier routing.
   // ─────────────────────────────────────────
   if (hasAdminRole) {
     return (
@@ -133,12 +118,9 @@ export default async function TalentDiscoveryPage({
     );
   }
 
-  if (
-    membershipTierRank != null &&
-    membershipTierRank >= GOLD_RANK &&
-    hasMemberRole
-  ) {
-    // Gold+ from any non-student entry → full view
+  // Gold+ → full partner view (job board + CV library + search)
+  const canAccessCvLibrary = await userCanAccessFeature(userId, "cv-library");
+  if (canAccessCvLibrary) {
     return (
       <TalentDiscoveryPartnerFullView
         title={copy.title}
@@ -147,12 +129,12 @@ export default async function TalentDiscoveryPage({
     );
   }
 
-  if (
-    membershipTierRank != null &&
-    membershipTierRank >= SILVER_RANK &&
-    hasMemberRole
-  ) {
-    // Silver members → job board only
+  // Silver+ → job board only
+  const canAccessJobBoard = await userCanAccessFeature(
+    userId,
+    "job-board-browse",
+  );
+  if (canAccessJobBoard) {
     return (
       <TalentDiscoveryPartnerJobBoardView
         title={copy.title}
@@ -162,7 +144,7 @@ export default async function TalentDiscoveryPage({
   }
 
   // ─────────────────────────────────────────
-  // 7) Fallback – should rarely be reached
+  // 7) Fallback – should rarely be reached (middleware catches most cases)
   // ─────────────────────────────────────────
   redirect("/access-denied?reason=access-denied&appKey=TALENT_DISCOVERY");
 }

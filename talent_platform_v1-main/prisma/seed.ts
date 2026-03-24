@@ -207,7 +207,7 @@ async function seedSpecificRolesAndUsers() {
     update: {},
     create: {
       email: 'admin@ucl.ac.uk',
-      passwordHash: "password123",
+      passwordHash: commonPassword,
       firstName: 'Global',
       lastName: 'Admin',
       roles: { create: { roleId: roleMap.get('ADMIN') } }
