@@ -40,3 +40,12 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 /src/app/generated/prisma
+
+#docker config files
+docker-compose.yml
+
+# Ignore uploaded files but keep the folder structure
+public/media/resumes/*
+public/media/images/*
+!public/media/resumes/.gitkeep
+!public/media/images/.gitkeep
