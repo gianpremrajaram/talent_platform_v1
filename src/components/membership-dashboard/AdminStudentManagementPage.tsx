@@ -25,8 +25,9 @@ export default function AdminStudentManagementPage() {
     fetch("/api/admin/students")
       .then((res) => res.json())
       .then((data: ManagedUser[]) => {
-        setUsers(data);
-        setSelectedUserId(data[0]?.id ?? "");
+        const safe = Array.isArray(data) ? data : [];
+        setUsers(safe);
+        setSelectedUserId(safe[0]?.id ?? "");
       });
   }, []);
 

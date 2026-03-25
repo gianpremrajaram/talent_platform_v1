@@ -17,12 +17,13 @@ datasource db {
 // -----------------------------
 
 model User {
-  id           String  @id @default(cuid())
-  email        String  @unique
+  id           String     @id @default(cuid())
+  email        String     @unique
   passwordHash String
   firstName    String
   lastName     String
-  isActive     Boolean @default(true)
+  isActive     Boolean    @default(true)
+  userStatus   UserStatus @default(ACTIVE)
 
   organisation   Organisation? @relation(fields: [organisationId], references: [id])
   organisationId Int?
@@ -69,6 +70,7 @@ model Organisation {
   id          Int              @id @default(autoincrement())
   name        String
   slug        String           @unique
+  domain      String           @unique
   type        OrganisationType
   status      CompanyStatus    @default(APPROVED)
   users       User[]
@@ -78,6 +80,14 @@ model Organisation {
   studentCompanyConsents StudentCompanyConsent[]
   jobPostings            JobPosting[]
   adminRecommendations   AdminRecommendation[]
+}
+
+/// Individual user approval state. Separate from company-level CompanyStatus.
+/// PENDING_APPROVAL: recruiter registered but admin hasn't approved yet.
+enum UserStatus {
+  ACTIVE
+  PENDING_APPROVAL
+  SUSPENDED
 }
 
 /// Company lifecycle status — controls recruiter access gating.

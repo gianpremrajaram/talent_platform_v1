@@ -115,8 +115,9 @@ export async function POST(req: Request) {
           const type = typeRaw as OrganisationType;
 
           const slug = await uniqueOrganisationSlug(name);
+          // domain is required — use slug-based placeholder for admin-created orgs
           const created = await tx.organisation.create({
-            data: { name, slug, type },
+            data: { name, slug, type, domain: `admin-created.${slug}.placeholder` },
             select: { id: true },
           });
 

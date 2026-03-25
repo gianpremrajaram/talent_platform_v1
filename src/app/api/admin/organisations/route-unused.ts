@@ -41,7 +41,7 @@ export async function POST(req: Request) {
   const slug = await uniqueOrganisationSlug(name);
 
   const organisation = await prisma.organisation.create({
-    data: { name, slug, type },
+    data: { name, slug, type, domain: `admin-created.${slug}.placeholder` },
     select: { id: true, name: true },
   });
 
