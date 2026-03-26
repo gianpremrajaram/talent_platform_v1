@@ -1,8 +1,8 @@
 // src/app/api/account/create-user/route.ts
-import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
 import { getServerAuthSession } from "@/lib/getServerAuthSession";
+import { ok, err } from "@/lib/api-response";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   const isAdmin = roleKeys.includes("ADMIN");
 
   if (!isAdmin) {
-    return NextResponse.json({ ok: false, error: "Admin access required." }, { status: 403 });
+    return err("FORBIDDEN");
   }
 
   const body = (await req.json()) as {
@@ -36,10 +36,7 @@ export async function POST(req: Request) {
   const lastName = (body.lastName ?? "").trim();
 
   if (!email || !firstName || !lastName) {
-    return NextResponse.json(
-      { ok: false, error: "Email, first name, and last name are required." },
-      { status: 400 },
-    );
+    return err("BAD_REQUEST", "Email, first name, and last name are required.");
   }
 
   const tempPassword = generateTempPassword(10);
@@ -56,14 +53,8 @@ export async function POST(req: Request) {
       select: { id: true },
     });
 
-    return NextResponse.json(
-      { ok: true, userId: created.id, tempPassword },
-      { status: 200 },
-    );
-  } catch (e: any) {
-    return NextResponse.json(
-      { ok: false, error: "Could not create user. Email may already exist." },
-      { status: 400 },
-    );
+    return ok({ userId: created.id, tempPassword });
+  } catch {
+    return err("CONFLICT", "Could not create user. Email may already exist.");
   }
 }

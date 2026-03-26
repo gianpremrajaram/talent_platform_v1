@@ -23,6 +23,7 @@ type NavItem = {
   label: string;
   href: string;
   exact?: boolean;
+  adminOnly?: boolean;
   icon: ReactNode;
 };
 
@@ -44,6 +45,7 @@ const navSections: NavSection[] = [
       {
         label: "Project",
         href: "/membership-dashboard/project",
+        adminOnly: true,
         icon: <HandshakeRoundedIcon />,
       },
     ],
@@ -54,11 +56,13 @@ const navSections: NavSection[] = [
       {
         label: "Partners",
         href: "/membership-dashboard/partner-users",
+        adminOnly: true,
         icon: <BusinessRoundedIcon />,
       },
       {
         label: "Students",
         href: "/membership-dashboard/student-users",
+        adminOnly: true,
         icon: <SchoolRoundedIcon />,
       },
     ],
@@ -147,6 +151,14 @@ export default function AdminSidebar() {
   const roleKeys: string[] = (session?.user as any)?.roleKeys ?? [];
   const displayRole = roleKeys.map((k) => roleLabel[k] ?? k).join(", ") || "Member";
   const initial = name.trim().charAt(0).toUpperCase();
+  const isAdmin = roleKeys.includes("ADMIN");
+
+  const visibleSections = navSections
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => !item.adminOnly || isAdmin),
+    }))
+    .filter((section) => section.items.length > 0);
 
   return (
     <Box
@@ -168,7 +180,7 @@ export default function AdminSidebar() {
 
       <Divider />
 
-      {navSections.map((section) => (
+      {visibleSections.map((section) => (
         <Box key={section.title}>
           <SectionTitle>{section.title}</SectionTitle>
           <NavSectionList items={section.items} />

@@ -1,5 +1,5 @@
 // prisma/seed.ts
-import { PrismaClient, OrganisationType } from '@prisma/client';
+import { PrismaClient, OrganisationType, UserStatus } from '@prisma/client';
 import fs from 'node:fs';
 import path from 'node:path';
 import { parse } from 'yaml';
@@ -247,37 +247,73 @@ async function seedSpecificRolesAndUsers() {
     });
   }
 
-  // 4. Seed 2 Recruiters (1 Approved, 1 Pending)
-  // 注意：Recruiter 需要关联到一个 Organisation (Industry)
-  const org = await prisma.organisation.findFirst({ where: { type: 'INDUSTRY' } });
-  
-  const recruiterData = [
-    { email: 'recruiter.active@example.com', status: 'active' },
-    { email: 'recruiter.pending@example.com', status: 'pending' }
+  // 4. Seed 2 Recruiters — each in their own test org with a real domain
+  const goldTier = await prisma.membershipTier.findUnique({ where: { key: 'GOLD' } });
+  if (!goldTier) throw new Error('GOLD tier not found — run seedMembershipTiers first');
+
+  const recruiterOrgs = [
+    {
+      slug: 'test-corp-active',
+      name: 'Test Corp (Active)',
+      domain: 'testcorp-active.example.com',
+      companyStatus: 'APPROVED' as const,
+      email: 'recruiter.active@example.com',
+      userStatus: UserStatus.ACTIVE,
+      membershipStatus: 'active',
+      isActive: true,
+    },
+    {
+      slug: 'test-corp-pending',
+      name: 'Test Corp (Pending)',
+      domain: 'testcorp-pending.example.com',
+      companyStatus: 'PENDING' as const,
+      email: 'recruiter.pending@example.com',
+      userStatus: UserStatus.PENDING_APPROVAL,
+      membershipStatus: 'pending',
+      isActive: false,
+    },
   ];
 
-  for (const r of recruiterData) {
-    await prisma.user.upsert({
+  for (const r of recruiterOrgs) {
+    const org = await prisma.organisation.upsert({
+      where: { slug: r.slug },
+      create: {
+        slug: r.slug,
+        name: r.name,
+        domain: r.domain,
+        type: OrganisationType.INDUSTRY,
+        status: r.companyStatus,
+      },
+      update: {
+        name: r.name,
+        domain: r.domain,
+        status: r.companyStatus,
+      },
+    });
+
+    const user = await prisma.user.upsert({
       where: { email: r.email },
-      update: {},
+      update: { userStatus: r.userStatus },
       create: {
         email: r.email,
         passwordHash: commonPassword,
         firstName: 'Recruiter',
-        lastName: r.status,
+        lastName: r.companyStatus === 'APPROVED' ? 'Active' : 'Pending',
+        userStatus: r.userStatus,
+        organisationId: org.id,
         roles: { create: { roleId: roleMap.get('RECRUITER') } },
         memberships: {
           create: {
-            organisationId: org?.id || 1,
-            membershipTierId: (await prisma.membershipTier.findFirst())?.id || 1,
-            status: r.status,
-            isActive: r.status === 'active'
-          }
-        }
-      }
+            organisationId: org.id,
+            membershipTierId: goldTier.id,
+            status: r.membershipStatus,
+            isActive: r.isActive,
+          },
+        },
+      },
     });
+    console.log(`  - Seeded recruiter ${user.email} (userStatus=${r.userStatus}, org=${org.name})`);
   }
-  console.log('  - Seeded 2 Recruiters (1 active, 1 pending)');
 }
 
 
@@ -311,16 +347,22 @@ async function main() {
     const redeemed = m.redeemed_benefits ?? [];
     console.log(`\nSeeding memberKey="${m.id}"…`);
 
+    // Derive a stable placeholder domain from the slug for seeded YAML members.
+    // Real domains are set when a recruiter self-registers via /register.
+    const placeholderDomain = `${m.id}.seed.example.com`;
+
     const organisation = await prisma.organisation.upsert({
       where: { slug: m.id },
       create: {
         slug: m.id,
         name: m.company.name,
         type: OrganisationType.INDUSTRY,
+        domain: placeholderDomain,
       },
       update: {
         name: m.company.name,
         type: OrganisationType.INDUSTRY,
+        domain: placeholderDomain,
       },
     });
     console.log(`  Organisation id=${organisation.id}, name=${organisation.name}`);

@@ -1,7 +1,7 @@
 // src/components/SignInForm.tsx
 "use client";
 
-import { useId, useState } from "react";
+import { useState } from "react";
 import { signIn } from "next-auth/react";
 
 type SignInFormProps = {
@@ -9,23 +9,16 @@ type SignInFormProps = {
 };
 
 export default function SignInForm({ defaultRedirect }: SignInFormProps) {
-  const helpId = useId();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const registerHelp =
-    "Register is currently only available to admins for adding new users.";
+  const registerHelp = "Create a new recruiter or student account.";
 
   function normalisedEmail(value: string) {
     return value.trim().toLowerCase();
-  }
-
-  function goRegisterDenied() {
-    window.location.assign("/access-denied?reason=register-admin-only");
   }
 
   async function handleSignIn(e: React.FormEvent) {
@@ -55,61 +48,9 @@ export default function SignInForm({ defaultRedirect }: SignInFormProps) {
     }
   }
 
-  async function handleRegister(e: React.MouseEvent<HTMLButtonElement>) {
-    // Keep this in-form, but ensure it never submits the form
+  function handleRegister(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault();
-
-    setError(null);
-
-    const emailNormalised = normalisedEmail(email);
-    const pw = password;
-
-    if (!emailNormalised || !pw) {
-      goRegisterDenied();
-      return;
-    }
-
-    setSubmitting(true);
-
-    try {
-      // 1) Check admin status (no session creation)
-      const r = await fetch("/api/auth/admin-check", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: emailNormalised, password: pw }),
-      });
-
-      if (!r.ok) {
-        goRegisterDenied();
-        return;
-      }
-
-      const data = (await r.json()) as { ok: boolean; isAdmin: boolean };
-
-      if (!(data.ok && data.isAdmin)) {
-        goRegisterDenied();
-        return;
-      }
-
-      // 2) Create a real NextAuth session (required for /account/add-user)
-      const signInRes = await signIn("credentials", {
-        redirect: false,
-        email: emailNormalised,
-        password: pw,
-      });
-
-      if (!signInRes?.ok) {
-        goRegisterDenied();
-        return;
-      }
-
-      // 3) Now authenticated, go to Add user page
-      window.location.assign("/account/add-user");
-    } catch {
-      goRegisterDenied();
-    } finally {
-      setSubmitting(false);
-    }
+    window.location.assign("/register");
   }
 
   return (

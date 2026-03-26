@@ -1,5 +1,6 @@
 // src/lib/access-control.ts
 import { prisma } from "@/lib/prisma";
+import { checkRecruiterAccess } from "@/lib/services/company-services";
 
 // ─────────────────────────────────────────────
 // Feature-permission config map (single source of truth)
@@ -73,16 +74,12 @@ export async function userCanAccessApp(userId: string, appKey: string) {
     return true;
   }
 
-  // TODO (#12): Add CompanyStatus check for RECRUITER here.
-  // When #12 (company lifecycle state machine) lands, insert a check:
-  //   if (roleKeys.includes("RECRUITER")) {
-  //     const org = await prisma.organisation.findFirst({
-  //       where: { users: { some: { id: userId } } },
-  //       select: { status: true },
-  //     });
-  //     if (org?.status !== "APPROVED") return false;
-  //   }
-  // This blocks pending/suspended/banned company recruiters from all apps.
+  // (#12) Company lifecycle + individual user status gate for recruiters.
+  // Blocks pending/suspended/banned company recruiters and individually pending users.
+  if (roleKeys.includes("RECRUITER")) {
+    const access = await checkRecruiterAccess(userId);
+    if (!access.allowed) return false;
+  }
 
   // 2) Membership-tier-based fallback (unchanged from your current policy)
   const activeMemberships = user.memberships.filter((m) => m.isActive);

@@ -39,8 +39,16 @@ export default async function PostSignInRouterPage() {
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { defaultApp: { select: { key: true } } },
+    select: {
+      userStatus: true,
+      defaultApp: { select: { key: true } },
+    },
   });
+
+  // Pending recruiters are blocked until admin approves them
+  if (user?.userStatus === "PENDING_APPROVAL") {
+    redirect("/register/pending");
+  }
 
   const defaultAppKey = user?.defaultApp?.key ?? null;
   if (!defaultAppKey) redirect("/");
