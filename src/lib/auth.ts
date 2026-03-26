@@ -4,6 +4,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import speakeasy from "speakeasy";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -18,6 +19,7 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
+        token: { label: "2FA Token", type: "text" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -44,6 +46,10 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid email or password");
         }
 
+        console.log("LOGIN ATTEMPT:", credentials);
+        console.log("User twofa:", user.twofa);
+        console.log("Token received:", credentials.token);
+
         const passwordValid = await bcrypt.compare(
           credentials.password,
           user.passwordHash,
@@ -52,6 +58,23 @@ export const authOptions: NextAuthOptions = {
         if (!passwordValid) {
           throw new Error("Invalid email or password");
         }
+        if (user.twofa) {
+          if (!credentials.token || credentials.token === "undefined") {
+            throw new Error("2FA_REQUIRED");
+          }
+        
+
+        const verified = speakeasy.totp.verify({
+          secret: user.twofaSecret!,
+          encoding: "base32",
+          token: credentials.token.toString().trim(),
+          window: 1,
+        });
+
+        if (!verified) {
+          throw new Error("INVALID_2FA");
+        }
+      }
 
         const roleKeys = user.roles.map((ur) => ur.role.key);
 

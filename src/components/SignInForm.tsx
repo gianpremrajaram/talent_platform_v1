@@ -17,6 +17,9 @@ export default function SignInForm({ defaultRedirect }: SignInFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [show2FA, setShow2FA] = useState(false);
+  const [token, setToken] = useState("");
+
   const registerHelp =
     "Register is currently only available to admins for adding new users.";
 
@@ -35,19 +38,32 @@ export default function SignInForm({ defaultRedirect }: SignInFormProps) {
 
     const emailNormalised = normalisedEmail(email);
 
+    console.log("show2FA:", show2FA);
+    console.log("token state:", token);
+
     try {
       const res = await signIn("credentials", {
         redirect: false,
         email: emailNormalised,
         password,
+        token: show2FA ? token : undefined,
       });
 
-      if (!res?.ok) {
-        setError("Invalid email or password.");
+      console.log("Login response:", res);
+
+      if (res?.error === "2FA_REQUIRED") {
+        setShow2FA(true);
+        setError(null);
+        return;
+      }
+
+      if (res?.error === "INVALID_2FA") {
+        setError("Invalid 2FA code");
         return;
       }
 
       window.location.assign(defaultRedirect);
+      
     } catch {
       setError("Something went wrong while signing in.");
     } finally {
@@ -146,6 +162,19 @@ export default function SignInForm({ defaultRedirect }: SignInFormProps) {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
+
+        {show2FA && (
+          <div className="auth-field">
+          <label className="auth-label">2FA Code</label>
+          <input
+            className="auth-input"
+            type="text"
+            placeholder="Enter 6-digit code"
+            value={token}
+            onChange={(e) => setToken(e.target.value)}
+          />
+        </div>
+      )}
 
         {error && (
           <p role="alert" className="small">

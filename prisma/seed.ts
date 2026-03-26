@@ -207,9 +207,11 @@ async function seedSpecificRolesAndUsers() {
     update: {},
     create: {
       email: 'admin@ucl.ac.uk',
-      passwordHash: "password123",
+      passwordHash: await bcrypt.hash("password123", 10),
       firstName: 'Global',
       lastName: 'Admin',
+      twofa: true,
+      twofaSecret: 'JBSWY3DPEHPK3PXP', // "Hello!" in base32, for testing
       roles: { create: { roleId: roleMap.get('ADMIN') } }
     }
   });
