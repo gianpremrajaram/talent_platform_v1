@@ -6,6 +6,9 @@
 
 import { useState, useCallback } from "react";
 import TierGate from "@/components/TierGate";
+import LoadingState from "@/components/ui/LoadingState";
+import EmptyState from "@/components/ui/EmptyState";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import type { StudentSearchResult, PaginatedStudentResults } from "@/types/index";
 
 type Tab = "job-board" | "student-search";
@@ -258,12 +261,29 @@ function StudentSearchPanel() {
       )}
 
       {/* Results */}
-      {searched && (
+      {loading && students.length === 0 && (
+        <LoadingState message="Searching students…" />
+      )}
+
+      {searched && !loading && students.length === 0 && (
+        <EmptyState
+          message="No matching students found."
+          description="Try adjusting your search filters."
+          actionLabel="Clear filters"
+          onAction={() => {
+            setFilters(EMPTY_FILTERS);
+            setStudents([]);
+            setNextCursor(null);
+            setSearched(false);
+            setError(null);
+          }}
+        />
+      )}
+
+      {searched && students.length > 0 && (
         <>
           <p className="small" style={{ marginBottom: "0.75rem", opacity: 0.7 }}>
-            {students.length === 0
-              ? "No matching students found."
-              : `Showing ${students.length} result${students.length !== 1 ? "s" : ""}`}
+            {`Showing ${students.length} result${students.length !== 1 ? "s" : ""}`}
           </p>
           {students.map((s) => (
             <StudentCard key={s.id} student={s} />
@@ -353,7 +373,9 @@ export default function TalentDiscoveryPartnerFullView({ title, description }: P
               members only. Upgrade your membership to access this feature.
             </p>
           }>
-            <StudentSearchPanel />
+            <ErrorBoundary>
+              <StudentSearchPanel />
+            </ErrorBoundary>
           </TierGate>
         </div>
       )}
