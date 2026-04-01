@@ -114,11 +114,29 @@ export default function RegisterForm() {
 
       {role === "student" ? (
         <div style={{ padding: "1rem 0" }}>
-          <p>
-            Student registration is managed by UCL. Please contact your
-            programme administrator to be added to the platform.
+          <p style={{ marginBottom: "1rem" }}>
+            Student registration will be handled via UCL Single Sign-On (SSO).
           </p>
-          <p className="small" style={{ marginTop: "0.75rem" }}>
+          
+          {/* SSO 占位按钮 - 点击只触发弹窗不发请求 */}
+          <button
+            type="button"
+            style={{ 
+              width: "100%", 
+              padding: "0.75rem", 
+              backgroundColor: "#2563eb", /* 蓝色按钮 */
+              color: "white", 
+              borderRadius: "0.375rem", 
+              border: "none", 
+              cursor: "pointer",
+              fontWeight: "500"
+            }}
+            onClick={() => alert("SSO integration is currently under research. \n\nPlaceholder for Issue #17.")}
+          >
+            Register with UCL SSO (Coming Soon)
+          </button>
+
+          <p className="small" style={{ marginTop: "1rem" }}>
             Already have an account?{" "}
             <Link href="/sign-in" className="auth-linklike">
               Sign in
