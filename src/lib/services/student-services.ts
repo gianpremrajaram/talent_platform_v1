@@ -303,3 +303,29 @@ export async function deleteStudentCV(id: string) {
     where: { id },
   });
 }
+
+export async function getMembersWithConsentStatus(studentId: string) {
+  const members = await prisma.membershipDashboardMember.findMany({
+    include: {
+      membership: {
+        include: {
+          organisation: {
+            include: {
+              studentCompanyConsents: {
+                where: { studentId },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return members.map((m) => ({
+    id: m.id,
+    memberKey: m.memberKey,
+    organisationId: m.membership?.organisation?.id ?? null,
+    name: m.membership?.organisation?.name ?? m.memberKey,
+    consented: m.membership?.organisation?.studentCompanyConsents[0]?.consented ?? true,
+  }));
+}

@@ -65,8 +65,8 @@ const cvItems: NavItem[] = [
 
 const settingsItems: NavItem[] = [
   {
-    label: "Visibility Settings",
-    href: "/talent-discovery-standalone/student-visibility-settings",
+    label: "Company Consent",
+    href: "/talent-discovery-standalone/student-company-consent",
     icon: <SettingsOutlinedIcon />,
   },
   {
