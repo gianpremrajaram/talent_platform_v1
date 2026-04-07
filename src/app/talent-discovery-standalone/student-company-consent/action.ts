@@ -1,0 +1,19 @@
+"use server";
+
+import { getServerAuthSession } from "@/lib/getServerAuthSession";
+import { prisma } from "@/lib/prisma";
+
+export async function toggleCompanyConsent(
+  organisationId: number,
+  consented: boolean,
+) {
+  const session = await getServerAuthSession();
+  const studentId = (session?.user as any)?.id as string | undefined;
+  if (!studentId) throw new Error("Unauthorized");
+
+  await prisma.studentCompanyConsent.upsert({
+    where: { studentId_companyId: { studentId, companyId: organisationId } },
+    update: { consented },
+    create: { studentId, companyId: organisationId, consented },
+  });
+}
