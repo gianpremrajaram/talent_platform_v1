@@ -14,6 +14,7 @@ import {
 } from "@/lib/services/student-services";
 import StudentProfileSideCard from "@/components/talent-discovery/student-components/StudentProfileSideCard";
 import StudentManageAccountPanel from "@/components/talent-discovery/student-components/StudentManageAccountPanel";
+import SecurityIcon from "@mui/icons-material/Security";
 
 function mapDbPlatformToSidebarPlatform(
   platform: "LINKEDIN" | "FACEBOOK" | "GITHUB" | "TWITTER",
@@ -73,6 +74,12 @@ export default async function StudentManagePage({
       icon: <WorkOutlineIcon fontSize="small" />,
       active: false,
       href: `${editBase}?tab=skills`,
+    },
+    {
+    label: "Manage Access",
+    icon: <SecurityIcon fontSize="small" />,
+    active: false,
+    href: `/membership-dashboard/student-users/${id}/edit?tab=access`,
     },
     {
       label: "Manage Account",
