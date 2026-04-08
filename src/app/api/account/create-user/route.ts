@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
 import { getServerAuthSession } from "@/lib/getServerAuthSession";
 import { ok, err } from "@/lib/api-response";
+import { userRegistrationSchema } from "@/lib/Validation";
 
 export const dynamic = "force-dynamic";
 
@@ -25,15 +26,18 @@ export async function POST(req: Request) {
     return err("FORBIDDEN");
   }
 
-  const body = (await req.json()) as {
-    email?: string;
-    firstName?: string;
-    lastName?: string;
-  };
+  const body: unknown = await req.json(); 
+    const parsed = userRegistrationSchema.safeParse(body);
 
-  const email = (body.email ?? "").trim().toLowerCase();
-  const firstName = (body.firstName ?? "").trim();
-  const lastName = (body.lastName ?? "").trim();
+    if (!parsed.success) {
+      const message = parsed.error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`).join('; ');
+      return err("VALIDATION_ERROR", message);
+    }
+  
+
+  const email = parsed.data.email.trim().toLowerCase();
+  const firstName = parsed.data.firstName;
+  const lastName = parsed.data.lastName;
 
   if (!email || !firstName || !lastName) {
     return err("BAD_REQUEST", "Email, first name, and last name are required.");

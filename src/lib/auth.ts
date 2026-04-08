@@ -83,6 +83,32 @@ export const authOptions: NextAuthOptions = {
         };
       },
     }),
+    // ✅ UCL provider is a separate provider
+    {
+      id: "ucl",
+      name: "UCL",
+      type: "oauth",
+
+      clientId: process.env.UCL_API_CLIENT_ID!,
+      clientSecret: process.env.UCL_API_CLIENT_SECRET!,
+
+      authorization: {
+        url: "https://uclapi.com/oauth/authorise",
+        params: { scope: "basic" },
+      },
+
+      token: "https://uclapi.com/oauth/token",
+
+      userinfo: "https://uclapi.com/oauth/user/data",
+
+      profile(profile: any) {
+        return {
+          id: profile.upi,
+          email: profile.email,
+          name: profile.name,
+        };
+      },
+    },
   ],
 
   pages: {
@@ -90,6 +116,78 @@ export const authOptions: NextAuthOptions = {
   },
 
   callbacks: {
+
+      async signIn({ user, account }) {
+    // Only handle UCL login
+    if (account?.provider === "ucl") {
+      console.log("UCL LOGIN:", user.email);
+      const email = user.email?.toLowerCase();
+
+      if (!email) return false;
+
+      const dbUser = await prisma.user.findUnique({
+        where: { email },
+        include: {
+          roles: { include: { role: true } },
+          memberships: {
+            where: { isActive: true },
+            include: { membershipTier: true },
+          },
+        },
+      });
+
+      let roleKeys: string[] = [];
+      let membershipTierKey: string | null = null;
+      let membershipTierRank: number | null = null;
+
+      if (dbUser) {
+        // Existing seeded user
+        roleKeys = dbUser.roles.map((r) => r.role.key);
+
+        if (dbUser.memberships.length > 0) {
+          const highest = dbUser.memberships.reduce((best, current) => {
+            if (!best) return current;
+            return current.membershipTier.rank > best.membershipTier.rank
+              ? current
+              : best;
+          }, dbUser.memberships[0]);
+
+          membershipTierKey = highest.membershipTier.key;
+          membershipTierRank = highest.membershipTier.rank;
+        }
+
+        user.id = dbUser.id;
+      } else {
+        // First-time UCL login → create student
+        const studentRole = await prisma.role.findUnique({
+          where: { key: "STUDENT" },
+        });
+
+        const newUser = await prisma.user.create({
+          data: {
+            email,
+            firstName: user.name ?? "UCL",
+            lastName: "User",
+            passwordHash: "123", // No password since they log in via UCL
+            roles: {
+              create: { roleId: studentRole!.id },
+            },
+          },
+        });
+
+        roleKeys = ["STUDENT"];
+        user.id = newUser.id;
+      }
+
+      // Inject into JWT pipeline
+      (user as any).roleKeys = roleKeys;
+      (user as any).membershipTierKey = membershipTierKey;
+      (user as any).membershipTierRank = membershipTierRank;
+    }
+
+    return true;
+  },
+
     async jwt({ token, user }) {
       if (user) {
         // Basic identity
