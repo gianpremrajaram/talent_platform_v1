@@ -83,7 +83,7 @@ export const authOptions: NextAuthOptions = {
         };
       },
     }),
-    // ✅ UCL provider is a separate provider
+    // UCL provider is a separate provider
     {
       id: "ucl",
       name: "UCL",
