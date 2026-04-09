@@ -554,8 +554,9 @@ export default function StudentPersonalInfoForm({
 
               <Grid container spacing={2.5}>
                 <Grid size={{ xs: 12, md: 6 }}>
-                  <Typography sx={labelSx}>First Name</Typography>
+                  <Typography component="label" htmlFor="field-first-name" sx={labelSx}>First Name</Typography>
                   <TextField
+                    id="field-first-name"
                     fullWidth
                     value={values.firstName}
                     onChange={handleChange("firstName")}
@@ -567,8 +568,9 @@ export default function StudentPersonalInfoForm({
                 </Grid>
 
                 <Grid size={{ xs: 12, md: 6 }}>
-                  <Typography sx={labelSx}>Last Name</Typography>
+                  <Typography component="label" htmlFor="field-last-name" sx={labelSx}>Last Name</Typography>
                   <TextField
+                    id="field-last-name"
                     fullWidth
                     value={values.lastName}
                     onChange={handleChange("lastName")}
@@ -580,8 +582,9 @@ export default function StudentPersonalInfoForm({
                 </Grid>
 
                 <Grid size={{ xs: 12, md: 6 }}>
-                  <Typography sx={labelSx}>Email Address</Typography>
+                  <Typography component="label" htmlFor="field-email" sx={labelSx}>Email Address</Typography>
                   <TextField
+                    id="field-email"
                     fullWidth
                     type="email"
                     value={values.email}
@@ -594,7 +597,7 @@ export default function StudentPersonalInfoForm({
                 </Grid>
 
                 <Grid size={{ xs: 12, md: 6 }}>
-                  <Typography sx={labelSx}>Date of Birth</Typography>
+                  <Typography component="label" htmlFor="field-dob" sx={labelSx}>Date of Birth</Typography>
                   <DatePicker
                     value={values.dateOfBirth}
                     onChange={handleDateChange}
@@ -603,6 +606,7 @@ export default function StudentPersonalInfoForm({
                     format="DD/MM/YYYY"
                     slotProps={{
                       textField: {
+                        id: "field-dob",
                         fullWidth: true,
                         error: !!errors.dateOfBirth,
                         helperText: errors.dateOfBirth,
@@ -613,8 +617,9 @@ export default function StudentPersonalInfoForm({
                 </Grid>
 
                 <Grid size={{ xs: 12, md: 6 }}>
-                  <Typography sx={labelSx}>Gender</Typography>
+                  <Typography component="label" htmlFor="field-gender" sx={labelSx}>Gender</Typography>
                   <TextField
+                    id="field-gender"
                     select
                     fullWidth
                     value={values.gender}
@@ -634,7 +639,22 @@ export default function StudentPersonalInfoForm({
                   <Typography sx={labelSx}>Phone Number</Typography>
                   <Stack direction="row" spacing={1.5}>
                     <TextField
+                      id="field-phone-code"
                       select
+                      label="Phone country code"
+                      InputLabelProps={{
+                        shrink: true,
+                        sx: {
+                          position: "absolute",
+                          width: 1,
+                          height: 1,
+                          overflow: "hidden",
+                          clip: "rect(0 0 0 0)",
+                          clipPath: "inset(50%)",
+                          whiteSpace: "nowrap",
+                        },
+                      }}
+                      InputProps={{ notched: false }}
                       value={values.phoneCode}
                       onChange={handleChange("phoneCode")}
                       disabled={!isEditingPersonal}
@@ -651,20 +671,23 @@ export default function StudentPersonalInfoForm({
                     </TextField>
 
                     <TextField
+                      id="field-phone-number"
                       fullWidth
                       value={values.phoneNumber}
                       onChange={handleChange("phoneNumber")}
                       error={!!errors.phoneNumber}
                       helperText={errors.phoneNumber}
                       disabled={!isEditingPersonal}
+                      inputProps={{ "aria-label": "Phone number" }}
                       sx={isEditingPersonal ? inputSx : readOnlySx}
                     />
                   </Stack>
                 </Grid>
 
                 <Grid size={{ xs: 12, md: 6 }}>
-                  <Typography sx={labelSx}>Designation</Typography>
+                  <Typography component="label" htmlFor="field-designation" sx={labelSx}>Designation</Typography>
                   <TextField
+                    id="field-designation"
                     fullWidth
                     value={values.designation}
                     onChange={handleChange("designation")}
@@ -735,8 +758,9 @@ export default function StudentPersonalInfoForm({
 
               <Grid container spacing={2.5}>
                 <Grid size={{ xs: 12, md: 6 }}>
-                  <Typography sx={labelSx}>Address Line 1</Typography>
+                  <Typography component="label" htmlFor="field-address1" sx={labelSx}>Address Line 1</Typography>
                   <TextField
+                    id="field-address1"
                     fullWidth
                     multiline
                     minRows={2}
@@ -750,8 +774,9 @@ export default function StudentPersonalInfoForm({
                 </Grid>
 
                 <Grid size={{ xs: 12, md: 6 }}>
-                  <Typography sx={labelSx}>Address Line 2</Typography>
+                  <Typography component="label" htmlFor="field-address2" sx={labelSx}>Address Line 2</Typography>
                   <TextField
+                    id="field-address2"
                     fullWidth
                     multiline
                     minRows={2}
@@ -763,8 +788,9 @@ export default function StudentPersonalInfoForm({
                 </Grid>
 
                 <Grid size={{ xs: 12, md: 6 }}>
-                  <Typography sx={labelSx}>Country</Typography>
+                  <Typography component="label" htmlFor="field-country" sx={labelSx}>Country</Typography>
                   <TextField
+                    id="field-country"
                     fullWidth
                     value={values.country}
                     onChange={handleChange("country")}
@@ -776,8 +802,9 @@ export default function StudentPersonalInfoForm({
                 </Grid>
 
                 <Grid size={{ xs: 12, md: 6 }}>
-                  <Typography sx={labelSx}>State / Province</Typography>
+                  <Typography component="label" htmlFor="field-state" sx={labelSx}>State / Province</Typography>
                   <TextField
+                    id="field-state"
                     fullWidth
                     value={values.state}
                     onChange={handleChange("state")}
@@ -789,8 +816,9 @@ export default function StudentPersonalInfoForm({
                 </Grid>
 
                 <Grid size={{ xs: 12, md: 6 }}>
-                  <Typography sx={labelSx}>City</Typography>
+                  <Typography component="label" htmlFor="field-city" sx={labelSx}>City</Typography>
                   <TextField
+                    id="field-city"
                     fullWidth
                     value={values.city}
                     onChange={handleChange("city")}
@@ -802,8 +830,9 @@ export default function StudentPersonalInfoForm({
                 </Grid>
 
                 <Grid size={{ xs: 12, md: 6 }}>
-                  <Typography sx={labelSx}>Postal Code</Typography>
+                  <Typography component="label" htmlFor="field-postal-code" sx={labelSx}>Postal Code</Typography>
                   <TextField
+                    id="field-postal-code"
                     fullWidth
                     value={values.postalCode}
                     onChange={handleChange("postalCode")}

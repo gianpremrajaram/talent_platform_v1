@@ -25,8 +25,7 @@ export default function BenefitsFilterToolbar({ value, onChange, counts }: Props
           aria-pressed={value === "redeemed"}
           onClick={() => onChange(toggle("redeemed", value))}
         >
-          ✅ <span className="sr-only">Redeemed</span>
-          <span aria-hidden="true">Redeemed</span> ({counts.redeemed})
+          <span aria-hidden="true">✅</span>{" "}Redeemed ({counts.redeemed})
         </button>
 
         <button
@@ -37,8 +36,7 @@ export default function BenefitsFilterToolbar({ value, onChange, counts }: Props
           aria-pressed={value === "available"}
           onClick={() => onChange(toggle("available", value))}
         >
-          🟡 <span className="sr-only">Available</span>
-          <span aria-hidden="true">Available</span> ({counts.available})
+          <span aria-hidden="true">🟡</span>{" "}Available ({counts.available})
         </button>
 
         <button
@@ -49,8 +47,7 @@ export default function BenefitsFilterToolbar({ value, onChange, counts }: Props
           aria-pressed={value === "locked"}
           onClick={() => onChange(toggle("locked", value))}
         >
-          🔒 <span className="sr-only">Not included</span>
-          <span aria-hidden="true">Not included</span> ({counts.locked})
+          <span aria-hidden="true">🔒</span>{" "}Not included ({counts.locked})
         </button>
 
         <button

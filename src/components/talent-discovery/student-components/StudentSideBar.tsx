@@ -137,6 +137,8 @@ function NavSection({ items }: { items: NavItem[] }) {
 export default function StudentSidebar() {
   return (
     <Box
+      component="nav"
+      aria-label="Student portal navigation"
       sx={{
         width: 280,
         height: "100vh",

@@ -40,13 +40,13 @@ const navSections: NavSection[] = [
         label: "Home",
         href: "/membership-dashboard",
         exact: true,
-        icon: <HomeRoundedIcon />,
+        icon: <HomeRoundedIcon aria-hidden="true" />,
       },
       {
         label: "Project",
         href: "/membership-dashboard/project",
         adminOnly: true,
-        icon: <HandshakeRoundedIcon />,
+        icon: <HandshakeRoundedIcon aria-hidden="true" />,
       },
     ],
   },
@@ -57,13 +57,13 @@ const navSections: NavSection[] = [
         label: "Partners",
         href: "/membership-dashboard/partner-users",
         adminOnly: true,
-        icon: <BusinessRoundedIcon />,
+        icon: <BusinessRoundedIcon aria-hidden="true" />,
       },
       {
         label: "Students",
         href: "/membership-dashboard/student-users",
         adminOnly: true,
-        icon: <SchoolRoundedIcon />,
+        icon: <SchoolRoundedIcon aria-hidden="true" />,
       },
     ],
   },
@@ -162,6 +162,8 @@ export default function AdminSidebar() {
 
   return (
     <Box
+      component="nav"
+      aria-label="Membership navigation"
       sx={{
         width: 280,
         height: "100vh",
