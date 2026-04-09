@@ -1,12 +1,23 @@
 import { z } from "zod";
 
-export const userRegistrationSchema = z.object({
-  email: z.string().email(),
+export const userRegistrationSchema = z
+  .object({
+    email: z
+      .string()
+      .min(1, "Email is required.")
+      .email("Please enter a valid email address."),
 
-  password: z.string().min(6, "Password must be at least 6 chars"),
+    firstName: z.string().min(1, "First name is required."),
+    lastName: z.string().min(1, "Last name is required."),
+    companyName: z.string().min(1, "Company name is required."),
 
-  firstName: z.string().min(1),
-  lastName: z.string().min(1),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters long."),
 
-  role: z.enum(["STUDENT", "RECRUITER"]),
-});
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });

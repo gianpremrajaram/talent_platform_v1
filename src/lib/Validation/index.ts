@@ -1,4 +1,4 @@
 export * from "./StudentProfile";
 export * from "./JobPosting";
-export * from "./userRegistration";
+export * from "./userregistration";
 export * from "./companyConsent";  

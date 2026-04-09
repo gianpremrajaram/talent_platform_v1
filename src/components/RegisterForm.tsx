@@ -27,15 +27,6 @@ export default function RegisterForm() {
     e.preventDefault();
     setError(null);
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
-      return;
-    }
-
     setSubmitting(true);
 
     try {
@@ -48,13 +39,21 @@ export default function RegisterForm() {
           lastName: lastName.trim(),
           companyName: companyName.trim(),
           password,
+          confirmPassword,
         }),
       });
 
       const data = await res.json();
 
+      console.log("API response:", data);
+
       if (!data.success) {
-        setError(data.error?.message ?? "Registration failed. Please try again.");
+        const message =
+          data.error?.message ||
+          data.details?.[0]?.message ||
+          "Registration failed.";
+
+        setError(message);
         return;
       }
 
@@ -138,7 +137,6 @@ export default function RegisterForm() {
                 name="firstName"
                 type="text"
                 autoComplete="given-name"
-                required
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
               />
@@ -153,7 +151,6 @@ export default function RegisterForm() {
                 name="lastName"
                 type="text"
                 autoComplete="family-name"
-                required
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
               />
@@ -168,9 +165,8 @@ export default function RegisterForm() {
               className="auth-input"
               id="email"
               name="email"
-              type="email"
+              type="text"
               autoComplete="email"
-              required
               placeholder="you@yourcompany.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -190,7 +186,6 @@ export default function RegisterForm() {
               name="companyName"
               type="text"
               autoComplete="organization"
-              required
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
             />
@@ -206,8 +201,6 @@ export default function RegisterForm() {
               name="password"
               type="password"
               autoComplete="new-password"
-              required
-              minLength={8}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -223,7 +216,6 @@ export default function RegisterForm() {
               name="confirmPassword"
               type="password"
               autoComplete="new-password"
-              required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
@@ -252,3 +244,5 @@ export default function RegisterForm() {
     </section>
   );
 }
+
+
