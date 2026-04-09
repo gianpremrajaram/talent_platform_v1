@@ -188,7 +188,7 @@ export default function JobOpeningsTable() {
           }}
         >
           {/* //TODO: replace with real company logo when available */}
-          <Avatar sx={{ width: 30, height: 30 }}>
+          <Avatar sx={{ width: 30, height: 30 }} aria-hidden="true">
             <GoogleIcon />
           </Avatar>
 
@@ -260,9 +260,9 @@ export default function JobOpeningsTable() {
           sx={{ height: "100%" }}
         >
           {params.row.status === "Applied" ? (
-            <CheckCircleOutlineIcon fontSize="small" color="success" />
+            <CheckCircleOutlineIcon fontSize="small" color="success" aria-hidden="true" />
           ) : (
-            <HighlightOffOutlinedIcon fontSize="small" color="error" />
+            <HighlightOffOutlinedIcon fontSize="small" color="error" aria-hidden="true" />
           )}
           <Typography variant="body2">{params.row.status}</Typography>
         </Stack>
@@ -296,10 +296,11 @@ export default function JobOpeningsTable() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           sx={{ minWidth: 280 }}
+          inputProps={{ "aria-label": "Search jobs" }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon fontSize="small" />
+                <SearchIcon fontSize="small" aria-hidden="true" />
               </InputAdornment>
             ),
           }}
@@ -308,6 +309,20 @@ export default function JobOpeningsTable() {
         <Stack direction="row" spacing={2}>
           <TextField
             select
+            label="Application status"
+            InputLabelProps={{
+              shrink: true,
+              sx: {
+                position: "absolute",
+                width: 1,
+                height: 1,
+                overflow: "hidden",
+                clip: "rect(0 0 0 0)",
+                clipPath: "inset(50%)",
+                whiteSpace: "nowrap",
+              },
+            }}
+            InputProps={{ notched: false }}
             size="small"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -320,6 +335,20 @@ export default function JobOpeningsTable() {
 
           <TextField
             select
+            label="Sort by"
+            InputLabelProps={{
+              shrink: true,
+              sx: {
+                position: "absolute",
+                width: 1,
+                height: 1,
+                overflow: "hidden",
+                clip: "rect(0 0 0 0)",
+                clipPath: "inset(50%)",
+                whiteSpace: "nowrap",
+              },
+            }}
+            InputProps={{ notched: false }}
             size="small"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
@@ -336,6 +365,7 @@ export default function JobOpeningsTable() {
         <DataGrid
           rows={filteredRows}
           columns={columns}
+          aria-label="Job openings"
           checkboxSelection
           disableRowSelectionOnClick
           rowHeight={78}

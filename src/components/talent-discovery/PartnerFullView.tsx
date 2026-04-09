@@ -4,7 +4,7 @@
 // Student search is consent-gated — only consented students appear.
 // Issue #34.
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import TierGate from "@/components/TierGate";
 import LoadingState from "@/components/ui/LoadingState";
 import EmptyState from "@/components/ui/EmptyState";
@@ -54,7 +54,7 @@ function StudentCard({ student }: { student: StudentSearchResult }) {
         </div>
         {student.location && (
           <span style={{ fontSize: "0.875rem", opacity: 0.65 }}>
-            📍 {student.location}
+            <span aria-hidden="true">📍</span> {student.location}
           </span>
         )}
       </div>
@@ -307,8 +307,11 @@ function StudentSearchPanel() {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
+const PARTNER_TABS: Tab[] = ["job-board", "student-search"];
+
 export default function TalentDiscoveryPartnerFullView({ title, description }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>("job-board");
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const tabStyle = (tab: Tab): React.CSSProperties => ({
     padding: "0.5rem 1.25rem",
@@ -319,6 +322,27 @@ export default function TalentDiscoveryPartnerFullView({ title, description }: P
     fontWeight: activeTab === tab ? 600 : 400,
     fontSize: "0.9375rem",
   });
+
+  function handleTabKeyDown(e: React.KeyboardEvent, currentIndex: number) {
+    let nextIndex: number | null = null;
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      nextIndex = (currentIndex + 1) % PARTNER_TABS.length;
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      nextIndex = (currentIndex - 1 + PARTNER_TABS.length) % PARTNER_TABS.length;
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      nextIndex = 0;
+    } else if (e.key === "End") {
+      e.preventDefault();
+      nextIndex = PARTNER_TABS.length - 1;
+    }
+    if (nextIndex !== null) {
+      setActiveTab(PARTNER_TABS[nextIndex]);
+      tabRefs.current[nextIndex]?.focus();
+    }
+  }
 
   return (
     <section className="content-section">
@@ -338,18 +362,28 @@ export default function TalentDiscoveryPartnerFullView({ title, description }: P
         }}
       >
         <button
+          ref={(el) => { tabRefs.current[0] = el; }}
+          id="tab-job-board"
           role="tab"
           aria-selected={activeTab === "job-board"}
+          aria-controls="panel-job-board"
+          tabIndex={activeTab === "job-board" ? 0 : -1}
           style={tabStyle("job-board")}
           onClick={() => setActiveTab("job-board")}
+          onKeyDown={(e) => handleTabKeyDown(e, 0)}
         >
           Job Board
         </button>
         <button
+          ref={(el) => { tabRefs.current[1] = el; }}
+          id="tab-student-search"
           role="tab"
           aria-selected={activeTab === "student-search"}
+          aria-controls="panel-student-search"
+          tabIndex={activeTab === "student-search" ? 0 : -1}
           style={tabStyle("student-search")}
           onClick={() => setActiveTab("student-search")}
+          onKeyDown={(e) => handleTabKeyDown(e, 1)}
         >
           Student Search
         </button>
@@ -357,7 +391,7 @@ export default function TalentDiscoveryPartnerFullView({ title, description }: P
 
       {/* Tab panels */}
       {activeTab === "job-board" && (
-        <div role="tabpanel">
+        <div role="tabpanel" id="panel-job-board" aria-labelledby="tab-job-board">
           <p>
             Post and manage job opportunities visible to UCL CS students.{" "}
             <em>(Job board posting UI — coming soon.)</em>
@@ -366,7 +400,7 @@ export default function TalentDiscoveryPartnerFullView({ title, description }: P
       )}
 
       {activeTab === "student-search" && (
-        <div role="tabpanel">
+        <div role="tabpanel" id="panel-student-search" aria-labelledby="tab-student-search">
           <TierGate requiredTier="gold" fallback={
             <p>
               Student search is available to <strong>Gold and Platinum</strong>{" "}

@@ -180,7 +180,7 @@ export default function MemberDashboard(props: MemberDashboardProps) {
                 <li key={b.id}>
                   <div className="tile" style={{ padding: ".5rem .75rem" }}>
                     <div className="benefit">
-                      <span className="benefit-state">{symbol}</span>
+                      <span className="benefit-state" aria-hidden="true">{symbol}</span>
                       <Link
                         href={`/membership-dashboard/benefits/${b.id}`}
                         className="benefit-link"

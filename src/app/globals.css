@@ -469,12 +469,16 @@ img {
   color: var(--ucl-blue);
   background: transparent;
 }
-.btn:hover,
-.btn:focus {
+.btn:hover {
   background: var(--ucl-blue);
   color: #fff;
   text-decoration: none;
-  outline: 2px solid transparent;
+}
+.btn:focus-visible {
+  background: var(--ucl-blue);
+  color: #fff;
+  text-decoration: none;
+  outline: 3px solid var(--ucl-blue);
   outline-offset: 2px;
 }
 .btn--primary {
@@ -506,12 +510,16 @@ img {
   cursor: pointer;
 }
 
-.button-link:hover,
-.button-link:focus {
+.button-link:hover {
   background: var(--ucl-blue);
   color: #fff;
   text-decoration: none;
-  outline: 2px solid transparent;
+}
+.button-link:focus-visible {
+  background: var(--ucl-blue);
+  color: #fff;
+  text-decoration: none;
+  outline: 3px solid var(--ucl-blue);
   outline-offset: 2px;
 }
 
@@ -782,17 +790,29 @@ article.pathway hr {
   cursor: pointer;
 }
 
-.pill:hover,
-.pill:focus {
+.pill:hover {
   background: #f3f4ff;
   text-decoration: none;
-  outline: 2px solid transparent;
+}
+.pill:focus-visible {
+  background: #f3f4ff;
+  text-decoration: none;
+  outline: 3px solid var(--ucl-blue);
+  outline-offset: 2px;
 }
 
 .pill[disabled],
 .pill[aria-disabled="true"] {
   opacity: 0.65;
   cursor: not-allowed;
+}
+
+@media (forced-colors: active) {
+  .button-link:focus-visible,
+  .btn:focus-visible,
+  .pill:focus-visible {
+    outline: 3px solid ButtonText;
+  }
 }
 
 /* Membership summary definition list */

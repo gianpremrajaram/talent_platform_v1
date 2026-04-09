@@ -13,7 +13,6 @@ export default function SecondaryNav() {
       <button
         type="button"
         className="pill"
-        aria-disabled="true"
         disabled
         title="This action will be enabled in a future release."
       >
@@ -23,7 +22,6 @@ export default function SecondaryNav() {
       <button
         type="button"
         className="pill"
-        aria-disabled="true"
         disabled
         title="This action will be enabled in a future release."
       >
@@ -33,7 +31,6 @@ export default function SecondaryNav() {
       <button
         type="button"
         className="pill"
-        aria-disabled="true"
         disabled
         title="This action will be enabled in a future release."
       >
@@ -43,7 +40,6 @@ export default function SecondaryNav() {
       <button
         type="button"
         className="pill"
-        aria-disabled="true"
         disabled
         title="This action will be enabled in a future release."
       >

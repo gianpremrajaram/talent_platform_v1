@@ -24,7 +24,6 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
         <main
           id="main"
           className={isFullWidth ? "site-main site-main--full" : "site-main"}
-          role="main"
         >
           {children}
         </main>

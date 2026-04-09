@@ -47,18 +47,18 @@ export default function DashboardTopBar({ title }: DashboardTopBarProps) {
         </Typography>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <IconButton color="inherit">
-            <Badge badgeContent={9} color="primary">
-              <NotificationsNoneOutlinedIcon />
+          <IconButton color="inherit" aria-label="Notifications — 9 unread">
+            <Badge badgeContent={9} color="primary" aria-hidden="true">
+              <NotificationsNoneOutlinedIcon aria-hidden="true" />
             </Badge>
           </IconButton>
 
-          <IconButton color="inherit">
-            <SettingsOutlinedIcon />
+          <IconButton color="inherit" aria-label="Settings">
+            <SettingsOutlinedIcon aria-hidden="true" />
           </IconButton>
 
           <Avatar
-            alt="User"
+            alt="Your profile"
             src="/images/avatar/avatar-1.png"
             sx={{ width: 40, height: 40, ml: 1 }}
           />

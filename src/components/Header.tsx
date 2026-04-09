@@ -67,7 +67,7 @@ const isAdmin = roleKeys.includes("ADMIN");
   }, []);
 
   return (
-    <header className="banner" role="banner">
+    <header className="banner">
       <div className="banner-top">
         <a
           className="logo"
@@ -102,13 +102,12 @@ const isAdmin = roleKeys.includes("ADMIN");
 
       <div className="banner-nav" onMouseLeave={closeAllMenus}>
         <nav className="nav-bar" aria-label="Primary">
-          <ul className="nav-root" role="menubar">
+          <ul className="nav-root">
             {/* Home */}
-            <li className="nav-item" role="none">
+            <li className="nav-item">
               <Link
                 className="nav-link"
                 href="/"
-                role="menuitem"
                 aria-current={pathname === "/" ? "page" : undefined}
               >
                 Home
@@ -116,7 +115,7 @@ const isAdmin = roleKeys.includes("ADMIN");
             </li>
 
             {/* For students */}
-            <li className="nav-item has-submenu" role="none">
+            <li className="nav-item has-submenu">
               <button
                 className="menu-button"
                 id="btn-students"
@@ -169,7 +168,7 @@ const isAdmin = roleKeys.includes("ADMIN");
             </li>
 
             {/* For researchers */}
-            <li className="nav-item has-submenu" role="none">
+            <li className="nav-item has-submenu">
               <button
                 className="menu-button"
                 id="btn-researchers"
@@ -222,7 +221,7 @@ const isAdmin = roleKeys.includes("ADMIN");
             </li>
 
             {/* For partners */}
-            <li className="nav-item has-submenu" role="none">
+            <li className="nav-item has-submenu">
               <button
                 className="menu-button"
                 id="btn-partners"
@@ -276,7 +275,7 @@ const isAdmin = roleKeys.includes("ADMIN");
 
             {/* Account / Sign in */}
             {isAuthenticated ? (
-              <li className="nav-item has-submenu" role="none">
+              <li className="nav-item has-submenu">
                 <button
                   className="menu-button"
                   id="btn-account"
@@ -343,11 +342,10 @@ const isAdmin = roleKeys.includes("ADMIN");
                 </ul>
               </li>
             ) : (
-              <li className="nav-item" role="none">
+              <li className="nav-item">
                 <Link
                   className="nav-link"
                   href="/sign-in"
-                  role="menuitem"
                   aria-current={pathname === "/sign-in" ? "page" : undefined}
                 >
                   Sign in
@@ -356,11 +354,10 @@ const isAdmin = roleKeys.includes("ADMIN");
             )}
 
             {/* Contact */}
-            <li className="nav-item" role="none">
+            <li className="nav-item">
               <Link
                 className="nav-link"
                 href="/contact"
-                role="menuitem"
                 aria-current={pathname === "/contact" ? "page" : undefined}
               >
                 Contact us

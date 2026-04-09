@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import {
   Avatar,
   Box,
@@ -39,11 +40,18 @@ type ProfileSidebarCardProps = {
   menuItems?: MenuItem[];
 };
 
+const socialLabels: Record<SocialLink["platform"], string> = {
+  linkedin: "LinkedIn profile (opens in new tab)",
+  twitter: "Twitter / X profile (opens in new tab)",
+  facebook: "Facebook profile (opens in new tab)",
+  github: "GitHub profile (opens in new tab)",
+};
+
 function SocialIcon({ platform }: { platform: SocialLink["platform"] }) {
-  if (platform === "twitter") return <XIcon fontSize="small" />;
-  if (platform === "facebook") return <FacebookIcon fontSize="small" />;
-  if (platform === "github") return <GitHubIcon fontSize="small" />;
-  return <LinkedInIcon fontSize="small" />;
+  if (platform === "twitter") return <XIcon fontSize="small" aria-hidden="true" />;
+  if (platform === "facebook") return <FacebookIcon fontSize="small" aria-hidden="true" />;
+  if (platform === "github") return <GitHubIcon fontSize="small" aria-hidden="true" />;
+  return <LinkedInIcon fontSize="small" aria-hidden="true" />;
 }
 
 function getSocialBg(platform: SocialLink["platform"]) {
@@ -144,7 +152,7 @@ export default function StudentProfileSideCard({
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={item.platform}
+                  aria-label={socialLabels[item.platform]}
                   sx={{
                     width: 28,
                     height: 28,
@@ -184,8 +192,9 @@ export default function StudentProfileSideCard({
             {menuItems.map((item, index) => (
               <Box
                 key={`${item.label}-${index}`}
-                component={item.href ? "a" : "div"}
+                component={item.href ? "a" : item.onClick ? "button" : "div"}
                 href={item.href}
+                type={!item.href && item.onClick ? "button" : undefined}
                 onClick={item.onClick}
                 sx={{
                   display: "flex",
@@ -199,6 +208,10 @@ export default function StudentProfileSideCard({
                   transition: "all 0.2s ease",
                   textDecoration: "none",
                   color: "inherit",
+                  border: "none",
+                  background: item.active ? undefined : "none",
+                  width: "100%",
+                  textAlign: "left",
                   "&:hover": {
                     bgcolor: item.active ? "primary.lighter" : "action.hover",
                   },
@@ -211,7 +224,9 @@ export default function StudentProfileSideCard({
                     alignItems: "center",
                   }}
                 >
-                  {item.icon}
+                  {React.isValidElement(item.icon)
+                    ? React.cloneElement(item.icon as React.ReactElement<any>, { "aria-hidden": true })
+                    : item.icon}
                 </Box>
 
                 <Typography variant="body2">{item.label}</Typography>

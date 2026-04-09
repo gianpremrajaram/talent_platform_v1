@@ -173,13 +173,14 @@ export default function StudentCVLibraryCard({
 
             <Tooltip title="Delete CV">
               <IconButton
+                aria-label={`Delete CV: ${title}`}
                 onClick={() => setConfirmOpen(true)}
                 sx={{
                   color: "error.main",
                   "&:hover": { backgroundColor: "error.50" },
                 }}
               >
-                <DeleteOutlineIcon />
+                <DeleteOutlineIcon aria-hidden="true" />
               </IconButton>
             </Tooltip>
           </Stack>

@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BENEFITS, type BenefitId } from "@/content/benefits";
 import type {
@@ -72,6 +72,30 @@ export default function AdminDashboardClient(props: {
   const urlTab = asTabKey(sp?.get("tab"));
   const bootTab = asTabKey(initialTab) ?? urlTab ?? "members";
   const [activeTab, setActiveTab] = useState<TabKey>(bootTab);
+
+  const ADMIN_TABS: TabKey[] = ["members", "benefits", "handbook"];
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  function handleTabKeyDown(e: React.KeyboardEvent, currentIndex: number) {
+    let nextIndex: number | null = null;
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      nextIndex = (currentIndex + 1) % ADMIN_TABS.length;
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      nextIndex = (currentIndex - 1 + ADMIN_TABS.length) % ADMIN_TABS.length;
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      nextIndex = 0;
+    } else if (e.key === "End") {
+      e.preventDefault();
+      nextIndex = ADMIN_TABS.length - 1;
+    }
+    if (nextIndex !== null) {
+      changeTab(ADMIN_TABS[nextIndex]);
+      tabRefs.current[nextIndex]?.focus();
+    }
+  }
 
   useEffect(() => {
     const next = asTabKey(sp?.get("tab"));
@@ -200,37 +224,46 @@ export default function AdminDashboardClient(props: {
         <div className="tabs">
           <div className="tab-list" role="tablist">
             <button
+              ref={(el) => { tabRefs.current[0] = el; }}
               type="button"
               role="tab"
               className={`tab ${activeTab === "members" ? "is-active" : ""}`}
               aria-selected={activeTab === "members"}
               aria-controls="panel-members"
               id="tab-members"
+              tabIndex={activeTab === "members" ? 0 : -1}
               onClick={() => changeTab("members")}
+              onKeyDown={(e) => handleTabKeyDown(e, 0)}
             >
               Members
             </button>
 
             <button
+              ref={(el) => { tabRefs.current[1] = el; }}
               type="button"
               role="tab"
               className={`tab ${activeTab === "benefits" ? "is-active" : ""}`}
               aria-selected={activeTab === "benefits"}
               aria-controls="panel-benefits"
               id="tab-benefits"
+              tabIndex={activeTab === "benefits" ? 0 : -1}
               onClick={() => changeTab("benefits")}
+              onKeyDown={(e) => handleTabKeyDown(e, 1)}
             >
               Benefits
             </button>
 
             <button
+              ref={(el) => { tabRefs.current[2] = el; }}
               type="button"
               role="tab"
               className={`tab ${activeTab === "handbook" ? "is-active" : ""}`}
               aria-selected={activeTab === "handbook"}
               aria-controls="panel-handbook"
               id="tab-handbook"
+              tabIndex={activeTab === "handbook" ? 0 : -1}
               onClick={() => changeTab("handbook")}
+              onKeyDown={(e) => handleTabKeyDown(e, 2)}
             >
               Handbook
             </button>
