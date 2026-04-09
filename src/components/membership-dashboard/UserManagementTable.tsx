@@ -214,6 +214,8 @@ export default function UserManagementTable({
                     window.location.href =
                       row.userType === "Student"
                         ? `/membership-dashboard/student-users/${row.id}/edit`
+                        : row.userType === "Company"
+                        ? `/membership-dashboard/partner-users/${row.id}/edit`
                         : "/account";
                   }}
                   sx={textActionButtonSx("#4b6078")}

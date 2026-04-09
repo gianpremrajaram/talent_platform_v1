@@ -24,7 +24,12 @@ import {
   getStudentTechnicalSkills,
 } from "@/lib/services/student-services";
 
-type Tab = "personal" | "academic" | "skills";
+import SecurityIcon from "@mui/icons-material/Security";
+import prisma from "@/lib/prisma";
+import AccessControlButtons from "./AccessControlButtons";
+import { Card, Typography } from "@mui/material"; // 如果顶部没有 Card 和 Typography，记得加上
+
+type Tab = "personal" | "academic" | "skills" | "access";
 
 function mapDbPlatformToSidebarPlatform(
   platform: "LINKEDIN" | "FACEBOOK" | "GITHUB" | "TWITTER",
@@ -78,15 +83,25 @@ export default async function StudentEditPage({
   const tab: Tab =
     tabParam === "academic" ? "academic"
     : tabParam === "skills"   ? "skills"
+    : tabParam === "access"   ? "access"
     : "personal";
 
-  const [user, socialLinks, projects] = await Promise.all([
+  const [user, socialLinks, projects, activeSuspension] = await Promise.all([
     getStudentUserById(id),
     getStudentSocialLinks(id),
     getStudentProjects(id),
+    prisma.appSuspension.findFirst({
+      where: { userId: id, appKey: "TALENT_DISCOVERY", liftedAt: null },
+      orderBy: { suspendedAt: "desc" }
+    })
   ]);
 
   if (!user) notFound();
+  
+  let currentStatus: "ACTIVE" | "SUSPENDED" | "BANNED" = "ACTIVE";
+  if (activeSuspension) {
+    currentStatus = activeSuspension.reason === "BANNED" ? "BANNED" : "SUSPENDED";
+  }
 
   const fullName = `${user.firstName} ${user.lastName}`.trim();
   const sidebarSocialLinks = socialLinks.map((link) => ({
@@ -114,6 +129,12 @@ export default async function StudentEditPage({
       icon: <WorkOutlineIcon fontSize="small" />,
       active: tab === "skills",
       href: `${baseUrl}?tab=skills`,
+    },
+    {
+      label: "Manage Access",
+      icon: <SecurityIcon fontSize="small" />,
+      active: tab === "access",
+      href: `/membership-dashboard/student-users/${id}/edit?tab=access`,
     },
     {
       label: "Manage Account",
@@ -201,7 +222,21 @@ export default async function StudentEditPage({
       </Stack>
     );
   }
-
+// --- Access tab --- 
+  let accessContent: React.ReactNode = null;
+  if (tab === "access") {
+    accessContent = (
+      <Card sx={{ p: 4, borderRadius: 2, boxShadow: "none", border: "1px solid #e7e9ee" }}>
+        <Typography variant="h5" sx={{ fontWeight: 600, mb: 3, color: "#d32f2f" }}>
+          Access & Security Control
+        </Typography>
+        <Typography sx={{ mb: 4, color: "#4b5563" }}>
+          Manage platform access for this student. Suspending a student revokes their access to the Talent Platform temporarily, while a ban is permanent.
+        </Typography>
+        <AccessControlButtons userId={id} currentStatus={currentStatus} />
+      </Card>
+    );
+  }
   const tabTitles: Record<Tab, string> = {
     personal: "Personal Info",
     academic: "Academic Information",
@@ -237,7 +272,7 @@ export default async function StudentEditPage({
           menuItems={menuItems}
         />
 
-        {personalContent ?? academicContent ?? skillsContent}
+        {personalContent ?? academicContent ?? skillsContent ?? accessContent}
       </Box>
     </Box>
   );

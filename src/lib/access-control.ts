@@ -59,6 +59,21 @@ export async function userCanAccessApp(userId: string, appKey: string) {
 
   if (!user || !app) return false;
 
+// 👇 --- 你要新增的 Issue #33 核心拦截逻辑开始 --- 👇
+  // 去 AppSuspension 表里查一下，这个人在当前这个 App 里有没有正在生效的封禁记录
+  const activeSuspension = await prisma.appSuspension.findFirst({
+    where: {
+      userId: userId,
+      appKey: appKey,
+      liftedAt: null, // liftedAt 为 null 代表还没被解封
+    }
+  });
+
+  // 如果查到了记录，说明这人被关小黑屋了，直接一脚踢飞，返回 false！
+  if (activeSuspension) {
+    return false; 
+  }
+
   const roleKeys = user.roles.map((ur) => ur.role.key);
 
   // 1) Role-first overrides
