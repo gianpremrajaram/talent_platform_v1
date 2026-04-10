@@ -7,53 +7,44 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const session = await getServerAuthSession();
-    const me = session?.user as any | undefined;
-    const roleKeys: string[] = me?.roleKeys ?? [];
+    const user = session?.user as { id?: string; roleKeys?: string[] } | undefined;
+    const roleKeys: string[] = user?.roleKeys ?? [];
     
-    if (!me?.id || !roleKeys.includes("ADMIN")) {
+    if (!user?.id || !roleKeys.includes("ADMIN")) {
       return NextResponse.json({ error: "Admin access required." }, { status: 403 });
     }
 
-    // Attempt to query users with PENDING_APPROVAL status
-    const pendingUsers = await prisma.user.findMany({
-      where: {
-        userStatus: "SUSPENDED",
-      },
+    const suspendedUsers = await prisma.user.findMany({
+      where: { userStatus: "SUSPENDED" },
       select: {
         id: true,
         email: true,
         firstName: true,
         lastName: true,
-        organisation: {
-          select: { 
-            name: true,
-          },
-        },
+        createdAt: true,
+        organisation: { select: { name: true } },
       },
-      // ⚠️ Temporarily removed orderBy
+      orderBy: { createdAt: "desc" },
     });
 
-    const rows = pendingUsers.map((u) => {
-      const domain = u.email ? u.email.split("@")[1] : "N/A";
-      
-      return {
-        id: u.id,
-        name: u.organisation?.name || "Unknown Company",
-        domain: domain,
-        email: u.email || "N/A",
-        firstName: u.firstName || "N/A",
-        lastName: u.lastName || "N/A",
-        date: "N/A", 
-      };
-    });
+    const rows = suspendedUsers.map((u) => ({
+      id: u.id,
+      name: u.organisation?.name || "No Org Linked",
+      domain: u.email ? u.email.split("@")[1] : "N/A",
+      email: u.email || "N/A",
+      firstName: u.firstName || "N/A",
+      lastName: u.lastName || "N/A",
+      date: u.createdAt ? u.createdAt.toISOString() : new Date().toISOString(),
+    }));
 
     return NextResponse.json(rows);
 
-  } catch (error: any) {
-    // If an error occurs, the specific red error message will be printed in the VS Code terminal running the server
-    console.error("🔥 API Error in pending-partners:", error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("[API_ERROR] suspended-partners:", errorMessage);
+    
     return NextResponse.json(
-      { error: "Something went wrong", details: error.message }, 
+      { error: "Internal Server Error" }, 
       { status: 500 }
     );
   }
