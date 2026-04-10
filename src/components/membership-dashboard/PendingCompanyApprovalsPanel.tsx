@@ -6,7 +6,6 @@ import {
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 
-// Define data types
 interface PendingCompany {
   id: string;
   name: string;
@@ -23,7 +22,6 @@ export default function PendingCompanyApprovalsPanel() {
   const [selectedTiers, setSelectedTiers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
-  // Fetch the pending approval list from the database on page load
   const fetchPendingCompanies = async () => {
     try {
       const res = await fetch("/api/admin/pending-partners");
@@ -32,7 +30,7 @@ export default function PendingCompanyApprovalsPanel() {
         setPendingCompanies(data);
       }
     } catch (error) {
-      console.error("Failed to fetch pending companies:", error);
+      console.error("[UI_ERROR] Failed to fetch pending companies:", error);
     } finally {
       setLoading(false);
     }
@@ -53,84 +51,11 @@ export default function PendingCompanyApprovalsPanel() {
       return;
     }
 
-    // Find the currently clicked company to get its specific details
-    const targetCompany = pendingCompanies.find(c => c.id === companyId);
+    const targetCompany = pendingCompanies.find((c) => c.id === companyId);
 
     try {
       const response = await fetch("/api/account/update-user", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          // 1. Target the specific user ID
-          targetUserId: companyId, 
-          
-          // 2. Strictly wrap user details inside the user object
-          user: {
-            email: targetCompany?.email,
-            firstName: targetCompany?.firstName,
-            lastName: targetCompany?.lastName,
-          },
-          
-          // 3. Admin transaction operations payload
-          admin: {
-            userStatus: "ACTIVE",
-            // 👉 Prompt the backend to create the organisation first
-            pending: {
-              organisations: [
-                { 
-                  clientId: "temp-org-1", // Temporary placeholder ID for transaction linking
-                  name: targetCompany?.name || "New Partner", 
-                  type: "INDUSTRY" 
-                }
-              ]
-            },
-            // 👉 Bind the newly created organisation to this user
-            organisationChoice: {
-              kind: "pending",
-              clientId: "temp-org-1"
-            },
-            
-            // 👉 Assign platform roles (must use this exact array format)
-            roleChoices: [
-              { kind: "existing", key: "MEMBER" }
-            ],
-
-            // 👉 Finally, assign the selected membership tier
-            membership: { 
-              membershipTierId: tier, // Passing the numeric tier ID, e.g., "1"
-              isActive: true 
-            }
-          }
-        }),
-      });
-
-      // Handle successful approval response
-      if (response.ok) {
-        alert("Approved successfully!");
-        setPendingCompanies((prev) => prev.filter((c) => c.id !== companyId));
-        router.refresh();
-      } else {
-        const errorText = await response.text(); 
-        console.error("Backend error response:", errorText);
-        try {
-          const errorJson = JSON.parse(errorText);
-          alert(`Failed to approve: ${errorJson.error || "Unknown error"}`);
-        } catch (e) {
-          alert(`Server failed with status ${response.status}. Check console.`);
-        }
-      }
-    } catch (error) {
-      console.error("Network or parsing error:", error);
-      alert("An error occurred while approving. Check console.");
-    }
-  }; 
-
-  const handleReject = async (companyId: string) => {
-    const targetCompany = pendingCompanies.find(c => c.id === companyId);
-    
-    try {
-      const response = await fetch("/api/account/update-user", {
-        method: "POST", 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           targetUserId: companyId,
@@ -140,8 +65,67 @@ export default function PendingCompanyApprovalsPanel() {
             lastName: targetCompany?.lastName,
           },
           admin: {
-            userStatus: "SUSPENDED"
-          }
+            userStatus: "ACTIVE",
+            pending: {
+              organisations: [
+                {
+                  clientId: "temp-org-1",
+                  name: targetCompany?.name || "New Partner",
+                  type: "INDUSTRY",
+                },
+              ],
+            },
+            organisationChoice: {
+              kind: "pending",
+              clientId: "temp-org-1",
+            },
+            roleChoices: [
+              { kind: "existing", key: "MEMBER" }
+            ],
+            membership: {
+              membershipTierId: tier,
+              isActive: true,
+            },
+          },
+        }),
+      });
+
+      if (response.ok) {
+        alert("Approved successfully!");
+        setPendingCompanies((prev) => prev.filter((c) => c.id !== companyId));
+        router.refresh();
+      } else {
+        const errorText = await response.text();
+        try {
+          const errorJson = JSON.parse(errorText);
+          alert(`Failed to approve: ${errorJson.error || "Unknown error"}`);
+        } catch {
+          alert(`Server failed with status ${response.status}. Check console.`);
+        }
+      }
+    } catch (error) {
+      console.error("[UI_ERROR] Error approving company:", error);
+      alert("An error occurred while approving. Check console.");
+    }
+  };
+
+  const handleReject = async (companyId: string) => {
+    const targetCompany = pendingCompanies.find((c) => c.id === companyId);
+
+    try {
+      const response = await fetch("/api/account/update-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          targetUserId: companyId,
+          user: {
+            email: targetCompany?.email,
+            firstName: targetCompany?.firstName,
+            lastName: targetCompany?.lastName,
+          },
+          admin: {
+            userStatus: "SUSPENDED",
+          },
         }),
       });
 
@@ -150,7 +134,6 @@ export default function PendingCompanyApprovalsPanel() {
         setPendingCompanies((prev) => prev.filter((c) => c.id !== companyId));
         router.refresh();
       } else {
-        // 👇 3. 顺手把错误捕获也加进来，防止悄悄崩溃
         const errorText = await response.text();
         try {
           const errorJson = JSON.parse(errorText);
@@ -160,7 +143,7 @@ export default function PendingCompanyApprovalsPanel() {
         }
       }
     } catch (error) {
-      console.error("Error rejecting company:", error);
+      console.error("[UI_ERROR] Error rejecting company:", error);
     }
   };
 
@@ -168,10 +151,9 @@ export default function PendingCompanyApprovalsPanel() {
     return <CircularProgress size={24} sx={{ mb: 2 }} />;
   }
 
-  // Display a placeholder message if there are no pending registrations
   if (pendingCompanies.length === 0) {
     return (
-      <Card sx={{ borderRadius: "8px", border: "1px solid #e8eaef", boxShadow: "none", mb: 2, p: 3, textAlign: 'center' }}>
+      <Card sx={{ borderRadius: "8px", border: "1px solid #e8eaef", boxShadow: "none", mb: 2, p: 3, textAlign: "center" }}>
         <Typography sx={{ color: "#6b7280" }}>
           No pending company registrations at the moment.
         </Typography>

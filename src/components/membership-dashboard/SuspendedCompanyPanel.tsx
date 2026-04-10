@@ -17,13 +17,13 @@ export default function SuspendedCompanyPanel() {
   useEffect(() => {
     const fetchSuspended = async () => {
       try {
-        const res = await fetch("/api/admin/suspended-partners"); // 👈 调用我们刚写的新 API
+        const res = await fetch("/api/admin/suspended-partners");
         if (res.ok) {
           const data = await res.json();
           setSuspendedCompanies(data);
         }
       } catch (error) {
-        console.error("Failed to fetch suspended companies:", error);
+        console.error("[UI_ERROR] Failed to fetch suspended companies:", error);
       } finally {
         setLoading(false);
       }
@@ -33,7 +33,7 @@ export default function SuspendedCompanyPanel() {
 
   if (loading) return <CircularProgress size={24} sx={{ mt: 2 }} />;
 
-  if (suspendedCompanies.length === 0) return null; // 如果没人被拒绝，就不显示这个面板
+  if (suspendedCompanies.length === 0) return null;
 
   return (
     <Card sx={{ borderRadius: "8px", border: "1px solid #fca5a5", boxShadow: "none", mt: 4 }}>

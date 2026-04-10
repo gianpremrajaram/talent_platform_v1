@@ -7,14 +7,14 @@ export const dynamic = "force-dynamic";
 export async function GET(req: Request) {
   try {
     const session = await getServerAuthSession();
-    const me = session?.user as any | undefined;
-    const roleKeys: string[] = me?.roleKeys ?? [];
     
-    if (!me?.id || !roleKeys.includes("ADMIN")) {
+    const user = session?.user as { id?: string; roleKeys?: string[] } | undefined;
+    const roleKeys: string[] = user?.roleKeys ?? [];
+    
+    if (!user?.id || !roleKeys.includes("ADMIN")) {
       return NextResponse.json({ error: "Admin access required." }, { status: 403 });
     }
 
-    // Extract userId from the query parameters (e.g., ?userId=123)
     const { searchParams } = new URL(req.url);
     const targetUserId = searchParams.get("userId");
 
@@ -22,14 +22,9 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Missing userId parameter." }, { status: 400 });
     }
 
-    // Fetch the real suspension history from the AppSuspension table
     const historyRecords = await prisma.appSuspension.findMany({
-      where: {
-        userId: targetUserId,
-      },
-      orderBy: {
-        suspendedAt: "desc", // Most recent suspensions first
-      },
+      where: { userId: targetUserId },
+      orderBy: { suspendedAt: "desc" },
       select: {
         id: true,
         appKey: true,
@@ -40,10 +35,12 @@ export async function GET(req: Request) {
 
     return NextResponse.json(historyRecords);
 
-  } catch (error: any) {
-    console.error("🔥 API Error fetching suspension history:", error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("[API_ERROR] suspension-history:", errorMessage);
+    
     return NextResponse.json(
-      { error: "Failed to fetch history.", details: error.message }, 
+      { error: "Internal Server Error" }, 
       { status: 500 }
     );
   }
