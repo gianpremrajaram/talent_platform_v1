@@ -15,6 +15,7 @@ import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
 
 import UserManagementTable, { type ManagedUser } from "./UserManagementTable";
 import SuspensionHistoryPanel from "./SuspensionHistoryPanel";
+import PendingCompanyApprovalsPanel from "./PendingCompanyApprovalsPanel";
 
 export default function AdminPartnerManagementPage() {
   const [users, setUsers] = useState<ManagedUser[]>([]);
@@ -158,6 +159,10 @@ export default function AdminPartnerManagementPage() {
                 onSearchChange={setSearch}
                 searchPlaceholder="Search partners"
               />
+            </Box>
+            
+            <Box sx={{ width: "100%" }}>
+              <PendingCompanyApprovalsPanel />
             </Box>
 
             <Box sx={{ width: "100%" }}>
