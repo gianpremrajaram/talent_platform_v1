@@ -1,4 +1,4 @@
-export * from "./StudentProfile";
-export * from "./JobPosting";
 export * from "./userregistration";
-export * from "./companyConsent";  
+export * from "./companyconsent";
+export * from "./jobposting";
+export * from "./studentprofile";

@@ -24,22 +24,17 @@ function toSlug(name: string): string {
 }
 
 export async function POST(req: Request) {
-  const body = (await req.json()) as Partial<RecruiterRegistrationInput>;
-
-  const email = (body.email ?? "").trim().toLowerCase();
-  const firstName = (body.firstName ?? "").trim();
-  const lastName = (body.lastName ?? "").trim();
-  const companyName = (body.companyName ?? "").trim();
-  const password = body.password ?? "";
+  const body = await req.json();
 
   const parsed = userRegistrationSchema.safeParse(body);
 
   if (!parsed.success) {
-    return err("VALIDATION_ERROR", parsed.error.issues[0].message);
+  return err("VALIDATION_ERROR", "Validation failed", 400, parsed.error.issues);
   }
 
-  const domain = extractDomain(email);
+  const { email, firstName, lastName, companyName, password } = parsed.data;
 
+  const domain = extractDomain(email);
   if (!domain) {
     return err("BAD_REQUEST", "Email must include a valid domain.");
   }

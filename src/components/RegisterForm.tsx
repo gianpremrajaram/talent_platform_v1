@@ -26,8 +26,17 @@ export default function RegisterForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-
     setSubmitting(true);
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return;
+    }
 
     try {
       const res = await fetch("/api/auth/register", {
@@ -45,12 +54,11 @@ export default function RegisterForm() {
 
       const data = await res.json();
 
-      console.log("API response:", data);
-
       if (!data.success) {
         const message =
-          data.error?.message ||
           data.details?.[0]?.message ||
+          data.error?.message ||
+          data.error ||
           "Registration failed.";
 
         setError(message);
@@ -165,7 +173,8 @@ export default function RegisterForm() {
               className="auth-input"
               id="email"
               name="email"
-              type="text"
+              type="email"
+              required
               autoComplete="email"
               placeholder="you@yourcompany.com"
               value={email}
@@ -200,6 +209,8 @@ export default function RegisterForm() {
               id="password"
               name="password"
               type="password"
+              required
+              minLength={8}
               autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
