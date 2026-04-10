@@ -16,6 +16,7 @@ import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
 import UserManagementTable, { type ManagedUser } from "./UserManagementTable";
 import SuspensionHistoryPanel from "./SuspensionHistoryPanel";
 import PendingCompanyApprovalsPanel from "./PendingCompanyApprovalsPanel";
+import SuspendedCompanyPanel from "@/components/membership-dashboard/SuspendedCompanyPanel";
 
 export default function AdminPartnerManagementPage() {
   const [users, setUsers] = useState<ManagedUser[]>([]);
@@ -167,6 +168,10 @@ export default function AdminPartnerManagementPage() {
 
             <Box sx={{ width: "100%" }}>
               <SuspensionHistoryPanel user={selectedUser} />
+            </Box>
+
+            <Box sx={{ width: "100%" }}>
+              <SuspendedCompanyPanel />
             </Box>
           </Box>
     </Box>

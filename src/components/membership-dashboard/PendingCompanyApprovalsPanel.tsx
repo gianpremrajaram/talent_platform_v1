@@ -126,14 +126,21 @@ export default function PendingCompanyApprovalsPanel() {
   }; 
 
   const handleReject = async (companyId: string) => {
+    const targetCompany = pendingCompanies.find(c => c.id === companyId);
+    
     try {
       const response = await fetch("/api/account/update-user", {
         method: "POST", 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           targetUserId: companyId,
+          user: {
+            email: targetCompany?.email,
+            firstName: targetCompany?.firstName,
+            lastName: targetCompany?.lastName,
+          },
           admin: {
-            userStatus: "REJECTED" 
+            userStatus: "SUSPENDED"
           }
         }),
       });
@@ -142,6 +149,15 @@ export default function PendingCompanyApprovalsPanel() {
         alert("Rejected successfully.");
         setPendingCompanies((prev) => prev.filter((c) => c.id !== companyId));
         router.refresh();
+      } else {
+        // 👇 3. 顺手把错误捕获也加进来，防止悄悄崩溃
+        const errorText = await response.text();
+        try {
+          const errorJson = JSON.parse(errorText);
+          alert(`Failed to reject: ${errorJson.error || "Unknown error"}`);
+        } catch {
+          alert(`Server failed with status ${response.status}.`);
+        }
       }
     } catch (error) {
       console.error("Error rejecting company:", error);
