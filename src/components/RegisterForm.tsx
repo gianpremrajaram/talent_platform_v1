@@ -26,17 +26,17 @@ export default function RegisterForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setSubmitting(true);
 
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
+
     if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+      setError("Password must be at least 8 characters long.");
       return;
     }
-
-    setSubmitting(true);
 
     try {
       const res = await fetch("/api/auth/register", {
@@ -48,13 +48,20 @@ export default function RegisterForm() {
           lastName: lastName.trim(),
           companyName: companyName.trim(),
           password,
+          confirmPassword,
         }),
       });
 
       const data = await res.json();
 
       if (!data.success) {
-        setError(data.error?.message ?? "Registration failed. Please try again.");
+        const message =
+          data.details?.[0]?.message ||
+          data.error?.message ||
+          data.error ||
+          "Registration failed.";
+
+        setError(message);
         return;
       }
 
@@ -156,7 +163,6 @@ export default function RegisterForm() {
                 name="firstName"
                 type="text"
                 autoComplete="given-name"
-                required
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
               />
@@ -171,7 +177,6 @@ export default function RegisterForm() {
                 name="lastName"
                 type="text"
                 autoComplete="family-name"
-                required
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
               />
@@ -187,8 +192,8 @@ export default function RegisterForm() {
               id="email"
               name="email"
               type="email"
-              autoComplete="email"
               required
+              autoComplete="email"
               placeholder="you@yourcompany.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -208,7 +213,6 @@ export default function RegisterForm() {
               name="companyName"
               type="text"
               autoComplete="organization"
-              required
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
             />
@@ -223,9 +227,9 @@ export default function RegisterForm() {
               id="password"
               name="password"
               type="password"
-              autoComplete="new-password"
               required
               minLength={8}
+              autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -241,7 +245,6 @@ export default function RegisterForm() {
               name="confirmPassword"
               type="password"
               autoComplete="new-password"
-              required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
@@ -270,3 +273,5 @@ export default function RegisterForm() {
     </section>
   );
 }
+
+

@@ -31,8 +31,10 @@ export function err(
   code: string,
   overrideMessage?: string,
   overrideStatus?: number,
+  details?: unknown
 ): NextResponse<ApiResponse<never>> {
   const preset = ERROR_MAP[code] ?? ERROR_MAP["INTERNAL"];
+
   return NextResponse.json(
     {
       success: false,
@@ -40,6 +42,7 @@ export function err(
         code,
         message: overrideMessage ?? preset.message,
       },
+      details,
     },
     { status: overrideStatus ?? preset.status },
   );

@@ -7,6 +7,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { ok, err } from "@/lib/api-response";
 import type { RecruiterRegistrationInput } from "@/types/index";
+import { userRegistrationSchema } from "@/lib/validation/userregistration";
 
 export const dynamic = "force-dynamic";
 
@@ -23,25 +24,19 @@ function toSlug(name: string): string {
 }
 
 export async function POST(req: Request) {
-  const body = (await req.json()) as Partial<RecruiterRegistrationInput>;
+  const body = await req.json();
 
-  const email = (body.email ?? "").trim().toLowerCase();
-  const firstName = (body.firstName ?? "").trim();
-  const lastName = (body.lastName ?? "").trim();
-  const companyName = (body.companyName ?? "").trim();
-  const password = body.password ?? "";
+  const parsed = userRegistrationSchema.safeParse(body);
 
-  if (!email || !firstName || !lastName || !companyName || !password) {
-    return err("BAD_REQUEST", "All fields are required.");
+  if (!parsed.success) {
+  return err("VALIDATION_ERROR", "Validation failed", 400, parsed.error.issues);
   }
 
-  if (password.length < 8) {
-    return err("BAD_REQUEST", "Password must be at least 8 characters.");
-  }
+  const { email, firstName, lastName, companyName, password } = parsed.data;
 
   const domain = extractDomain(email);
   if (!domain) {
-    return err("BAD_REQUEST", "Invalid email address.");
+    return err("BAD_REQUEST", "Email must include a valid domain.");
   }
 
   // Check for duplicate user
