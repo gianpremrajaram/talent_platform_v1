@@ -48,4 +48,4 @@ docker-compose.yml
 public/media/resumes/*
 public/media/images/*
 !public/media/resumes/.gitkeep
-!public/media/images/.gitkeep
+!public/media/images/.gitkeep.claude/
