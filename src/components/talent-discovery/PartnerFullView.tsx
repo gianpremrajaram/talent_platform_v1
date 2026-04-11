@@ -9,6 +9,7 @@ import TierGate from "@/components/TierGate";
 import LoadingState from "@/components/ui/LoadingState";
 import EmptyState from "@/components/ui/EmptyState";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
+import RecruiterJobsPanel from "@/components/talent-discovery/RecruiterJobsPanel";
 import type { StudentSearchResult, PaginatedStudentResults } from "@/types/index";
 
 type Tab = "job-board" | "student-search";
@@ -392,10 +393,9 @@ export default function TalentDiscoveryPartnerFullView({ title, description }: P
       {/* Tab panels */}
       {activeTab === "job-board" && (
         <div role="tabpanel" id="panel-job-board" aria-labelledby="tab-job-board">
-          <p>
-            Post and manage job opportunities visible to UCL CS students.{" "}
-            <em>(Job board posting UI — coming soon.)</em>
-          </p>
+          <ErrorBoundary>
+            <RecruiterJobsPanel />
+          </ErrorBoundary>
         </div>
       )}
 

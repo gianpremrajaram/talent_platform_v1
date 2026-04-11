@@ -68,6 +68,48 @@ export interface PaginatedStudentResults {
 }
 
 // ─────────────────────────────────────────────
+// JOB BOARD (#28)
+// ─────────────────────────────────────────────
+
+export interface JobPostingResult {
+  id: string;
+  title: string;
+  description: string;
+  location: string;
+  salaryBand: string | null;
+  roleType: string;
+  postedAt: string;       // ISO string
+  expiresAt: string | null; // ISO string or null
+  isActive: boolean;
+  organisationId: number;
+  organisation: { name: string };
+}
+
+export interface CreateJobPostingInput {
+  title: string;
+  description: string;
+  location: string;
+  salaryBand?: string;
+  roleType: string;
+  expiresAt?: string;
+}
+
+export interface UpdateJobPostingInput {
+  title?: string;
+  description?: string;
+  location?: string;
+  salaryBand?: string;
+  roleType?: string;
+  expiresAt?: string;
+  isActive?: boolean;
+}
+
+export interface PaginatedJobPostings {
+  jobs: JobPostingResult[];
+  nextCursor: string | null;
+}
+
+// ─────────────────────────────────────────────
 // REGISTRATION (#18)
 // ─────────────────────────────────────────────
 

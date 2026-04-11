@@ -1,7 +1,10 @@
-// src/components/talent-discovery/student-components/JobOpeningsTable.tsx
 "use client";
+// src/components/talent-discovery/student-components/JobOpeningsTable.tsx
+// Job listings table for students — Issue #28.
+// Fetches active, non-expired postings from /api/jobs on mount.
+// Cursor-paginated with "Load more". Application tracking deferred to L5.
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   Avatar,
   Box,
@@ -12,228 +15,159 @@ import {
   Typography,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import HighlightOffOutlinedIcon from "@mui/icons-material/HighlightOffOutlined";
-import GoogleIcon from "@mui/icons-material/Google";
-import {
-  DataGrid,
-  GridColDef,
-  GridRenderCellParams,
-  GridRowSelectionModel,
-} from "@mui/x-data-grid";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import LoadingState from "@/components/ui/LoadingState";
+import EmptyState from "@/components/ui/EmptyState";
+import type { JobPostingResult, PaginatedJobPostings } from "@/types/index";
+
+// ─── Row shape ────────────────────────────────────────────────────────────────
 
 type JobRow = {
-  id: number;
-  jobId: string;
+  id: string;
+  title: string;
   companyName: string;
-  email: string;
-  role: string;
+  roleType: string;
   location: string;
-  salary: string;
-  status: "Applied" | "Not Applied";
+  salaryBand: string;
+  postedAt: string; // ISO
 };
 
-const rows: JobRow[] = [
-  //TODO: populate with real data from the datavbase.
-  {
-    id: 1,
-    jobId: "#790841",
-    companyName: "Carson Darrin",
-    email: "carson.darrin@devias.io",
-    role: "Hong Kong, China",
-    location: "Hong Kong",
-    salary: "100,000 $",
-    status: "Not Applied",
-  },
-  {
-    id: 2,
-    jobId: "#790842",
-    companyName: "Carson Darrin",
-    email: "carson.darrin@devias.io",
-    role: "North Canton, Ohio, USA",
-    location: "Hong Kong",
-    salary: "100,000 $",
-    status: "Not Applied",
-  },
-  {
-    id: 3,
-    jobId: "#798699",
-    companyName: "Carson Darrin",
-    email: "carson.darrin@devias.io",
-    role: "Madrid, Madrid, Spain",
-    location: "Hong Kong",
-    salary: "100,000 $",
-    status: "Not Applied",
-  },
-  {
-    id: 4,
-    jobId: "#790752",
-    companyName: "Carson Darrin",
-    email: "carson.darrin@devias.io",
-    role: "Murray, Utah, USA",
-    location: "Hong Kong",
-    salary: "100,000 $",
-    status: "Applied",
-  },
-  {
-    id: 5,
-    jobId: "#790955",
-    companyName: "Carson Darrin",
-    email: "carson.darrin@devias.io",
-    role: "Salt Lake City, Utah, USA",
-    location: "Hong Kong",
-    salary: "100,000 $",
-    status: "Not Applied",
-  },
-  {
-    id: 6,
-    jobId: "#790843",
-    companyName: "Carson Darrin",
-    email: "carson.darrin@devias.io",
-    role: "Murray, Utah, USA",
-    location: "Hong Kong",
-    salary: "100,000 $",
-    status: "Not Applied",
-  },
-  {
-    id: 7,
-    jobId: "#790844",
-    companyName: "Carson Darrin",
-    email: "carson.darrin@devias.io",
-    role: "Cleveland, Ohio, USA",
-    location: "Hong Kong",
-    salary: "100,000 $",
-    status: "Not Applied",
-  },
-  {
-    id: 8,
-    jobId: "#790845",
-    companyName: "Carson Darrin",
-    email: "carson.darrin@devias.io",
-    role: "Madrid, Madrid, Spain",
-    location: "Hong Kong",
-    salary: "100,000 $",
-    status: "Not Applied",
-  },
-  {
-    id: 9,
-    jobId: "#790846",
-    companyName: "Carson Darrin",
-    email: "carson.darrin@devias.io",
-    role: "San Diego, California, USA",
-    location: "Hong Kong",
-    salary: "100,000 $",
-    status: "Not Applied",
-  },
-];
+function formatPostedDate(iso: string): string {
+  const diffDays = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 7) return `${diffDays} days ago`;
+  return new Date(iso).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function toRow(job: JobPostingResult): JobRow {
+  return {
+    id: job.id,
+    title: job.title,
+    companyName: job.organisation.name,
+    roleType: job.roleType,
+    location: job.location,
+    salaryBand: job.salaryBand ?? "—",
+    postedAt: job.postedAt,
+  };
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function JobOpeningsTable() {
+  const [rows, setRows] = useState<JobRow[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("default");
-  const [selectionModel, setSelectionModel] = useState<GridRowSelectionModel>();
+
+  useEffect(() => {
+    async function fetchJobs() {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch("/api/jobs");
+        const data = await res.json();
+        if (!data.success) {
+          setError(data.error?.message ?? "Failed to load jobs.");
+          return;
+        }
+        const result: PaginatedJobPostings = data.data;
+        setRows(result.jobs.map(toRow));
+        setNextCursor(result.nextCursor);
+      } catch {
+        setError("Something went wrong loading jobs.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchJobs();
+  }, []);
+
+  async function handleLoadMore() {
+    if (!nextCursor) return;
+    setLoadingMore(true);
+    try {
+      const res = await fetch(`/api/jobs?cursor=${encodeURIComponent(nextCursor)}`);
+      const data = await res.json();
+      if (!data.success) return;
+      const result: PaginatedJobPostings = data.data;
+      setRows((prev) => [...prev, ...result.jobs.map(toRow)]);
+      setNextCursor(result.nextCursor);
+    } catch {
+      // silent — user can retry by scrolling and clicking Load more again
+    } finally {
+      setLoadingMore(false);
+    }
+  }
 
   const filteredRows = useMemo(() => {
     let data = [...rows];
-
     if (search.trim()) {
       const q = search.toLowerCase();
       data = data.filter(
-        (row) =>
-          row.companyName.toLowerCase().includes(q) ||
-          row.role.toLowerCase().includes(q) ||
-          row.jobId.toLowerCase().includes(q),
+        (r) =>
+          r.companyName.toLowerCase().includes(q) ||
+          r.title.toLowerCase().includes(q) ||
+          r.roleType.toLowerCase().includes(q),
       );
     }
-
-    if (statusFilter !== "all") {
-      data = data.filter((row) =>
-        statusFilter === "applied"
-          ? row.status === "Applied"
-          : row.status === "Not Applied",
-      );
-    }
-
-    if (sortBy === "company") {
-      data.sort((a, b) => a.companyName.localeCompare(b.companyName));
-    } else if (sortBy === "jobId") {
-      data.sort((a, b) => a.jobId.localeCompare(b.jobId));
-    }
-
+    if (sortBy === "company") data.sort((a, b) => a.companyName.localeCompare(b.companyName));
+    else if (sortBy === "title") data.sort((a, b) => a.title.localeCompare(b.title));
     return data;
-  }, [search, statusFilter, sortBy]);
+  }, [rows, search, sortBy]);
 
   const columns: GridColDef<JobRow>[] = [
     {
-      field: "jobId",
-      headerName: "Job Id",
-      flex: 0.9,
-      minWidth: 110,
+      field: "title",
+      headerName: "Role / Position",
+      flex: 1.6,
+      minWidth: 200,
     },
     {
       field: "companyName",
-      headerName: "Company Name",
-      flex: 1.8,
-      minWidth: 220,
+      headerName: "Company",
+      flex: 1.6,
+      minWidth: 180,
       sortable: true,
       renderCell: (params) => (
         <Stack
           direction="row"
           spacing={1.5}
           alignItems="center"
-          sx={{
-            height: "100%",
-            width: "100%",
-            overflow: "hidden",
-          }}
+          sx={{ height: "100%", width: "100%", overflow: "hidden" }}
         >
-          {/* //TODO: replace with real company logo when available */}
-          <Avatar sx={{ width: 30, height: 30 }} aria-hidden="true">
-            <GoogleIcon />
+          <Avatar
+            sx={{ width: 30, height: 30, fontSize: 14, bgcolor: "primary.light" }}
+            aria-hidden="true"
+          >
+            {params.row.companyName.charAt(0).toUpperCase()}
           </Avatar>
-
-          <Box
+          <Typography
+            variant="body2"
             sx={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              minWidth: 0,
+              fontWeight: 600,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
             }}
           >
-            <Typography
-              variant="body2"
-              sx={{
-                fontWeight: 600,
-                lineHeight: 1.2,
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {params.row.companyName}
-            </Typography>
-
-            <Typography
-              variant="caption"
-              sx={{
-                color: "text.secondary",
-                lineHeight: 1.2,
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {params.row.email}
-            </Typography>
-          </Box>
+            {params.row.companyName}
+          </Typography>
         </Stack>
       ),
     },
     {
-      field: "role",
-      headerName: "Role / Position",
-      flex: 1.6,
-      minWidth: 220,
+      field: "roleType",
+      headerName: "Role type",
+      flex: 1,
+      minWidth: 130,
     },
     {
       field: "location",
@@ -242,33 +176,57 @@ export default function JobOpeningsTable() {
       minWidth: 130,
     },
     {
-      field: "salary",
-      headerName: "Salary Range",
+      field: "salaryBand",
+      headerName: "Salary band",
       flex: 1,
       minWidth: 140,
     },
     {
-      field: "status",
-      headerName: "Application Status",
-      flex: 1.3,
-      minWidth: 190,
+      field: "postedAt",
+      headerName: "Posted",
+      flex: 0.9,
+      minWidth: 110,
       renderCell: (params) => (
-        <Stack
-          direction="row"
-          spacing={1}
-          alignItems="center"
-          sx={{ height: "100%" }}
-        >
-          {params.row.status === "Applied" ? (
-            <CheckCircleOutlineIcon fontSize="small" color="success" aria-hidden="true" />
-          ) : (
-            <HighlightOffOutlinedIcon fontSize="small" color="error" aria-hidden="true" />
-          )}
-          <Typography variant="body2">{params.row.status}</Typography>
-        </Stack>
+        <Typography variant="body2" sx={{ color: "text.secondary" }}>
+          {formatPostedDate(params.row.postedAt)}
+        </Typography>
       ),
     },
   ];
+
+  if (loading) {
+    return <LoadingState message="Loading available positions…" />;
+  }
+
+  if (error) {
+    return (
+      <Box
+        sx={{
+          mt: 3,
+          p: 2.5,
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: 3,
+          bgcolor: "background.paper",
+        }}
+      >
+        <Typography role="alert" sx={{ fontSize: 13, color: "error.main" }}>
+          {error}
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (rows.length === 0) {
+    return (
+      <Box sx={{ mt: 3 }}>
+        <EmptyState
+          message="No open positions at the moment."
+          description="Check back later for new opportunities from our industry partners."
+        />
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -291,7 +249,7 @@ export default function JobOpeningsTable() {
         }}
       >
         <TextField
-          placeholder="Search by company or job title"
+          placeholder="Search by company, role, or type"
           size="small"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -306,75 +264,44 @@ export default function JobOpeningsTable() {
           }}
         />
 
-        <Stack direction="row" spacing={2}>
-          <TextField
-            select
-            label="Application status"
-            InputLabelProps={{
-              shrink: true,
-              sx: {
-                position: "absolute",
-                width: 1,
-                height: 1,
-                overflow: "hidden",
-                clip: "rect(0 0 0 0)",
-                clipPath: "inset(50%)",
-                whiteSpace: "nowrap",
-              },
-            }}
-            InputProps={{ notched: false }}
-            size="small"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            sx={{ minWidth: 140 }}
-          >
-            <MenuItem value="all">All Status</MenuItem>
-            <MenuItem value="applied">Applied</MenuItem>
-            <MenuItem value="not-applied">Not Applied</MenuItem>
-          </TextField>
-
-          <TextField
-            select
-            label="Sort by"
-            InputLabelProps={{
-              shrink: true,
-              sx: {
-                position: "absolute",
-                width: 1,
-                height: 1,
-                overflow: "hidden",
-                clip: "rect(0 0 0 0)",
-                clipPath: "inset(50%)",
-                whiteSpace: "nowrap",
-              },
-            }}
-            InputProps={{ notched: false }}
-            size="small"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            sx={{ minWidth: 140 }}
-          >
-            <MenuItem value="default">Sort by</MenuItem>
-            <MenuItem value="company">Company</MenuItem>
-            <MenuItem value="jobId">Job Id</MenuItem>
-          </TextField>
-        </Stack>
+        <TextField
+          select
+          label="Sort by"
+          InputLabelProps={{
+            shrink: true,
+            sx: {
+              position: "absolute",
+              width: 1,
+              height: 1,
+              overflow: "hidden",
+              clip: "rect(0 0 0 0)",
+              clipPath: "inset(50%)",
+              whiteSpace: "nowrap",
+            },
+          }}
+          InputProps={{ notched: false }}
+          size="small"
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          sx={{ minWidth: 140 }}
+        >
+          <MenuItem value="default">Sort by</MenuItem>
+          <MenuItem value="company">Company</MenuItem>
+          <MenuItem value="title">Role title</MenuItem>
+        </TextField>
       </Box>
 
-      <Box sx={{ height: 640, width: "100%" }}>
+      <Box sx={{ height: 540, width: "100%" }}>
         <DataGrid
           rows={filteredRows}
           columns={columns}
           aria-label="Job openings"
-          checkboxSelection
           disableRowSelectionOnClick
-          rowHeight={78}
+          rowHeight={72}
           pagination
-          pageSizeOptions={[5, 10, 25]}
+          pageSizeOptions={[10, 25, 50]}
           initialState={{
-            pagination: {
-              paginationModel: { pageSize: 10, page: 0 },
-            },
+            pagination: { paginationModel: { pageSize: 10, page: 0 } },
           }}
           sx={{
             border: 0,
@@ -389,12 +316,23 @@ export default function JobOpeningsTable() {
               borderBottom: "1px solid",
               borderColor: "divider",
             },
-            "& .MuiDataGrid-columnHeaderTitle": {
-              fontWeight: 600,
-            },
+            "& .MuiDataGrid-columnHeaderTitle": { fontWeight: 600 },
           }}
         />
       </Box>
+
+      {nextCursor && (
+        <Box sx={{ mt: 1.5, display: "flex", justifyContent: "center" }}>
+          <button
+            type="button"
+            className="button-link button-link--secondary"
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+          >
+            {loadingMore ? "Loading…" : "Load more positions"}
+          </button>
+        </Box>
+      )}
     </Box>
   );
 }
