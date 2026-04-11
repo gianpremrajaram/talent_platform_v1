@@ -13,11 +13,12 @@ import type {
 import type { HandbookRenderResult } from "@/lib/handbook";
 import { canAccessBenefit } from "@/lib/membership-dashboard-admin";
 import { saveRedeemedBenefitsAction } from "@/lib/membership-dashboard-actions";
+import TalentMetricsPanel from "./TalentMetricsPanel";
 
-type TabKey = "members" | "benefits" | "handbook";
+type TabKey = "members" | "benefits" | "handbook" | "metrics";
 
 function asTabKey(v: string | null | undefined): TabKey | null {
-  if (v === "members" || v === "benefits" || v === "handbook") return v;
+  if (v === "members" || v === "benefits" || v === "handbook" || v === "metrics") return v;
   return null;
 }
 
@@ -73,7 +74,7 @@ export default function AdminDashboardClient(props: {
   const bootTab = asTabKey(initialTab) ?? urlTab ?? "members";
   const [activeTab, setActiveTab] = useState<TabKey>(bootTab);
 
-  const ADMIN_TABS: TabKey[] = ["members", "benefits", "handbook"];
+  const ADMIN_TABS: TabKey[] = ["members", "benefits", "handbook", "metrics"];
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   function handleTabKeyDown(e: React.KeyboardEvent, currentIndex: number) {
@@ -266,6 +267,21 @@ export default function AdminDashboardClient(props: {
               onKeyDown={(e) => handleTabKeyDown(e, 2)}
             >
               Handbook
+            </button>
+
+            <button
+              ref={(el) => { tabRefs.current[3] = el; }} // 注意这里是 [3]
+              type="button"
+              role="tab"
+              className={`tab ${activeTab === "metrics" ? "is-active" : ""}`}
+              aria-selected={activeTab === "metrics"}
+              aria-controls="panel-metrics"
+              id="tab-metrics"
+              tabIndex={activeTab === "metrics" ? 0 : -1}
+              onClick={() => changeTab("metrics")}
+              onKeyDown={(e) => handleTabKeyDown(e, 3)} // 注意这里是 3
+            >
+              Talent Platform
             </button>
           </div>
 
@@ -609,7 +625,6 @@ export default function AdminDashboardClient(props: {
                     </button>
                   )}
                 </div>
-
                 {/* No extra title here; Markdown owns the chapter heading */}
                 <div
                   className="markdown-content"
@@ -617,6 +632,16 @@ export default function AdminDashboardClient(props: {
                 />
               </article>
             )}
+          </div>
+          <div
+            role="tabpanel"
+            id="panel-metrics"
+            aria-labelledby="tab-metrics"
+            className="tab-panel tab-panel--scroll"
+            hidden={activeTab !== "metrics"}
+          >
+            <h3 style={{ marginTop: 0 }}>Talent Platform Metrics</h3>
+            {activeTab === "metrics" && <TalentMetricsPanel />}
           </div>
         </div>
       </section>

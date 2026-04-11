@@ -187,7 +187,6 @@ async function seedAppAccessRules(apps: any, tiers: Map<string, number>) {
 async function seedSpecificRolesAndUsers() {
   console.log('\nSeeding Roles and Specific Users for Issue #14...');
 
-  // 1. 确保角色存在
   const roles = ['ADMIN', 'STUDENT', 'RECRUITER'];
   const roleMap = new Map();
   for (const r of roles) {
@@ -226,15 +225,15 @@ async function seedSpecificRolesAndUsers() {
         firstName: `Student${i}`,
         lastName: 'UCL',
         roles: { create: { roleId: roleMap.get('STUDENT') } },
-        // 满足 "Populate StudentProfile records" 要求
+
         studentProfile: {
           create: { bio: `I am student number ${i}` }
         },
-        // 满足 "varying consent states" 和 "at least one student has consent records" 要求
+
         consents: i === 1 ? undefined : {
           create: {
             type: 'PRIVACY_POLICY',
-            accepted: i === 2 // 学生2同意，学生3拒绝
+            accepted: i === 2 
           }
         },
         studentSkills: {
@@ -291,28 +290,31 @@ async function seedSpecificRolesAndUsers() {
       },
     });
 
+    const recruiterRoleId = roleMap.get('RECRUITER');
+
     const user = await prisma.user.upsert({
       where: { email: r.email },
-      update: { userStatus: r.userStatus },
       create: {
         email: r.email,
         passwordHash: commonPassword,
-        firstName: 'Recruiter',
-        lastName: r.companyStatus === 'APPROVED' ? 'Active' : 'Pending',
-        userStatus: r.userStatus,
+        firstName: 'Test',
+        lastName: 'Recruiter',
         organisationId: org.id,
-        roles: { create: { roleId: roleMap.get('RECRUITER') } },
-        memberships: {
-          create: {
-            organisationId: org.id,
-            membershipTierId: goldTier.id,
-            status: r.membershipStatus,
-            isActive: r.isActive,
-          },
-        },
+        roles: { create: { roleId: recruiterRoleId } },
+      },
+      update: {
+        organisationId: org.id,
       },
     });
-    console.log(`  - Seeded recruiter ${user.email} (userStatus=${r.userStatus}, org=${org.name})`);
+
+    await prisma.userRole.upsert({
+      where: {
+        userId_roleId: { userId: user.id, roleId: recruiterRoleId }
+      },
+      update: {},
+      create: { userId: user.id, roleId: recruiterRoleId }
+    });
+    console.log(`  User id=${user.id}, email=${user.email}, role=RECRUITER`);
   }
 }
 
@@ -369,6 +371,12 @@ async function main() {
 
     const passwordHash = await hashPassword(m.credentials.password);
 
+    const recruiterRole = await prisma.role.upsert({
+      where: { key: 'RECRUITER' },
+      update: {},
+      create: { key: 'RECRUITER', label: 'Recruiter' },
+    });
+    
     const user = await prisma.user.upsert({
       where: { email: m.credentials.email },
       create: {
@@ -377,6 +385,7 @@ async function main() {
         firstName: m.company.contact_first,
         lastName: m.company.contact_last,
         organisationId: organisation.id,
+        roles: { create: { roleId: recruiterRole.id } },
       },
       update: {
         firstName: m.company.contact_first,
@@ -385,6 +394,15 @@ async function main() {
         passwordHash,
       },
     });
+
+    await prisma.userRole.upsert({
+      where: {
+        userId_roleId: { userId: user.id, roleId: recruiterRole.id }
+      },
+      update: {},
+      create: { userId: user.id, roleId: recruiterRole.id }
+    });
+    
     console.log(`  User id=${user.id}, email=${user.email}`);
 
     const tierId = tierIdByYaml.get(m.membership.tier);
