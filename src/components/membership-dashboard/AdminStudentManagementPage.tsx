@@ -20,6 +20,7 @@ export default function AdminStudentManagementPage() {
   const [users, setUsers] = useState<ManagedUser[]>([]);
   const [search, setSearch] = useState("");
   const [selectedUserId, setSelectedUserId] = useState<string>("");
+  const [metrics, setMetrics] = useState({ active: 0, suspended: 0, banned: 0, total: 0 });
 
   useEffect(() => {
     fetch("/api/admin/students")
@@ -28,6 +29,12 @@ export default function AdminStudentManagementPage() {
         const safe = Array.isArray(data) ? data : [];
         setUsers(safe);
         setSelectedUserId(safe[0]?.id ?? "");
+      });
+    
+    fetch("/api/admin/student-metrics")
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.error) setMetrics(data);
       });
   }, []);
 
@@ -40,10 +47,6 @@ export default function AdminStudentManagementPage() {
       user.name.toLowerCase().includes(keyword)
     );
   }, [users, search]);
-
-  const activeCount = users.filter((u) => u.status === "active").length;
-  const suspendedCount = users.filter((u) => u.status === "suspended").length;
-  const bannedCount = users.filter((u) => u.status === "banned").length;
 
   return (
     <Box data-admin-page="student-management">
@@ -73,7 +76,7 @@ export default function AdminStudentManagementPage() {
             {[
               {
                 title: "Active students",
-                value: activeCount,
+                value: metrics.active,
                 note: "Access currently allowed",
                 icon: <VerifiedUserRoundedIcon />,
                 bg: "#eef2ef",
@@ -81,7 +84,7 @@ export default function AdminStudentManagementPage() {
               },
               {
                 title: "Suspended students",
-                value: suspendedCount,
+                value: metrics.suspended,
                 note: "Temporary app restriction",
                 icon: <LockPersonRoundedIcon />,
                 bg: "#f3efe8",
@@ -89,7 +92,7 @@ export default function AdminStudentManagementPage() {
               },
               {
                 title: "Banned students",
-                value: bannedCount,
+                value: metrics.banned,
                 note: "Permanent restriction",
                 icon: <GppBadRoundedIcon />,
                 bg: "#f4ecec",
@@ -97,7 +100,7 @@ export default function AdminStudentManagementPage() {
               },
               {
                 title: "Student accounts",
-                value: users.length,
+                value: metrics.total,
                 note: "Managed in this scope",
                 icon: <SchoolRoundedIcon />,
                 bg: "#edf1f5",
