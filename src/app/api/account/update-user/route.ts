@@ -212,7 +212,10 @@ export async function POST(req: Request) {
       if (isAdmin) {
         // Admin can also set organisation
         userUpdate.organisationId = resolvedOrganisationId;
-
+        
+        if (admin?.userStatus) {
+          userUpdate.userStatus = admin.userStatus;
+        }
         // If admin explicitly set an admin defaultAppId, prefer it;
         // otherwise userDefaultAppId already covers the common case.
         if (resolvedDefaultAppIdForAdmin !== undefined) {

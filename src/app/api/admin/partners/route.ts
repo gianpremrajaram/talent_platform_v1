@@ -6,14 +6,16 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   const session = await getServerAuthSession();
-  const me = session?.user as any | undefined;
-  const roleKeys: string[] = me?.roleKeys ?? [];
-  if (!me?.id || !roleKeys.includes("ADMIN")) {
+  const user = session?.user as { id?: string; roleKeys?: string[] } | undefined;
+  const roleKeys: string[] = user?.roleKeys ?? [];
+  
+  if (!user?.id || !roleKeys.includes("ADMIN")) {
     return NextResponse.json({ error: "Admin access required." }, { status: 403 });
   }
 
   const partners = await prisma.user.findMany({
     where: {
+      userStatus: "ACTIVE",
       organisation: {
         type: "INDUSTRY",
       },
