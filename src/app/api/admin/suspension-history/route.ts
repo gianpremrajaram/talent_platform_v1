@@ -24,16 +24,48 @@ export async function GET(req: Request) {
 
     const historyRecords = await prisma.appSuspension.findMany({
       where: { userId: targetUserId },
-      orderBy: { suspendedAt: "desc" },
       select: {
         id: true,
         appKey: true,
         reason: true,
         suspendedAt: true,
+        liftedAt: true,
       }
     });
 
-    return NextResponse.json(historyRecords);
+    // Flatten database records into distinct timeline events
+    const mappedRecords = historyRecords.flatMap((record) => {
+      const events = [];
+
+      // Base event: Initial suspension or ban
+      events.push({
+        id: `${record.id}-initial`, // Suffix ensures unique React keys
+        appKey: record.appKey,
+        reason: record.reason,
+        suspendedAt: record.suspendedAt.toISOString(), 
+        action: record.reason === "BANNED" ? "ban" : "suspend",
+      });
+
+      // Secondary event: Access restoration (if lifted)
+      if (record.liftedAt !== null) {
+        events.push({
+          id: `${record.id}-lifted`,
+          appKey: record.appKey,
+          reason: "Access Restored",
+          suspendedAt: record.liftedAt.toISOString(),
+          action: "lift",
+        });
+      }
+
+      return events;
+    });
+
+    // Re-sort the flattened timeline in descending order (newest first)
+    mappedRecords.sort((a, b) => 
+      new Date(b.suspendedAt).getTime() - new Date(a.suspendedAt).getTime()
+    );
+
+    return NextResponse.json(mappedRecords);
 
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
