@@ -12,7 +12,7 @@ import GppBadRoundedIcon from "@mui/icons-material/GppBadRounded";
 import LockPersonRoundedIcon from "@mui/icons-material/LockPersonRounded";
 import VerifiedUserRoundedIcon from "@mui/icons-material/VerifiedUserRounded";
 import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
-
+import PendingActionsRoundedIcon from "@mui/icons-material/PendingActionsRounded";
 import UserManagementTable, { type ManagedUser } from "./UserManagementTable";
 import SuspensionHistoryPanel from "./SuspensionHistoryPanel";
 import PendingCompanyApprovalsPanel from "./PendingCompanyApprovalsPanel";
@@ -22,6 +22,7 @@ export default function AdminPartnerManagementPage() {
   const [users, setUsers] = useState<ManagedUser[]>([]);
   const [search, setSearch] = useState("");
   const [selectedUserId, setSelectedUserId] = useState<string>("");
+  const [metrics, setMetrics] = useState({ active: 0, pending: 0, suspended: 0, banned: 0, total: 0 });
 
   useEffect(() => {
     fetch("/api/admin/partners")
@@ -30,6 +31,11 @@ export default function AdminPartnerManagementPage() {
         const safe = Array.isArray(data) ? data : [];
         setUsers(safe);
         setSelectedUserId(safe[0]?.id ?? "");
+      });
+    fetch("/api/admin/partner-metrics")
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.error) setMetrics(data);
       });
   }, []);
 
@@ -67,7 +73,7 @@ export default function AdminPartnerManagementPage() {
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+              gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
               gap: 1.8,
               mb: 2.5,
             }}
@@ -75,15 +81,22 @@ export default function AdminPartnerManagementPage() {
             {[
               {
                 title: "Active partners",
-                value: activeCount,
+                value: metrics.active,
                 note: "Access currently allowed",
                 icon: <VerifiedUserRoundedIcon />,
                 bg: "#eef2ef",
                 color: "#557564",
               },
               {
+                title: "Pending partners",
+                value: metrics.pending, 
+                icon: <PendingActionsRoundedIcon />, 
+                bg: "#eef7ff",
+                color: "#4a7a9e",
+              },
+              {
                 title: "Suspended partners",
-                value: suspendedCount,
+                value: metrics.suspended,
                 note: "Temporary app restriction",
                 icon: <LockPersonRoundedIcon />,
                 bg: "#f3efe8",
@@ -91,15 +104,15 @@ export default function AdminPartnerManagementPage() {
               },
               {
                 title: "Banned partners",
-                value: bannedCount,
+                value: metrics.banned,
                 note: "Permanent restriction",
                 icon: <GppBadRoundedIcon />,
                 bg: "#f4ecec",
                 color: "#865e62",
               },
               {
-                title: "Partner accounts",
-                value: users.length,
+                title: "Total accounts",
+                value: metrics.total,
                 note: "Managed in this scope",
                 icon: <BusinessRoundedIcon />,
                 bg: "#edf1f5",
