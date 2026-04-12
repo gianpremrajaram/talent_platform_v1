@@ -1,6 +1,7 @@
 "use server";
 
-import prisma from "@/lib/prisma"; 
+import prisma from "@/lib/prisma";
+import { OrganisationType, CompanyStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 // Execute suspension or ban
@@ -40,8 +41,13 @@ export async function updateOrganisation(orgId: string, userId: string, data: {
   status?: string;
 }) {
   await prisma.organisation.update({
-    where: { id: orgId },
-    data: data,
+    where: { id: Number(orgId) },
+    data: {
+      ...(data.slug   !== undefined && { slug:   data.slug }),
+      ...(data.domain !== undefined && { domain: data.domain }),
+      ...(data.type   !== undefined && { type:   data.type as OrganisationType }),
+      ...(data.status !== undefined && { status: data.status as CompanyStatus }),
+    },
   });
   
   revalidatePath(`/membership-dashboard/partner-users/${userId}/edit`);

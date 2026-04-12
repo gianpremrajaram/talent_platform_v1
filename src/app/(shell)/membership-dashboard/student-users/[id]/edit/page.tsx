@@ -241,6 +241,7 @@ export default async function StudentEditPage({
     personal: "Personal Info",
     academic: "Academic Information",
     skills: "Skills and Experience",
+    access: "Access & Security",
   };
 
   return (
