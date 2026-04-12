@@ -14,8 +14,8 @@ export async function GET(req: Request) {
   const session = await getServerAuthSession();
   if (!session?.user) return err("UNAUTHORIZED");
 
-  const userId = (session.user as any).id as string;
-  const roleKeys: string[] = (session.user as any).roleKeys ?? [];
+  const userId = session.user.id;
+  const roleKeys: string[] = session.user.roleKeys ?? [];
 
   // Must have RECRUITER role
   if (!roleKeys.includes("RECRUITER") && !roleKeys.includes("ADMIN")) {

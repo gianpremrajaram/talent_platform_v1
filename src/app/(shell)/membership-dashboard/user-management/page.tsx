@@ -4,7 +4,7 @@ import AdminUserManagementPage from "@/components/membership-dashboard/AdminUser
 
 export default async function UserManagementPage() {
   const session = await getServerAuthSession();
-  const roleKeys: string[] = (session?.user as any)?.roleKeys ?? [];
+  const roleKeys: string[] = session?.user?.roleKeys ?? [];
   if (!roleKeys.includes("ADMIN")) {
     redirect("/membership-dashboard");
   }

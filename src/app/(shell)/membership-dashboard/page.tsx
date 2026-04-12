@@ -68,8 +68,8 @@ export default async function MembershipDashboardPage(props: Props) {
     );
   }
 
-  const userId = (session.user as any).id as string;
-  const roleKeys = ((session.user as any).roleKeys ?? []) as string[];
+  const userId = session.user.id;
+  const roleKeys: string[] = session.user.roleKeys ?? [];
   const isAdmin = roleKeys.includes("ADMIN");
 
   // 2) Enforce app access rules (for non-admin users)

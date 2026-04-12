@@ -6,12 +6,12 @@ import { redirect } from "next/navigation";
 import AccountManagement from "@/components/talent-discovery/student-components/SecutiySettingsPage";
 export default async function StudentCVFunctionsPage() {
   const session = await getServerAuthSession();
-  const sessionUser = session?.user as any | undefined;
+  const sessionUser = session?.user;
   if (!sessionUser?.id) {
     redirect("/sign-in");
   }
-  const userId = sessionUser.id as string;
-  const email = sessionUser.email as string;
+  const userId = sessionUser.id;
+  const email = sessionUser.email ?? "";
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>

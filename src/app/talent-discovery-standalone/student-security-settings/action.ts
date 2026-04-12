@@ -15,7 +15,7 @@ export async function exportAllData(
 > {
   // Server-side guard: confirm the caller owns this userId
   const session = await getServerAuthSession();
-  const me = session?.user as any | undefined;
+  const me = session?.user;
   if (!me?.id || me.id !== userId)
     return { ok: false, error: "Not signed in." };
 

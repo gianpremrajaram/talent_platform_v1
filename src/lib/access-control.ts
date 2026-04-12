@@ -189,7 +189,7 @@ export async function userCanAccessFeature(
  * @param featureName - Key from FEATURE_PERMISSIONS config map
  */
 export function canAccessFeature(
-  session: { user?: any } | null,
+  session: { user?: { roleKeys?: string[]; membershipTierRank?: number | null } } | null,
   featureName: string,
 ): boolean {
   const rule = FEATURE_PERMISSIONS[featureName];

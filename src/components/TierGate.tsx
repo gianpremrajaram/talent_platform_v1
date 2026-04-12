@@ -53,7 +53,7 @@ export default function TierGate({
     return <>{fallback}</>;
   }
 
-  const user = session.user as any;
+  const user = session.user;
   const roleKeys: string[] = user.roleKeys ?? [];
   const userTierRank: number | null = user.membershipTierRank ?? null;
 

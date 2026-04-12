@@ -21,7 +21,7 @@ export default async function PartnerEditPage({
 }) {
   // --- Permission check (keeping the original logic) ---
   const session = await getServerAuthSession();
-  const sessionUser = session?.user as any | undefined;
+  const sessionUser = session?.user;
   if (!sessionUser?.id) redirect("/sign-in");
 
   const roleKeys: string[] = sessionUser.roleKeys ?? [];

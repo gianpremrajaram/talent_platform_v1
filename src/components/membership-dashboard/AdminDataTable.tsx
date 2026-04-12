@@ -77,7 +77,6 @@ export default function AdminDataTable<T>({
   useEffect(() => {
     setPage(0);
     setPageInput("1");
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rows]);
 
   useEffect(() => {

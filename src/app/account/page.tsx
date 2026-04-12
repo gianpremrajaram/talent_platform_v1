@@ -15,12 +15,12 @@ function pickFirst(value: string | string[] | undefined): string | undefined {
 
 export default async function AccountPage(props: AccountPageProps) {
   const session = await getServerAuthSession();
-  const sessionUser = session?.user as any | undefined;
+  const sessionUser = session?.user;
 
   if (!sessionUser?.id) redirect("/sign-in");
 
   const me = await prisma.user.findUnique({
-    where: { id: sessionUser.id as string },
+    where: { id: sessionUser.id },
     select: {
       id: true,
       email: true,

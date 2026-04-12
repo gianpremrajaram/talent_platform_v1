@@ -148,7 +148,7 @@ export default function AdminSidebar() {
   const { data: session } = useSession();
 
   const name = session?.user?.name ?? "";
-  const roleKeys: string[] = (session?.user as any)?.roleKeys ?? [];
+  const roleKeys: string[] = session?.user?.roleKeys ?? [];
   const displayRole = roleKeys.map((k) => roleLabel[k] ?? k).join(", ") || "Member";
   const initial = name.trim().charAt(0).toUpperCase();
   const isAdmin = roleKeys.includes("ADMIN");

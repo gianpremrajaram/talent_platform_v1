@@ -17,7 +17,7 @@ export async function saveRedeemedBenefitsAction(input: {
   redeemedBenefitCodes: BenefitId[];
 }) {
   const session = await getServerAuthSession();
-  const roleKeys = (session?.user as any)?.roleKeys;
+  const roleKeys = session?.user?.roleKeys;
   requireAdmin(roleKeys);
 
   // Validate benefit ids exist

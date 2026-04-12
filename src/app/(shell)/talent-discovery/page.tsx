@@ -55,9 +55,9 @@ export default async function TalentDiscoveryPage({
   }
 
   // 2) Extract user info from the session
-  const user = session.user as any;
-  const userId = user.id as string;
-  const roleKeys = (user.roleKeys ?? []) as string[];
+  const user = session.user;
+  const userId = user.id;
+  const roleKeys: string[] = user.roleKeys ?? [];
 
   const hasStudentRole = roleKeys.includes("STUDENT");
   const hasAdminRole = roleKeys.includes("ADMIN");

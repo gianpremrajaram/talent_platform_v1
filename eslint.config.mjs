@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored Mantis UI template — not project code
+    "src/lib/mantis/**",
   ]),
 ]);
 

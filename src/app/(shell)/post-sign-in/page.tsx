@@ -26,7 +26,7 @@ export default async function PostSignInRouterPage() {
 
   if (!session?.user) redirect("/");
 
-  const roleKeys = ((session.user as any).roleKeys ?? []) as string[];
+  const roleKeys: string[] = session.user.roleKeys ?? [];
   const isAdmin = roleKeys.includes("ADMIN");
   const isStudent = roleKeys.includes("STUDENT");
 
@@ -35,7 +35,7 @@ export default async function PostSignInRouterPage() {
     redirect("/membership-dashboard");
   }
 
-  const userId = (session.user as any).id as string;
+  const userId = session.user.id;
 
   const user = await prisma.user.findUnique({
     where: { id: userId },

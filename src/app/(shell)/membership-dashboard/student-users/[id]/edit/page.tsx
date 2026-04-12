@@ -72,7 +72,7 @@ export default async function StudentEditPage({
   searchParams: Promise<{ tab?: string }>;
 }) {
   const session = await getServerAuthSession();
-  const sessionUser = session?.user as any | undefined;
+  const sessionUser = session?.user;
   if (!sessionUser?.id) redirect("/sign-in");
 
   const roleKeys: string[] = sessionUser.roleKeys ?? [];
@@ -237,13 +237,6 @@ export default async function StudentEditPage({
       </Card>
     );
   }
-  const tabTitles: Record<Tab, string> = {
-    personal: "Personal Info",
-    academic: "Academic Information",
-    skills: "Skills and Experience",
-    access: "Access & Security",
-  };
-
   return (
     <Box>
       <Link href="/membership-dashboard/student-users" style={{ textDecoration: "none" }}>
