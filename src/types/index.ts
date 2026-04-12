@@ -100,7 +100,7 @@ export interface UpdateJobPostingInput {
   location?: string;
   salaryBand?: string;
   roleType?: string;
-  expiresAt?: string;
+  expiresAt?: string | null;
   isActive?: boolean;
 }
 

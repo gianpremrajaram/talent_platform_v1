@@ -97,9 +97,17 @@ export default function RecruiterJobsPanel() {
   async function handleDelete(jobId: string) {
     if (!confirm("Permanently delete this job posting?")) return;
     setError(null);
-    const res = await fetch(`/api/recruiter/jobs/${jobId}`, { method: "DELETE" });
-    const data = await res.json();
-    if (data.success) setJobs((prev) => prev.filter((j) => j.id !== jobId));
+    try {
+      const res = await fetch(`/api/recruiter/jobs/${jobId}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setError(data.error?.message ?? "Failed to delete job posting. Please try again.");
+        return;
+      }
+      setJobs((prev) => prev.filter((j) => j.id !== jobId));
+    } catch {
+      setError("Something went wrong deleting this posting. Please try again.");
+    }
   }
 
   if (loading) return <LoadingState message="Loading your job postings…" />;

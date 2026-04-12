@@ -9,7 +9,7 @@ export default async function TalentDiscoveryStandaloneLayout({
 }) {
   // 1. Get the currently logged-in user
   const session = await getServerAuthSession();
-  const userId = session?.user?.id as string | undefined;
+  const userId = (session?.user as { id?: string })?.id;
 
   // If not logged in, redirect to the sign-in page
   if (!userId) {

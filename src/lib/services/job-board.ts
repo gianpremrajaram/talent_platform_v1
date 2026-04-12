@@ -165,10 +165,13 @@ export async function updateJobPosting(
   // via a prior edit). Using patch.expiresAt as the effective expiry allows
   // { isActive: true, expiresAt: "<future>" } to succeed in one atomic call.
   if (patch.isActive === true) {
+    // null means the expiry is being cleared → evergreen, never blocked.
+    // undefined means no change to expiresAt → fall back to existing value.
+    const effectiveExpiry =
+      patch.expiresAt !== undefined
+        ? (patch.expiresAt === null ? null : new Date(patch.expiresAt))
+        : existing.expiresAt;
     const now = new Date();
-    const effectiveExpiry = patch.expiresAt
-      ? new Date(patch.expiresAt)
-      : existing.expiresAt;
     if (effectiveExpiry !== null && effectiveExpiry <= now) {
       throw new Error("EXPIRED_JOB");
     }
@@ -183,13 +186,21 @@ export async function updateJobPosting(
   let effectiveIsActive = patch.isActive;
 
   if (patch.expiresAt !== undefined && patch.isActive === undefined) {
-    const newExpiry = new Date(patch.expiresAt);
-    const now = new Date();
-    if (newExpiry <= now) {
-      effectiveIsActive = false;
-    } else {
-      const wasExpired = existing.expiresAt !== null && existing.expiresAt <= now;
+    if (patch.expiresAt === null) {
+      // Clearing the expiry makes the posting evergreen; reactivate if it was
+      // previously expired so it doesn't stay stuck in an inactive state.
+      const wasExpired =
+        existing.expiresAt !== null && existing.expiresAt <= new Date();
       if (wasExpired) effectiveIsActive = true;
+    } else {
+      const newExpiry = new Date(patch.expiresAt);
+      const now = new Date();
+      if (newExpiry <= now) {
+        effectiveIsActive = false;
+      } else {
+        const wasExpired = existing.expiresAt !== null && existing.expiresAt <= now;
+        if (wasExpired) effectiveIsActive = true;
+      }
     }
   }
 

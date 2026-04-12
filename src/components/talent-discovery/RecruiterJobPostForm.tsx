@@ -15,7 +15,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { jobPostingSchema } from "@/lib/Validation/JobPosting";
+import { jobPostingSchema, updateJobPostingSchema } from "@/lib/Validation/JobPosting";
 import type { JobPostingResult } from "@/types/index";
 
 type Props = {
@@ -70,17 +70,30 @@ export default function RecruiterJobPostForm({ open, editJob, onClose, onSaved }
     e.preventDefault();
     setError(null);
 
-    const payload = {
-      title: form.title,
-      description: form.description,
-      location: form.location,
-      roleType: form.roleType,
-      ...(form.salaryBand ? { salaryBand: form.salaryBand } : {}),
-      ...(form.expiresAt ? { expiresAt: new Date(form.expiresAt).toISOString() } : {}),
-    };
+    // In edit mode we send expiresAt: null to explicitly clear the date.
+    // In create mode we omit the field entirely — absence means evergreen.
+    const payload = isEdit
+      ? {
+          title: form.title,
+          description: form.description,
+          location: form.location,
+          roleType: form.roleType,
+          ...(form.salaryBand ? { salaryBand: form.salaryBand } : {}),
+          expiresAt: form.expiresAt ? new Date(form.expiresAt).toISOString() : null,
+        }
+      : {
+          title: form.title,
+          description: form.description,
+          location: form.location,
+          roleType: form.roleType,
+          ...(form.salaryBand ? { salaryBand: form.salaryBand } : {}),
+          ...(form.expiresAt ? { expiresAt: new Date(form.expiresAt).toISOString() } : {}),
+        };
 
-    // Client-side validation before hitting the network
-    const parsed = jobPostingSchema.safeParse(payload);
+    // Client-side validation before hitting the network.
+    // Edit mode uses the update schema which accepts null for expiresAt.
+    const schema = isEdit ? updateJobPostingSchema : jobPostingSchema;
+    const parsed = schema.safeParse(payload);
     if (!parsed.success) {
       const errs: Record<string, string> = {};
       for (const issue of parsed.error.issues) {
