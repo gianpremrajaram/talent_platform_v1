@@ -49,10 +49,6 @@ export default function AdminPartnerManagementPage() {
     );
   }, [users, search]);
 
-  const activeCount = users.filter((u) => u.status === "active").length;
-  const suspendedCount = users.filter((u) => u.status === "suspended").length;
-  const bannedCount = users.filter((u) => u.status === "banned").length;
-
   return (
     <Box data-admin-page="partner-management">
           <Stack
