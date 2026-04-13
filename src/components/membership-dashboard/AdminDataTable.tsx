@@ -244,14 +244,14 @@ export default function AdminDataTable<T>({
             "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows, & .MuiTablePagination-input":
               {
                 fontSize: 13,
-                color: "#6b7280",
+                color: "#4b5563",
               },
           }}
         />
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Typography
-            sx={{ fontSize: 13, color: "#6b7280", whiteSpace: "nowrap" }}
+            sx={{ fontSize: 13, color: "#4b5563", whiteSpace: "nowrap" }}
           >
             Go to page
           </Typography>
@@ -282,7 +282,7 @@ export default function AdminDataTable<T>({
             }}
           />
           <Typography
-            sx={{ fontSize: 13, color: "#6b7280", whiteSpace: "nowrap" }}
+            sx={{ fontSize: 13, color: "#4b5563", whiteSpace: "nowrap" }}
           >
             / {totalPages}
           </Typography>

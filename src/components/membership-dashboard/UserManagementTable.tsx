@@ -134,7 +134,7 @@ export default function UserManagementTable({
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchRoundedIcon fontSize="small" sx={{ color: "#9ca3af" }} />
+                <SearchRoundedIcon fontSize="small" sx={{ color: "#4b5563" }} />
               </InputAdornment>
             ),
           }}
@@ -231,7 +231,7 @@ export default function UserManagementTable({
             <Typography sx={{ fontWeight: 600, color: "#374151" }}>
               No users found
             </Typography>
-            <Typography sx={{ fontSize: 15, color: "#6b7280", mt: 0.75 }}>
+            <Typography sx={{ fontSize: 15, color: "#4b5563", mt: 0.75 }}>
               Try another search term or clear the current filter.
             </Typography>
           </>

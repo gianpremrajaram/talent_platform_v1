@@ -121,7 +121,7 @@ export default function RecruiterJobsPanel() {
           alignItems="center"
           sx={{ mb: 2 }}
         >
-          <Typography sx={{ fontSize: 14, color: "#6b7280" }}>
+          <Typography sx={{ fontSize: 14, color: "#4b5563" }}>
             Postings are visible to UCL CS students on the job board.
           </Typography>
           <Button
@@ -226,7 +226,7 @@ function JobPostingCard({
               />
             )}
           </Stack>
-          <Typography sx={{ fontSize: 13, color: "#6b7280", mt: 0.5 }}>
+          <Typography sx={{ fontSize: 13, color: "#4b5563", mt: 0.5 }}>
             {job.location}
             {job.salaryBand ? ` · ${job.salaryBand}` : ""}
             {` · Posted ${postedDate}`}

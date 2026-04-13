@@ -49,18 +49,18 @@ export default function SuspendedCompanyPanel() {
       <Table>
         <TableHead>
           <TableRow sx={{ bgcolor: "#fff" }}>
-            <TableCell sx={{ fontSize: 12, fontWeight: 600, color: "#6b7280" }}>COMPANY NAME</TableCell>
-            <TableCell sx={{ fontSize: 12, fontWeight: 600, color: "#6b7280" }}>DOMAIN</TableCell>
-            <TableCell sx={{ fontSize: 12, fontWeight: 600, color: "#6b7280" }}>EMAIL</TableCell>
-            <TableCell sx={{ fontSize: 12, fontWeight: 600, color: "#6b7280", textAlign: "right" }}>STATUS</TableCell>
+            <TableCell sx={{ fontSize: 12, fontWeight: 600, color: "#4b5563" }}>COMPANY NAME</TableCell>
+            <TableCell sx={{ fontSize: 12, fontWeight: 600, color: "#4b5563" }}>DOMAIN</TableCell>
+            <TableCell sx={{ fontSize: 12, fontWeight: 600, color: "#4b5563" }}>EMAIL</TableCell>
+            <TableCell sx={{ fontSize: 12, fontWeight: 600, color: "#4b5563", textAlign: "right" }}>STATUS</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {suspendedCompanies.map((company) => (
             <TableRow key={company.id}>
               <TableCell sx={{ fontSize: 14, fontWeight: 500, color: "#374151" }}>{company.name}</TableCell>
-              <TableCell sx={{ fontSize: 14, color: "#6b7280" }}>{company.domain}</TableCell>
-              <TableCell sx={{ fontSize: 14, color: "#6b7280" }}>{company.email}</TableCell>
+              <TableCell sx={{ fontSize: 14, color: "#4b5563" }}>{company.domain}</TableCell>
+              <TableCell sx={{ fontSize: 14, color: "#4b5563" }}>{company.email}</TableCell>
               <TableCell align="right">
                 <Chip label="Rejected" color="error" size="small" variant="outlined" />
               </TableCell>

@@ -140,3 +140,35 @@
     status: active
     expiry: 2025-12-14
   redeemed_benefits: [B04, B14]
+
+# ── Test fixtures (dev/staging) ──────────────────────────────────────────────
+# test-corp-active: APPROVED company, used to verify full recruiter access flow
+#   and student company consent page. Visible in MembershipDashboardMember.
+- id: test-corp-active
+  credentials:
+    email: recruiter.active@example.com
+    password: testcorp-demo
+  company:
+    name: Test Corp (Active)
+    contact_first: Test
+    contact_last: Recruiter
+  membership:
+    tier: gold
+    status: active
+  redeemed_benefits: []
+
+# test-corp-pending: PENDING company, used to verify admin approval gating.
+#   Org status is overridden to PENDING and userStatus to PENDING_APPROVAL
+#   by the post-loop fixture block in seed.ts.
+- id: test-corp-pending
+  credentials:
+    email: recruiter.pending@example.com
+    password: testcorp-demo
+  company:
+    name: Test Corp (Pending)
+    contact_first: Test
+    contact_last: Recruiter
+  membership:
+    tier: gold
+    status: inactive
+  redeemed_benefits: []

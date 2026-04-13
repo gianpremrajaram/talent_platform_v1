@@ -195,7 +195,7 @@ export default function PartnersTable() {
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchRoundedIcon fontSize="small" sx={{ color: "#9ca3af" }} />
+                <SearchRoundedIcon fontSize="small" sx={{ color: "#4b5563" }} />
               </InputAdornment>
             ),
           }}
@@ -270,7 +270,7 @@ export default function PartnersTable() {
                   </Button>
                 </Stack>
               ) : (
-                <Typography sx={{ fontSize: 11, color: "#6b7280" }}>
+                <Typography sx={{ fontSize: 11, color: "#4b5563" }}>
                   {row.status === "approved"
                     ? "Published to partner listings"
                     : "Hidden from partner listings"}

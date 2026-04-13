@@ -34,7 +34,7 @@ export default function EmptyState({
         justifyContent: "center",
         py: 6,
         gap: 1.5,
-        color: "#6b7280",
+        color: "#4b5563",
       }}
     >
       {icon && (
@@ -46,7 +46,7 @@ export default function EmptyState({
       </Typography>
 
       {description && (
-        <Typography sx={{ fontSize: 13, color: "#9ca3af", textAlign: "center", maxWidth: 340 }}>
+        <Typography sx={{ fontSize: 13, color: "#4b5563", textAlign: "center", maxWidth: 340 }}>
           {description}
         </Typography>
       )}

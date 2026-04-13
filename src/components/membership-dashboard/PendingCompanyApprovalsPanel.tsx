@@ -154,7 +154,7 @@ export default function PendingCompanyApprovalsPanel() {
   if (pendingCompanies.length === 0) {
     return (
       <Card sx={{ borderRadius: "8px", border: "1px solid #e8eaef", boxShadow: "none", mb: 2, p: 3, textAlign: "center" }}>
-        <Typography sx={{ color: "#6b7280" }}>
+        <Typography sx={{ color: "#4b5563" }}>
           No pending company registrations at the moment.
         </Typography>
       </Card>
@@ -167,7 +167,7 @@ export default function PendingCompanyApprovalsPanel() {
         <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#1f2937" }}>
           Pending Company Registrations
         </Typography>
-        <Typography sx={{ fontSize: 13, color: "#6b7280", mt: 0.5 }}>
+        <Typography sx={{ fontSize: 13, color: "#4b5563", mt: 0.5 }}>
           Review and approve or reject newly registered recruiter accounts. Assign a membership tier to approve.
         </Typography>
       </Box>
@@ -175,12 +175,12 @@ export default function PendingCompanyApprovalsPanel() {
       <Table>
         <TableHead>
           <TableRow sx={{ bgcolor: "#f9fafb" }}>
-            <TableCell sx={{ fontSize: 12, fontWeight: 600, color: "#6b7280" }}>COMPANY NAME</TableCell>
-            <TableCell sx={{ fontSize: 12, fontWeight: 600, color: "#6b7280" }}>DOMAIN</TableCell>
-            <TableCell sx={{ fontSize: 12, fontWeight: 600, color: "#6b7280" }}>EMAIL</TableCell>
-            <TableCell sx={{ fontSize: 12, fontWeight: 600, color: "#6b7280" }}>DATE</TableCell>
-            <TableCell sx={{ fontSize: 12, fontWeight: 600, color: "#6b7280" }}>TIER ASSIGNMENT</TableCell>
-            <TableCell sx={{ fontSize: 12, fontWeight: 600, color: "#6b7280", textAlign: "right" }}>ACTION</TableCell>
+            <TableCell sx={{ fontSize: 12, fontWeight: 600, color: "#4b5563" }}>COMPANY NAME</TableCell>
+            <TableCell sx={{ fontSize: 12, fontWeight: 600, color: "#4b5563" }}>DOMAIN</TableCell>
+            <TableCell sx={{ fontSize: 12, fontWeight: 600, color: "#4b5563" }}>EMAIL</TableCell>
+            <TableCell sx={{ fontSize: 12, fontWeight: 600, color: "#4b5563" }}>DATE</TableCell>
+            <TableCell sx={{ fontSize: 12, fontWeight: 600, color: "#4b5563" }}>TIER ASSIGNMENT</TableCell>
+            <TableCell sx={{ fontSize: 12, fontWeight: 600, color: "#4b5563", textAlign: "right" }}>ACTION</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>

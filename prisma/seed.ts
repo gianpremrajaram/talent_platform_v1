@@ -246,76 +246,6 @@ async function seedSpecificRolesAndUsers() {
     });
   }
 
-  // 4. Seed 2 Recruiters — each in their own test org with a real domain
-  const goldTier = await prisma.membershipTier.findUnique({ where: { key: 'GOLD' } });
-  if (!goldTier) throw new Error('GOLD tier not found — run seedMembershipTiers first');
-
-  const recruiterOrgs = [
-    {
-      slug: 'test-corp-active',
-      name: 'Test Corp (Active)',
-      domain: 'testcorp-active.example.com',
-      companyStatus: 'APPROVED' as const,
-      email: 'recruiter.active@example.com',
-      userStatus: UserStatus.ACTIVE,
-      membershipStatus: 'active',
-      isActive: true,
-    },
-    {
-      slug: 'test-corp-pending',
-      name: 'Test Corp (Pending)',
-      domain: 'testcorp-pending.example.com',
-      companyStatus: 'PENDING' as const,
-      email: 'recruiter.pending@example.com',
-      userStatus: UserStatus.PENDING_APPROVAL,
-      membershipStatus: 'pending',
-      isActive: false,
-    },
-  ];
-
-  for (const r of recruiterOrgs) {
-    const org = await prisma.organisation.upsert({
-      where: { slug: r.slug },
-      create: {
-        slug: r.slug,
-        name: r.name,
-        domain: r.domain,
-        type: OrganisationType.INDUSTRY,
-        status: r.companyStatus,
-      },
-      update: {
-        name: r.name,
-        domain: r.domain,
-        status: r.companyStatus,
-      },
-    });
-
-    const recruiterRoleId = roleMap.get('RECRUITER');
-
-    const user = await prisma.user.upsert({
-      where: { email: r.email },
-      create: {
-        email: r.email,
-        passwordHash: commonPassword,
-        firstName: 'Test',
-        lastName: 'Recruiter',
-        organisationId: org.id,
-        roles: { create: { roleId: recruiterRoleId } },
-      },
-      update: {
-        organisationId: org.id,
-      },
-    });
-
-    await prisma.userRole.upsert({
-      where: {
-        userId_roleId: { userId: user.id, roleId: recruiterRoleId }
-      },
-      update: {},
-      create: { userId: user.id, roleId: recruiterRoleId }
-    });
-    console.log(`  User id=${user.id}, email=${user.email}, role=RECRUITER`);
-  }
 }
 
 
@@ -470,6 +400,21 @@ async function main() {
       `  Dashboard id=${dashboard.id}, redeemedBenefitCodes=[${dashboard.redeemedBenefitCodes.join(', ')}]`,
     );
   }
+
+  //
+  // Post-loop: apply test-fixture status overrides
+  // test-corp-pending must be PENDING company with PENDING_APPROVAL user —
+  // these states cannot be expressed in members.yml so are set here idempotently.
+  //
+  await prisma.organisation.updateMany({
+    where: { slug: 'test-corp-pending' },
+    data: { status: 'PENDING' },
+  });
+  await prisma.user.updateMany({
+    where: { email: 'recruiter.pending@example.com' },
+    data: { userStatus: UserStatus.PENDING_APPROVAL },
+  });
+  console.log('\nApplied test-corp-pending status overrides (PENDING / PENDING_APPROVAL)');
 
   //
   // NEW: Seed Apps + Rules (AFTER tiers and users exist)

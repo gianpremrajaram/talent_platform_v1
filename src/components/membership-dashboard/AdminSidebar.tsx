@@ -221,7 +221,7 @@ export default function AdminSidebar() {
           <Typography sx={{ fontSize: 12, fontWeight: 600, lineHeight: 1.2 }}>
             {name}
           </Typography>
-          <Typography sx={{ fontSize: 11, color: "#9ca3af" }}>
+          <Typography sx={{ fontSize: 11, color: "#4b5563" }}>
             {displayRole}
           </Typography>
         </Box>

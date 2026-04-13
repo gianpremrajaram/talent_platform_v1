@@ -99,7 +99,7 @@ export default function SuspensionActionModal({
           <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#111827" }}>
             {user.name}
           </Typography>
-          <Typography sx={{ fontSize: 12, color: "#6b7280", mt: 0.5 }}>
+          <Typography sx={{ fontSize: 12, color: "#4b5563", mt: 0.5 }}>
             {user.userType} · {user.email}
           </Typography>
         </Box>

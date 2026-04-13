@@ -70,7 +70,7 @@ export default function SuspensionHistoryPanel({ user }: Props) {
     return (
       <Card sx={{ borderRadius: "8px", border: "1px solid #e7e9ee", boxShadow: "none", p: 2 }}>
         <Typography sx={{ fontWeight: 600, color: "#111827" }}>Suspension history</Typography>
-        <Typography sx={{ mt: 1, fontSize: 14, color: "#6b7280" }}>
+        <Typography sx={{ mt: 1, fontSize: 14, color: "#4b5563" }}>
           Select a user from the table to view suspension history and audit records.
         </Typography>
       </Card>
@@ -83,7 +83,7 @@ export default function SuspensionHistoryPanel({ user }: Props) {
         <Typography sx={{ fontSize: 17, fontWeight: 600, color: "#111827" }}>
           Suspension history
         </Typography>
-        <Typography sx={{ fontSize: 14, color: "#6b7280", mt: 0.5 }}>
+        <Typography sx={{ fontSize: 14, color: "#4b5563", mt: 0.5 }}>
           Audit trail is retained even when access is restored.
         </Typography>
       </Box>
@@ -91,7 +91,7 @@ export default function SuspensionHistoryPanel({ user }: Props) {
       <Box sx={{ p: 2 }}>
         <Box sx={{ p: 1.5, borderRadius: "10px", border: "1px solid #e5e7eb", backgroundColor: "#f9fafb", mb: 2 }}>
           <Typography sx={{ fontSize: 16, fontWeight: 600, color: "#111827" }}>{user.name}</Typography>
-          <Typography sx={{ fontSize: 14, color: "#6b7280", mt: 0.5 }}>
+          <Typography sx={{ fontSize: 14, color: "#4b5563", mt: 0.5 }}>
             {user.userType} · {user.email}
           </Typography>
 
@@ -121,12 +121,12 @@ export default function SuspensionHistoryPanel({ user }: Props) {
             aria-label="Loading suspension records"
           >
             <CircularProgress size={24} aria-hidden="true" />
-            <Typography sx={{ color: "#6b7280", fontSize: 14 }}>Loading records...</Typography>
+            <Typography sx={{ color: "#4b5563", fontSize: 14 }}>Loading records...</Typography>
           </Stack>
         ) : history.length === 0 ? (
           <Box sx={{ p: 2, borderRadius: "10px", border: "1px dashed #d1d5db", backgroundColor: "#fff" }}>
             <Typography sx={{ fontSize: 15, fontWeight: 600, color: "#374151" }}>No history yet</Typography>
-            <Typography sx={{ fontSize: 14, color: "#6b7280", mt: 0.5 }}>
+            <Typography sx={{ fontSize: 14, color: "#4b5563", mt: 0.5 }}>
               This user has a clean record. No records found in the database.
             </Typography>
           </Box>
@@ -147,12 +147,12 @@ export default function SuspensionHistoryPanel({ user }: Props) {
                       <Typography sx={{ fontSize: 15, fontWeight: 600, color: "#111827" }}>
                         {record.appKey}
                       </Typography>
-                      <Typography sx={{ fontSize: 13, color: "#6b7280", mt: 0.4 }}>
+                      <Typography sx={{ fontSize: 13, color: "#4b5563", mt: 0.4 }}>
                         Logged at {new Date(record.suspendedAt).toLocaleDateString()}
                       </Typography>
                     </Box>
 
-                    <Typography sx={{ fontSize: 13, color: "#6b7280" }}>
+                    <Typography sx={{ fontSize: 13, color: "#4b5563" }}>
                       Record {history.length - index}
                     </Typography>
                   </Box>
