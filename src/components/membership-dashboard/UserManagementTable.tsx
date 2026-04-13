@@ -96,7 +96,7 @@ export default function UserManagementTable({
   rows,
   selectedUserId,
   onSelectUser,
-  onOpenAction,
+  // onOpenAction intentionally not destructured — WIP interface contract for action button wiring
   search = "",
   onSearchChange,
   searchPlaceholder = "Search users",
