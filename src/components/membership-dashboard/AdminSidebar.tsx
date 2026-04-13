@@ -148,7 +148,7 @@ export default function AdminSidebar() {
   const { data: session } = useSession();
 
   const name = session?.user?.name ?? "";
-  const roleKeys: string[] = (session?.user as any)?.roleKeys ?? [];
+  const roleKeys: string[] = session?.user?.roleKeys ?? [];
   const displayRole = roleKeys.map((k) => roleLabel[k] ?? k).join(", ") || "Member";
   const initial = name.trim().charAt(0).toUpperCase();
   const isAdmin = roleKeys.includes("ADMIN");
@@ -221,7 +221,7 @@ export default function AdminSidebar() {
           <Typography sx={{ fontSize: 12, fontWeight: 600, lineHeight: 1.2 }}>
             {name}
           </Typography>
-          <Typography sx={{ fontSize: 11, color: "#9ca3af" }}>
+          <Typography sx={{ fontSize: 11, color: "#4b5563" }}>
             {displayRole}
           </Typography>
         </Box>

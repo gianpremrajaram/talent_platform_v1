@@ -105,7 +105,7 @@ export default function AdminStatsCards() {
             py: 1.1,
           }}
         >
-          <Typography sx={{ fontSize: 11, color: "#9ca3af", mb: 0.75 }}>
+          <Typography sx={{ fontSize: 11, color: "#4b5563", mb: 0.75 }}>
             {card.title}
           </Typography>
 

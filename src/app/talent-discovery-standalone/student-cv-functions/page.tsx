@@ -7,11 +7,11 @@ import { redirect } from "next/navigation";
 
 export default async function StudentCVFunctionsPage() {
   const session = await getServerAuthSession();
-  const sessionUser = session?.user as any | undefined;
+  const sessionUser = session?.user;
   if (!sessionUser?.id) {
     redirect("/sign-in");
   }
-  const userId = sessionUser.id as string;
+  const userId = sessionUser.id;
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>

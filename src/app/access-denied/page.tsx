@@ -82,7 +82,7 @@ export default async function AccessDeniedPage({
   // 2) Role / membership-based app access denied
   // ─────────────────────────────────────────────
   const session = await getServerAuthSession();
-  const user = session?.user as any | undefined;
+  const user = session?.user;
 
   const userRoles: string[] = user?.roleKeys ?? [];
   const userTierKey: string | null = user?.membershipTierKey ?? null;
@@ -90,7 +90,7 @@ export default async function AccessDeniedPage({
   let requiredTierLabel: string | null = null;
 
   // Try to look up app and tier requirement if appKey was provided
-  let appLabelFallback =
+  const appLabelFallback =
     appKey?.replace(/_/g, " ").toLowerCase() ??
     "this part of the Alliances Platform";
 

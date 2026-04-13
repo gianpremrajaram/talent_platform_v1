@@ -5,7 +5,13 @@ import { ReactNode } from "react";
 import { ThemeProvider, CssBaseline, createTheme } from "@mui/material";
 
 const theme = createTheme({
-  // your palette/typography/etc
+  palette: {
+    text: {
+      primary: "#141414",
+      secondary: "#4b5563",
+      disabled: "rgba(0,0,0,0.38)",
+    },
+  },
 });
 
 type Props = {

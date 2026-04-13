@@ -317,7 +317,7 @@ export default function AdminUserManagementPage({
                   ? "Partner access management"
                   : "User access management"}
               </Typography>
-              <Typography sx={{ mt: 0.75, color: "#6b7280", maxWidth: 760 }}>
+              <Typography sx={{ mt: 0.75, color: "#4b5563", maxWidth: 760 }}>
                 {userTypeFilter === "Student"
                   ? "Suspend, lift, or permanently ban student access to the Talent Platform without affecting other apps."
                   : userTypeFilter === "Company"

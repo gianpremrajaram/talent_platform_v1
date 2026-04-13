@@ -4,7 +4,7 @@ import AdminPartnerManagementPage from "@/components/membership-dashboard/AdminP
 
 export default async function PartnerUsersPage() {
   const session = await getServerAuthSession();
-  const roleKeys: string[] = (session?.user as any)?.roleKeys ?? [];
+  const roleKeys: string[] = session?.user?.roleKeys ?? [];
   if (!roleKeys.includes("ADMIN")) {
     redirect("/membership-dashboard");
   }

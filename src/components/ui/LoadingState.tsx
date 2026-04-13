@@ -25,7 +25,7 @@ export default function LoadingState({ message = "Loading…", size = 40 }: Prop
     >
       <CircularProgress size={size} />
       {message && (
-        <Typography sx={{ fontSize: 14, color: "#6b7280" }}>{message}</Typography>
+        <Typography sx={{ fontSize: 14, color: "#4b5563" }}>{message}</Typography>
       )}
     </Box>
   );

@@ -8,7 +8,7 @@ export async function toggleCompanyConsent(
   consented: boolean,
 ) {
   const session = await getServerAuthSession();
-  const studentId = (session?.user as any)?.id as string | undefined;
+  const studentId = session?.user?.id;
   if (!studentId) throw new Error("Unauthorized");
 
   await prisma.studentCompanyConsent.upsert({

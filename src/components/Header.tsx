@@ -21,7 +21,7 @@ export default function Header() {
   const isAuthenticated = status === "authenticated";
   const user = session?.user;
 
-const roleKeys = ((user as any)?.roleKeys ?? []) as string[];
+const roleKeys: string[] = user?.roleKeys ?? [];
 const isAdmin = roleKeys.includes("ADMIN");
 
   const studentsServices = getServicesForAudience("students");

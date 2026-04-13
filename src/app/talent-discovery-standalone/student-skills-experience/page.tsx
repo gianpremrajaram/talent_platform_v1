@@ -55,10 +55,10 @@ function mapProject(project: any) {
 
 export default async function StudentCVFunctionsPage() {
   const session = await getServerAuthSession();
-  const sessionUser = session?.user as any | undefined;
+  const sessionUser = session?.user;
   if (!sessionUser?.id) redirect("/sign-in");
 
-  const userId = sessionUser.id as string;
+  const userId = sessionUser.id;
 
   //find the intial data for the student from the DB.
   const experiences = await getStudentWorkExperiences(userId);
@@ -70,7 +70,7 @@ export default async function StudentCVFunctionsPage() {
     href: link.url,
   }));
   console.log(sessionUser);
-  const userName = sessionUser.name;
+  const userName = sessionUser.name ?? "";
   const roleName = sessionUser.roleKeys[0] === "STUDENT" ? "Student" : "User";
 
   return (

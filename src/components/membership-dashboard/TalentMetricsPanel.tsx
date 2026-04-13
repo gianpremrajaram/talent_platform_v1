@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { Box, Card, Typography, Grid, CircularProgress } from "@mui/material";
-import { PieChart } from "@mui/x-charts/PieChart";
+import { PieChart } from "@mui/x-charts";
 
 // 定义后端返回的数据格式
 interface MetricsData {
@@ -61,21 +61,21 @@ export default function TalentMetricsPanel() {
     <Box sx={{ mt: 3 }}>
       <Grid container spacing={3}>
         {/* 顶部 4 个统计卡片 */}
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <MetricCard title="Total Students" value={metrics.totalStudents} />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <MetricCard title="Consented Students" value={metrics.consentedStudents} color="#2e7d32" />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <MetricCard title="Approved Firms" value={metrics.approvedFirms} />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <MetricCard title="Matchable Pairs" value={metrics.matchablePairs.toLocaleString()} />
         </Grid>
 
         {/* 底部饼图区域 */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Card sx={{ p: 3, borderRadius: "8px", border: "1px solid #e5e7eb", boxShadow: "none", display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>Student Consent Rate</Typography>
             <PieChart
@@ -96,7 +96,7 @@ export default function TalentMetricsPanel() {
         </Grid>
 
         {/* 右侧说明 */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
             <Card sx={{ p: 3, borderRadius: "8px", border: "1px solid #e5e7eb", boxShadow: "none", height: '100%' }}>
                 <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>About these metrics</Typography>
                 <Typography variant="body2" color="text.secondary">
@@ -113,7 +113,7 @@ export default function TalentMetricsPanel() {
 function MetricCard({ title, value, color = "#111827" }: { title: string, value: string | number, color?: string }) {
   return (
     <Card sx={{ p: 3, borderRadius: "8px", border: "1px solid #e5e7eb", boxShadow: "none" }}>
-      <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#6b7280", textTransform: "uppercase", mb: 1 }}>
+      <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#4b5563", textTransform: "uppercase", mb: 1 }}>
         {title}
       </Typography>
       <Typography sx={{ fontSize: 28, fontWeight: 700, color: color }}>

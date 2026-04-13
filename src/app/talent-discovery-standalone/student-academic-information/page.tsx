@@ -28,13 +28,13 @@ function mapDbPlatformToSidebarPlatform(
 
 export default async function StudentAcademicInformationPage() {
   const session = await getServerAuthSession();
-  const sessionUser = session?.user as any | undefined;
+  const sessionUser = session?.user;
 
   if (!sessionUser?.id) {
     redirect("/sign-in");
   }
 
-  const userId = sessionUser.id as string;
+  const userId = sessionUser.id;
   const universities = await getStudentUniversities(userId);
   const acheivementTags = await getStudentAcheivementTags(userId);
   const socialLinks = await getStudentSocialLinks(userId);

@@ -7,13 +7,13 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
   const session = await getServerAuthSession();
-  const me = session?.user as any | undefined;
+  const me = session?.user;
   if (!me?.id) {
     return NextResponse.json({ ok: false, error: "Not signed in." }, { status: 401 });
   }
 
   const url = new URL(req.url);
-  const requestedUserId = url.searchParams.get("userId") ?? (me.id as string);
+  const requestedUserId = url.searchParams.get("userId") ?? me.id;
 
   const roleKeys: string[] = me.roleKeys ?? [];
   const isAdmin = roleKeys.includes("ADMIN");

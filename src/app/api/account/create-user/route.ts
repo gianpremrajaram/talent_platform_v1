@@ -18,7 +18,7 @@ function generateTempPassword(len = 10) {
 
 export async function POST(req: Request) {
   const session = await getServerAuthSession();
-  const user = session?.user as any | undefined;
+  const user = session?.user;
   const roleKeys: string[] = user?.roleKeys ?? [];
   const isAdmin = roleKeys.includes("ADMIN");
 

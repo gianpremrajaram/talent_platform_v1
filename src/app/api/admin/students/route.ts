@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   const session = await getServerAuthSession();
-  const me = session?.user as any | undefined;
+  const me = session?.user;
   const roleKeys: string[] = me?.roleKeys ?? [];
   if (!me?.id || !roleKeys.includes("ADMIN")) {
     return NextResponse.json({ error: "Admin access required." }, { status: 403 });

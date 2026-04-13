@@ -4,7 +4,7 @@ import AdminPartnersPage from "@/components/membership-dashboard/AdminPartnersPa
 
 export default async function ProjectPage() {
   const session = await getServerAuthSession();
-  const roleKeys: string[] = (session?.user as any)?.roleKeys ?? [];
+  const roleKeys: string[] = session?.user?.roleKeys ?? [];
   if (!roleKeys.includes("ADMIN")) {
     redirect("/membership-dashboard");
   }

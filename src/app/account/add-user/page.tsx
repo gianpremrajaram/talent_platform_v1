@@ -6,7 +6,7 @@ import CreateUserForm from "@/components/account/CreateUserForm";
 
 export default async function AddUserPage() {
   const session = await getServerAuthSession();
-  const user = session?.user as any | undefined;
+  const user = session?.user;
   if (!user) redirect("/sign-in");
 
   const roleKeys: string[] = user.roleKeys ?? [];

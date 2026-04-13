@@ -4,6 +4,17 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import {
+  Box,
+  Button,
+  Card,
+  Chip,
+  InputAdornment,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import { BENEFITS, type BenefitId } from "@/content/benefits";
 import type {
   AdminBenefitRedemptionStat,
@@ -14,6 +25,24 @@ import type { HandbookRenderResult } from "@/lib/handbook";
 import { canAccessBenefit } from "@/lib/membership-dashboard-admin";
 import { saveRedeemedBenefitsAction } from "@/lib/membership-dashboard-actions";
 import TalentMetricsPanel from "./TalentMetricsPanel";
+import AdminDataTable, { type AdminTableColumn } from "./AdminDataTable";
+
+const MEMBER_COLUMNS: AdminTableColumn[] = [
+  { key: "organisationName", label: "COMPANY NAME", width: "26%" },
+  { key: "contactName", label: "CONTACT NAME", width: "22%" },
+  { key: "tierLabel", label: "TIER", width: "14%" },
+  { key: "lastSignedInLabel", label: "LAST SIGN-IN", width: "20%" },
+  { key: "action", label: "ACTIONS", width: "18%" },
+];
+
+function tierChipSx(label: string) {
+  const k = label.toLowerCase();
+  if (k.includes("platinum")) return { backgroundColor: "#ede9fe", color: "#5b21b6" };
+  if (k.includes("gold"))     return { backgroundColor: "#fef08a", color: "#713f12" };
+  if (k.includes("silver"))   return { backgroundColor: "#e2e8f0", color: "#1e293b" };
+  if (k.includes("bronze"))   return { backgroundColor: "#fed7aa", color: "#7c2d12" };
+  return { backgroundColor: "#f3f4f6", color: "#374151" };
+}
 
 type TabKey = "members" | "benefits" | "handbook" | "metrics";
 
@@ -137,14 +166,15 @@ export default function AdminDashboardClient(props: {
     });
   }
 
-  const tierGroups = useMemo(() => {
-    const map = new Map<string, AdminMemberListItem[]>();
-    for (const m of members) {
-      const key = m.tierLabel;
-      map.set(key, [...(map.get(key) ?? []), m]);
-    }
-    return [...map.entries()];
-  }, [members]);
+  const [memberSearch, setMemberSearch] = useState("");
+
+  const filteredMembers = useMemo(() => {
+    const keyword = memberSearch.trim().toLowerCase();
+    if (!keyword) return members;
+    return members.filter((m) =>
+      m.organisationName.toLowerCase().includes(keyword),
+    );
+  }, [members, memberSearch]);
 
   const benefitStatsMap = useMemo(() => {
     const m = new Map<string, AdminBenefitRedemptionStat>();
@@ -294,28 +324,117 @@ export default function AdminDashboardClient(props: {
             hidden={activeTab !== "members"}
           >
             {!hasSelection ? (
-              <>
-                <h3 style={{ marginTop: 0 }}>Members overview</h3>
+              <Card
+                sx={{
+                  borderRadius: "8px",
+                  border: "1px solid #e7e9ee",
+                  boxShadow: "none",
+                  overflow: "hidden",
+                }}
+              >
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  sx={{ px: 2, py: 1.4, borderBottom: "1px solid #eceef2" }}
+                >
+                  <Box>
+                    <Typography sx={{ fontSize: 17, fontWeight: 600, color: "#111827" }}>
+                      Members overview
+                    </Typography>
+                    <Typography sx={{ fontSize: 13, color: "#4b5563", mt: 0.25 }}>
+                      {filteredMembers.length} of {members.length} members
+                    </Typography>
+                  </Box>
+                  <TextField
+                    size="small"
+                    value={memberSearch}
+                    onChange={(e) => setMemberSearch(e.target.value)}
+                    placeholder="Search by company"
+                    sx={{
+                      width: 240,
+                      "& .MuiOutlinedInput-root": {
+                        height: 34,
+                        backgroundColor: "#f9fafb",
+                      },
+                    }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchRoundedIcon fontSize="small" sx={{ color: "#4b5563" }} />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Stack>
 
-                {tierGroups.map(([tierLabel, items]) => (
-                  <details key={tierLabel} open>
-                    <summary>
-                      <strong>{tierLabel}</strong> ({items.length})
-                    </summary>
-
-                    <ul className="list-plain" style={{ marginTop: ".5rem" }}>
-                      {items.map((m) => (
-                        <li key={m.userId} style={{ marginBottom: ".35rem" }}>
-                          <span>
-                            <strong>{m.organisationName}</strong> ({m.contactName}) — Last sign-in:{" "}
-                            <span>{m.lastSignedInLabel}</span>
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </details>
-                ))}
-              </>
+                <AdminDataTable
+                  columns={MEMBER_COLUMNS}
+                  rows={filteredMembers}
+                  getRowKey={(row) => row.userId}
+                  getCells={(row) => [
+                    {
+                      key: "organisationName",
+                      content: (
+                        <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
+                          {row.organisationName}
+                        </Typography>
+                      ),
+                    },
+                    { key: "contactName", content: row.contactName },
+                    {
+                      key: "tierLabel",
+                      content: (
+                        <Chip
+                          label={row.tierLabel}
+                          size="small"
+                          sx={{ fontWeight: 600, ...tierChipSx(row.tierLabel) }}
+                        />
+                      ),
+                    },
+                    { key: "lastSignedInLabel", content: row.lastSignedInLabel },
+                    {
+                      key: "action",
+                      content: (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setLocalSelectedUserId(row.userId);
+                            setSelectedUser(row.userId);
+                          }}
+                          sx={{
+                            minWidth: 0,
+                            px: 1.2,
+                            py: 0.25,
+                            fontSize: 13,
+                            textTransform: "none",
+                            borderColor: "#cbd5e1",
+                            color: "#1f2937",
+                            "&:hover": {
+                              borderColor: "#94a3b8",
+                              backgroundColor: "#f8fafc",
+                            },
+                          }}
+                        >
+                          View
+                        </Button>
+                      ),
+                    },
+                  ]}
+                  emptyState={
+                    <>
+                      <Typography sx={{ fontWeight: 600, color: "#374151" }}>
+                        No members found
+                      </Typography>
+                      <Typography sx={{ fontSize: 14, color: "#4b5563", mt: 0.5 }}>
+                        Try another search term.
+                      </Typography>
+                    </>
+                  }
+                />
+              </Card>
             ) : (
               <>
                 <h3 style={{ marginTop: 0 }}>Member details</h3>

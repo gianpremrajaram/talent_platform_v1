@@ -19,7 +19,7 @@ function generateTempPassword(len = 8) {
 
 export async function POST(req: Request) {
   const session = await getServerAuthSession();
-  const me = session?.user as any | undefined;
+  const me = session?.user;
   if (!me?.id) return NextResponse.json({ ok: false, error: "Not signed in." }, { status: 401 });
 
   const roleKeys: string[] = me.roleKeys ?? [];

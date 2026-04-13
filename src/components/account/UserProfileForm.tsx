@@ -73,7 +73,7 @@ export default function UserProfileForm(props: {
 
   // Default app (visible to all)
   const [defaultAppId, setDefaultAppId] = useState<number | null>(null);
-  const [defaultAppTouched, setDefaultAppTouched] = useState(false);
+
 
   // Tracks the last preset we auto-applied in this session
   const lastAppliedPresetAppIdRef = useRef<number | null>(null);
@@ -213,7 +213,6 @@ export default function UserProfileForm(props: {
         setEmail(data.user.email ?? "");
 
         setDefaultAppId(data.user.defaultAppId ?? null);
-        setDefaultAppTouched(false);
         lastAppliedPresetAppIdRef.current = null;
 
         // Clear pending items when switching targets
@@ -726,7 +725,6 @@ export default function UserProfileForm(props: {
                 className="auth-input"
                 value={defaultAppId ?? ""}
                 onChange={(e) => {
-                  setDefaultAppTouched(true);
                   // lastAppliedPresetAppIdRef.current = null; // optional: not used in "role change wins" approach
                   setDefaultAppId(e.target.value ? Number(e.target.value) : null);
                 }}
