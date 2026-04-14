@@ -80,8 +80,8 @@ export default function CompanyProfileForm({
             {isEditing ? (
               <Select fullWidth size="small" value={formData.type} onChange={(e) => setFormData({...formData, type: e.target.value})} disabled={loading}>
                 <MenuItem value="INDUSTRY">INDUSTRY</MenuItem>
-                <MenuItem value="ACADEMIC">ACADEMIC</MenuItem>
-                <MenuItem value="NON_PROFIT">NON_PROFIT</MenuItem>
+                <MenuItem value="UNIVERSITY">UNIVERSITY</MenuItem>
+                <MenuItem value="OTHER">OTHER</MenuItem>
               </Select>
             ) : (
               <Typography>{org?.type || "INDUSTRY"}</Typography>
@@ -95,7 +95,8 @@ export default function CompanyProfileForm({
               <Select fullWidth size="small" value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})} disabled={loading}>
                 <MenuItem value="APPROVED">APPROVED</MenuItem>
                 <MenuItem value="PENDING">PENDING</MenuItem>
-                <MenuItem value="REJECTED">REJECTED</MenuItem>
+                <MenuItem value="SUSPENDED">SUSPENDED</MenuItem>
+                <MenuItem value="BANNED">BANNED</MenuItem>
               </Select>
             ) : (
               <Typography>{org?.status || "PENDING"}</Typography>
