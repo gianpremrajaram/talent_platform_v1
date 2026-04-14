@@ -40,8 +40,17 @@ export async function updateOrganisation(orgId: string, userId: string, data: {
   type?: string;
   status?: string;
 }) {
+  // 1. 增加严格的运行时验证 (Runtime Validation)
+  if (data.type && !Object.values(OrganisationType).includes(data.type as OrganisationType)) {
+    throw new Error(`Invalid Organisation Type: ${data.type}`);
+  }
+  if (data.status && !Object.values(CompanyStatus).includes(data.status as CompanyStatus)) {
+    throw new Error(`Invalid Company Status: ${data.status}`);
+  }
+
+  // 2. 验证通过后，安全地存入数据库
   await prisma.organisation.update({
-    where: { id: Number(orgId) },
+    where: { id: orgId },
     data: {
       ...(data.slug   !== undefined && { slug:   data.slug }),
       ...(data.domain !== undefined && { domain: data.domain }),
