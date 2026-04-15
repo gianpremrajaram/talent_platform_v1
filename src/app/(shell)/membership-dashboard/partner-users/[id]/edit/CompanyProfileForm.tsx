@@ -19,6 +19,7 @@ export default function CompanyProfileForm({
   email 
 }: { 
   org: OrgProp | null;
+  userId: string;
   tier: string;
   email: string;
 }) {
