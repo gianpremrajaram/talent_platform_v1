@@ -15,8 +15,14 @@ export async function GET() {
       return NextResponse.json({ error: "Admin access required." }, { status: 403 });
     }
 
+    // find “user-userStatus : PENDING_APPROVAL” or “organisation-status: PENDING”
     const pendingUsers = await prisma.user.findMany({
-      where: { userStatus: "PENDING_APPROVAL" },
+      where: {
+        OR: [
+          { userStatus: "PENDING_APPROVAL" },
+          { organisation: { status: "PENDING" } }
+        ]
+      },
       select: {
         id: true,
         email: true,
