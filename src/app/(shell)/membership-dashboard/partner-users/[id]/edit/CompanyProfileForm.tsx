@@ -4,14 +4,22 @@ import { useState } from "react";
 import { Box, Button, TextField, Stack, Typography, MenuItem, Select, Card, Divider } from "@mui/material";
 import { updateOrganisation } from "./actions";
 
+interface OrgProp {
+  id?: number;
+  slug?: string;
+  domain?: string;
+  type?: string;
+  status?: string;
+}
+
 export default function CompanyProfileForm({ 
   org, 
   userId, 
   tier, 
   email 
 }: { 
-  org: any; 
-  userId: string; 
+  org: OrgProp | null;
+  userId: string;
   tier: string;
   email: string;
 }) {

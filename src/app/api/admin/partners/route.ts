@@ -13,12 +13,16 @@ export async function GET() {
     return NextResponse.json({ error: "Admin access required." }, { status: 403 });
   }
 
+  // 1. Expand query scope: Fetch the real status of the Organisation and AppSuspension records
   const partners = await prisma.user.findMany({
     where: {
       userStatus: "ACTIVE",
+      // To avoid missing any partners (e.g., Amazon, which might be set to OTHER or UNIVERSITY)
+      // We remove the strict 'type: "INDUSTRY"' restriction; as long as there is an organisationId, it's included
+      organisationId: { not: null },
       organisation: {
-        type: "INDUSTRY",
-      },
+        status: { not: "PENDING" }
+      }
     },
     select: {
       id: true,
@@ -26,11 +30,18 @@ export async function GET() {
       lastName: true,
       email: true,
       organisation: {
-        select: { name: true },
+        select: { 
+          name: true,
+          status: true // Fetch the company's real approval status
+        },
+      },
+      appSuspensions: { // Fetch penalty/suspension logs
+        where: { appKey: "TALENT_DISCOVERY", liftedAt: null }, // Only fetch currently active suspensions/bans
+        select: { reason: true },
+        take: 1, // One active penalty record is enough
       },
       memberships: {
         select: {
-          status: true,
           membershipTier: { select: { key: true } },
         },
         orderBy: { id: "desc" },
@@ -42,9 +53,18 @@ export async function GET() {
 
   const rows = partners.map((u) => {
     const membership = u.memberships[0];
-    const rawStatus = membership?.status ?? "active";
-    const status =
-      rawStatus === "suspended" || rawStatus === "banned" ? rawStatus : "active";
+    const orgStatus = u.organisation?.status;
+    const activeSuspension = u.appSuspensions[0];
+
+    // 2. Core logic: Calculate the "Effective Status"
+    let finalStatus = "active";
+    if (activeSuspension) {
+      // If there is an unlifted penalty record, prioritize showing the penalty status (suspended or banned)
+      finalStatus = activeSuspension.reason.toLowerCase();
+    } else if (orgStatus === "SUSPENDED" || orgStatus === "BANNED" || orgStatus === "PENDING") {
+      // Otherwise, fall back to the company's base approval status
+      finalStatus = orgStatus.toLowerCase();
+    }
 
     return {
       id: u.id,
@@ -55,7 +75,7 @@ export async function GET() {
         : undefined,
       email: u.email,
       appScope: "Talent Platform",
-      status,
+      status: finalStatus,
       history: [],
     };
   });
