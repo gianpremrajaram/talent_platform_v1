@@ -34,7 +34,7 @@ export async function liftSuspension(userId: string) {
 } // <--- The previously missing brace is closed here!
 
 // Update organisation information (It is now outside, independent and safe)
-export async function updateOrganisation(orgId: string, userId: string, data: {
+export async function updateOrganisation(orgId: number, userId: string, data: {
   slug?: string;
   domain?: string;
   type?: string;
