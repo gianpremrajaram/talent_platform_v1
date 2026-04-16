@@ -25,11 +25,10 @@ export async function GET() {
       firstName: true,
       lastName: true,
       email: true,
-      memberships: {
-        select: {
-          status: true,
-        },
-        orderBy: { id: "desc" },
+      userStatus: true,
+      appSuspensions: {
+        where: { appKey: "TALENT_DISCOVERY", liftedAt: null },
+        select: { reason: true },
         take: 1,
       },
     },
@@ -37,9 +36,18 @@ export async function GET() {
   });
 
   const rows = students.map((u) => {
-    const rawStatus = u.memberships[0]?.status ?? "active";
-    const status =
-      rawStatus === "suspended" || rawStatus === "banned" ? rawStatus : "active";
+    const activeSuspension = u.appSuspensions[0];
+
+    let status: string;
+    if (activeSuspension?.reason === "BANNED") {
+      status = "banned";
+    } else if (activeSuspension?.reason === "SUSPENDED") {
+      status = "suspended";
+    } else if (u.userStatus === "PENDING_APPROVAL") {
+      status = "pending_approval";
+    } else {
+      status = "active";
+    }
 
     return {
       id: u.id,

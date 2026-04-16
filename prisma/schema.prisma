@@ -86,6 +86,7 @@ model Organisation {
 
 /// Individual user approval state. Separate from company-level CompanyStatus.
 /// PENDING_APPROVAL: recruiter registered but admin hasn't approved yet.
+/// Ban state is tracked exclusively via AppSuspension.reason = "BANNED".
 enum UserStatus {
   ACTIVE
   PENDING_APPROVAL

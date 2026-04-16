@@ -1,36 +1,57 @@
 "use server";
 
-import prisma from "@/lib/prisma"; // Adjust path if necessary
+import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
-// Execute suspension or ban
+// Execute suspension or ban (Dual-write: AppSuspension audit log + userStatus sync)
 export async function suspendOrBanUser(userId: string, actionType: "SUSPEND" | "BAN") {
-  // As per Issue #33: Insert a new record into AppSuspension
-  await prisma.appSuspension.create({
-    data: {
-      userId: userId,
-      appKey: "TALENT_DISCOVERY", // Issue requires Per-app (limited to the current talent platform)
-      reason: actionType === "BAN" ? "BANNED" : "SUSPENDED", // Use reason to distinguish between suspension and permanent ban
-    },
+  const targetReason = actionType === "BAN" ? "BANNED" : "SUSPENDED";
+
+  await prisma.$transaction(async (tx) => {
+    // Action A: Create an AppSuspension audit log entry
+    await tx.appSuspension.create({
+      data: {
+        userId,
+        appKey: "TALENT_DISCOVERY",
+        reason: targetReason,
+      },
+    });
+
+    // Action B: Sync userStatus — use SUSPENDED for both suspend and ban.
+    // BANNED is tracked via AppSuspension.reason; the UserStatus enum may not yet
+    // include BANNED if prisma generate hasn't been re-run after the schema change.
+    await tx.user.update({
+      where: { id: userId },
+      data: { userStatus: "SUSPENDED" },
+    });
   });
-  
-  // Refresh the current page so the UI reads the latest state
-  revalidatePath(`/membership-dashboard/partner-users/${userId}/edit`);
+
+  revalidatePath(`/membership-dashboard/student-users/${userId}/edit`);
+  revalidatePath("/membership-dashboard/student-users");
 }
 
-// Lift suspension/ban
+// Lift suspension/ban (Dual-write: lift audit record + restore userStatus to ACTIVE)
 export async function liftSuspension(userId: string) {
-  // As per Issue #33: Lifting a suspension only updates liftedAt, absolutely no row deletion (to retain audit records rows not deleted)
-  await prisma.appSuspension.updateMany({
-    where: {
-      userId: userId,
-      appKey: "TALENT_DISCOVERY",
-      liftedAt: null, // Find the currently active suspension record
-    },
-    data: {
-      liftedAt: new Date(), // Apply the unban timestamp
-    },
+  await prisma.$transaction(async (tx) => {
+    // Action A: Mark the active suspension record as lifted (never delete rows — audit trail)
+    await tx.appSuspension.updateMany({
+      where: {
+        userId,
+        appKey: "TALENT_DISCOVERY",
+        liftedAt: null,
+      },
+      data: {
+        liftedAt: new Date(),
+      },
+    });
+
+    // Action B: Restore userStatus to ACTIVE
+    await tx.user.update({
+      where: { id: userId },
+      data: { userStatus: "ACTIVE" },
+    });
   });
-  
-  revalidatePath(`/membership-dashboard/partner-users/${userId}/edit`);
+
+  revalidatePath(`/membership-dashboard/student-users/${userId}/edit`);
+  revalidatePath("/membership-dashboard/student-users");
 }
