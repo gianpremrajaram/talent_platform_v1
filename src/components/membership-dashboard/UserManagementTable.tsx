@@ -14,7 +14,7 @@ import AdminDataTable, { AdminTableColumn } from "./AdminDataTable";
 
 export type AppScope = "Talent Platform";
 export type UserType = "Student" | "Company";
-export type AccessStatus = "active" | "suspended" | "banned";
+export type AccessStatus = "active" | "pending_approval" | "suspended" | "banned";
 export type SuspensionActionType = "suspend" | "lift" | "ban";
 
 export type SuspensionRecord = {
@@ -70,6 +70,7 @@ function tierChipSx(label: string) {
 
 function statusTextColor(status: AccessStatus) {
   if (status === "active") return "#1f6a4f";
+  if (status === "pending_approval") return "#5a6a9a";
   if (status === "suspended") return "#8a6b2f";
   return "#a23b45";
 }

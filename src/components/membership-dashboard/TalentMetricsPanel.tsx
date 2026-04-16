@@ -100,7 +100,7 @@ export default function TalentMetricsPanel() {
             <Card sx={{ p: 3, borderRadius: "8px", border: "1px solid #e5e7eb", boxShadow: "none", height: '100%' }}>
                 <Typography variant="h6" sx={{ mb: 1, fontWeight: 600 }}>About these metrics</Typography>
                 <Typography variant="body2" color="text.secondary">
-                    These metrics represent the "North Star" health of the Talent Platform.
+                    These metrics represent the &quot;North Star&quot; health of the Talent Platform.
                     It tracks users who have passed initial verification and can use the platform without friction.
                 </Typography>
             </Card>

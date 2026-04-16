@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Box,
   Button,
@@ -36,15 +36,9 @@ export default function SuspensionActionModal({
   onClose,
   onConfirm,
 }: Props) {
-  const [appScope, setAppScope] = useState<AppScope>("Talent Platform");
+  // appScope is derived from user prop — no separate state needed
+  const appScope: AppScope = user?.appScope ?? "Talent Platform";
   const [reason, setReason] = useState("");
-
-  useEffect(() => {
-    if (isOpen && user) {
-      setAppScope(user.appScope);
-      setReason("");
-    }
-  }, [isOpen, user, action]);
 
   const title = useMemo(() => {
     if (action === "suspend") return "Suspend user access";
@@ -108,7 +102,7 @@ export default function SuspensionActionModal({
           select
           label="App scope"
           value={appScope}
-          onChange={(e) => setAppScope(e.target.value as AppScope)}
+          onChange={() => undefined}
           fullWidth
           size="small"
           data-autofocus="true"
