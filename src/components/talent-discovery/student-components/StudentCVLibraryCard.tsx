@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Box,
   Button,
@@ -21,6 +21,7 @@ import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { deleteStudentCVAction } from "@/app/talent-discovery-standalone/student-cv-functions/action";
+import { replaceStudentCVAction } from "@/app/talent-discovery-standalone/student-cv-functions/action";
 //TODO: there some formatting error while rendering it shows file name as id_name.pdf instead of name.pdf
 type StudentCVLibraryCardProps = {
   id: string;
@@ -67,8 +68,29 @@ export default function StudentCVLibraryCard({
     onDeleted(id);
   };
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleReplace = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    e.target.value = ""; // Reset file input
+    await replaceStudentCVAction(id, formData);
+
+    onDeleted(id); // Refresh the list after replacement
+  };
+
   return (
     <>
+      <input
+        type = "file"
+        hidden
+        ref={fileInputRef}
+        onChange={handleReplace}
+      />
       <Card
         elevation={0}
         sx={{
@@ -88,7 +110,7 @@ export default function StudentCVLibraryCard({
             alignItems: "center",
           }}
         >
-          <Stack direction="row" spacing={2} alignItems="flex-start">
+          <Stack direction="row" spacing={2} alignItems="center">
             <Box
               sx={{
                 mt: 0.5,
@@ -156,6 +178,19 @@ export default function StudentCVLibraryCard({
               }}
             >
               Preview CV
+            </Button>
+
+            <Button
+              variant="outlined"
+              onClick={() => fileInputRef.current?.click()}
+              sx={{
+                minWidth: 120,
+                textTransform: "none",
+                borderRadius: 1.5,
+                boxShadow: "none",
+              }}
+            >
+              Replace CV
             </Button>
 
             <Button

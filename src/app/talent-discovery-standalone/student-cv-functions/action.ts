@@ -7,6 +7,7 @@ import {
 import { revalidatePath } from "next/cache";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
+import { replaceStudentCV } from "@/lib/services/student-services";
 
 const ALLOWED_TYPES = [
   "application/pdf",
@@ -87,3 +88,18 @@ export async function deleteStudentCVAction(id: string) {
   await deleteStudentCV(id);
   revalidatePath("/talent-discovery-standalone/student-cv-functions");
 }
+
+export async function replaceStudentCVAction(
+  cvId: string,
+  formData: FormData
+){
+  const file = formData.get("file") as File | null;
+
+  if (!file || file.size === 0) {
+    return { success: false, error: "Please select a file to upload." };
+  }
+
+  await replaceStudentCV(cvId, file);
+  revalidatePath("/talent-discovery-standalone/student-cv-library");
+  return { success: true };
+} 

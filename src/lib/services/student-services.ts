@@ -1,6 +1,8 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import { SocialPlatform } from "@prisma/client";
+import fs from "fs";
+import path from "path";
 
 //api to get the work expereince of the student
 export async function getStudentWorkExperiences(userId: string) {
@@ -287,6 +289,55 @@ export async function createStudentCV(
       fileUrl: data.fileUrl,
       notes: data.notes,
       tags: data.tags ?? [],
+    },
+  });
+}
+
+// Function replacing student CV's and deleting the old file from the server.
+export async function replaceStudentCV(
+  cvId: string,
+  file: File
+) {
+  const existing = await prisma.studentCV.findUnique({
+    where: { id: cvId },
+  });
+
+  if (!existing) {
+    throw new Error("CV not found");
+  }
+
+  //converts file
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+
+  //ensures the file exists
+  const uploadDir = path.join(process.cwd(), "public/uploads");
+
+  if(!fs.existsSync(uploadDir)){
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+
+  const fileName = `${Date.now()}-${file.name}`;
+  const filePath = path.join(uploadDir, fileName);
+
+  fs.writeFileSync(filePath, buffer);
+  
+  const oldPath = path.join(process.cwd(), "public", existing.fileUrl);
+
+  // Delete the old file if it exists
+  if(existing.fileUrl) {
+    const oldFilePath = path.join(process.cwd(), "public", existing.fileUrl);
+    if(fs.existsSync(oldPath)) {
+      fs.unlinkSync(oldPath);
+    }
+  }
+
+  // Update DB record with new file URL
+  return prisma.studentCV.update({
+    where: { id: cvId },
+    data: {
+      fileUrl: `/uploads/${fileName}`,
+      uploadedAt: new Date(),
     },
   });
 }
