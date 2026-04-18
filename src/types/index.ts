@@ -67,6 +67,69 @@ export interface PaginatedStudentResults {
   nextCursor: string | null;
 }
 
+// ADMIN RECOMMENDATION GATEWAY (#35)
+
+/**
+ * Filter input for the admin candidate panel and recruiter talent search.
+ * Uses exact-match only (no LIKE %...%) so results stay precise.
+ */
+export interface CandidateFilters {
+  /** Required: scopes the consent LEFT JOIN to this firm's consented students. */
+  firmId: number;
+  /** Exact city match (case-insensitive). */
+  city?: string;
+  /** Exact country match (case-insensitive). */
+  country?: string;
+  /** Exact degree program match (case-insensitive). */
+  degreeProgram?: string;
+  /** Skill tag terms; each must exact-match a StudentSkill.name. */
+  skills?: string[];
+  /** CV tag terms; each must exact-match a StudentCV.tags entry. */
+  cvTags?: string[];
+  /** Cursor for pagination (cuid of last row from previous page). */
+  cursor?: string;
+}
+
+/**
+ * A student shown in the admin candidate panel or on a recruiter's
+ * Recommended Students tab. Includes degree, location, skills, and CV count.
+ */
+export interface RecommendationCandidate {
+  id: string;
+  firstName: string;
+  lastName: string;
+  degreeProgram: string | null;
+  location: string | null;
+  skills: string[];
+  cvCount: number;
+}
+
+export interface PaginatedCandidates {
+  candidates: RecommendationCandidate[];
+  nextCursor: string | null;
+}
+
+/** A single recommendation row, as shown in the admin's right-panel list. */
+export interface RecommendationRow {
+  id: string;
+  studentId: string;
+  firmId: number;
+  adminId: string;
+  createdAt: string;       // ISO string
+  revokedAt: string | null; // ISO string or null
+  student: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  firm: { name: string };
+}
+
+export interface AddRecommendationInput {
+  studentId: string;
+  firmId: number;
+}
+
 // ─────────────────────────────────────────────
 // JOB BOARD (#28)
 // ─────────────────────────────────────────────
