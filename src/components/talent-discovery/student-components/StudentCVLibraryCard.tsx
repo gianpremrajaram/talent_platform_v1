@@ -14,6 +14,7 @@ import {
   DialogTitle,
   IconButton,
   Stack,
+  TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -22,6 +23,7 @@ import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { deleteStudentCVAction } from "@/app/talent-discovery-standalone/student-cv-functions/action";
 import { replaceStudentCVAction } from "@/app/talent-discovery-standalone/student-cv-functions/action";
+import { updateStudentCVAction } from "@/app/talent-discovery-standalone/student-cv-functions/action";
 //TODO: there some formatting error while rendering it shows file name as id_name.pdf instead of name.pdf
 type StudentCVLibraryCardProps = {
   id: string;
@@ -46,6 +48,9 @@ export default function StudentCVLibraryCard({
 }: StudentCVLibraryCardProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [label, setLabel] = useState(title);
+  const [tagsState, setTagsState] = useState(tags);
 
   const handlePreview = () => {
     window.open(fileUrl, "_blank");
@@ -67,6 +72,17 @@ export default function StudentCVLibraryCard({
     setConfirmOpen(false);
     onDeleted(id);
   };
+
+  const handleSave = async () => {
+    await updateStudentCVAction(id, {
+      label, 
+      tags: tagsState,
+    });
+
+    setEditOpen(false);
+
+    onDeleted(id); // Refresh the list after update
+  }
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -171,39 +187,53 @@ export default function StudentCVLibraryCard({
               variant="contained"
               onClick={handlePreview}
               sx={{
-                minWidth: 120,
+                minWidth: 80,
                 textTransform: "none",
                 borderRadius: 1.5,
                 boxShadow: "none",
               }}
             >
-              Preview CV
+              Preview
             </Button>
 
             <Button
               variant="outlined"
               onClick={() => fileInputRef.current?.click()}
               sx={{
-                minWidth: 120,
+                minWidth: 90,
                 textTransform: "none",
                 borderRadius: 1.5,
                 boxShadow: "none",
               }}
             >
-              Replace CV
+              Replace
+            </Button>
+
+            <Button
+              variant="outlined"
+              onClick={() => setEditOpen(true)}
+              sx={{
+                minWidth: 40,
+                textTransform: "none",
+                borderRadius: 1.5,
+                boxShadow: "none",
+              }}
+
+            >
+              Edit
             </Button>
 
             <Button
               variant="contained"
               onClick={handleDownload}
               sx={{
-                minWidth: 130,
+                minWidth: 90,
                 textTransform: "none",
                 borderRadius: 1.5,
                 boxShadow: "none",
               }}
             >
-              Download CV
+              Download
             </Button>
 
             <Tooltip title="Delete CV">
@@ -257,6 +287,38 @@ export default function StudentCVLibraryCard({
           </Button>
         </DialogActions>
       </Dialog>
+      {/* ── Edit dialog (for label and tags) ── */}
+
+      <Dialog open={editOpen} onClose={() => setEditOpen(false)} fullWidth maxWidth="sm">
+      <DialogTitle>Edit CV</DialogTitle>
+      <DialogContent>
+        <TextField
+          fullWidth
+          label="Label"
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          sx={{ mb: 2 }}
+        />
+
+        <TextField
+          fullWidth
+          label="Tags (comma separated)"
+          value={tagsState.join(", ")}
+          onChange={(e) =>
+            setTagsState(
+              e.target.value.split(",").map((t) => t.trim()).filter(Boolean)
+            )
+          }
+        />
+      </DialogContent>
+
+      <DialogActions>
+        <Button onClick={() => setEditOpen(false)}>Cancel</Button>
+        <Button variant="contained" onClick={handleSave}>
+          Save
+        </Button>
+      </DialogActions>
+    </Dialog>
     </>
   );
 }

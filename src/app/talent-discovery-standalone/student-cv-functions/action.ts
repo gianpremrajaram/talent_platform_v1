@@ -8,6 +8,8 @@ import { revalidatePath } from "next/cache";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { replaceStudentCV } from "@/lib/services/student-services";
+import { updateStudentCVTags } from "@/lib/services/student-services";
+
 
 const ALLOWED_TYPES = [
   "application/pdf",
@@ -103,3 +105,11 @@ export async function replaceStudentCVAction(
   revalidatePath("/talent-discovery-standalone/student-cv-library");
   return { success: true };
 } 
+export async function updateStudentCVAction(
+  cvId: string,
+  data: {label?: string; tags?: string[]}
+){
+  await updateStudentCVTags(cvId, data);
+  revalidatePath("/talent-discovery-standalone/student-cv-library");
+  return { success: true };
+}
