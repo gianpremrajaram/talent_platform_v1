@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Box,
   Button,
   Card,
+  CircularProgress,
   InputAdornment,
   Stack,
   TextField,
@@ -14,7 +15,7 @@ import {
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import AdminDataTable, { AdminTableColumn } from "./AdminDataTable";
 
-type MembershipTier = "silver" | "gold" | "platinum";
+type MembershipTier = "silver" | "gold" | "platinum" | string | null;
 type PartnerProjectStatus = "pending" | "approved" | "rejected";
 
 type PartnerProjectRow = {
@@ -26,48 +27,9 @@ type PartnerProjectRow = {
   status: PartnerProjectStatus;
 };
 
-const initialRows: PartnerProjectRow[] = [
-  {
-    id: "partner-001",
-    companyName: "Google DeepMind",
-    projectName: "Applied AI Fellowships",
-    dateApplied: "07 Mar 2026",
-    tier: "platinum",
-    status: "pending",
-  },
-  {
-    id: "partner-002",
-    companyName: "Microsoft Research",
-    projectName: "Research Analyst Track",
-    dateApplied: "08 Mar 2026",
-    tier: "gold",
-    status: "pending",
-  },
-  {
-    id: "partner-003",
-    companyName: "Spotify",
-    projectName: "Product Design Rotation",
-    dateApplied: "08 Mar 2026",
-    tier: "gold",
-    status: "pending",
-  },
-  {
-    id: "partner-004",
-    companyName: "Tencent",
-    projectName: "Data Science Internship",
-    dateApplied: "09 Mar 2026",
-    tier: "silver",
-    status: "rejected",
-  },
-  {
-    id: "partner-005",
-    companyName: "BBC News",
-    projectName: "Frontend Engineering Project",
-    dateApplied: "09 Mar 2026",
-    tier: "gold",
-    status: "approved",
-  },
-];
+type Props = {
+  onRowsChanged?: () => void;
+};
 
 const columns: AdminTableColumn[] = [
   { key: "companyName", label: "COMPANY NAME", width: "25%" },
@@ -79,14 +41,8 @@ const columns: AdminTableColumn[] = [
 ];
 
 function statusTextColor(status: PartnerProjectStatus) {
-  if (status === "approved") {
-    return "#1f6a4f";
-  }
-
-  if (status === "rejected") {
-    return "#a23b45";
-  }
-
+  if (status === "approved") return "#1f6a4f";
+  if (status === "rejected") return "#a23b45";
   return "#8a6b2f";
 }
 
@@ -108,10 +64,44 @@ function actionTextButtonSx(color: string) {
   };
 }
 
-export default function PartnersTable() {
-  const [rows, setRows] = useState<PartnerProjectRow[]>(initialRows);
+function formatDate(iso: string) {
+  const d = new Date(iso);
+  return d.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+export default function PartnersTable({ onRowsChanged }: Props) {
+  const [rows, setRows] = useState<PartnerProjectRow[]>([]);
+  const [loading, setLoading] = useState(true);
   const [bannerMessage, setBannerMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const [search, setSearch] = useState("");
+
+  const loadRows = useCallback(async () => {
+    setLoading(true);
+    setErrorMessage("");
+    try {
+      const res = await fetch("/api/admin/partner-projects");
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setErrorMessage(body?.error ?? "Failed to load partner projects.");
+        return;
+      }
+      const data: PartnerProjectRow[] = await res.json();
+      setRows(Array.isArray(data) ? data : []);
+    } catch {
+      setErrorMessage("Something went wrong loading partner projects.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadRows();
+  }, [loadRows]);
 
   const filteredRows = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -119,47 +109,45 @@ export default function PartnersTable() {
     return rows.filter(
       (row) =>
         row.companyName.toLowerCase().includes(keyword) ||
-        row.projectName.toLowerCase().includes(keyword)
+        row.projectName.toLowerCase().includes(keyword),
     );
   }, [rows, search]);
 
-  async function handleApprove(row: PartnerProjectRow) {
-    // TODO: replace with partner endpoint call.
-    // Example:
-    // await fetch(`/api/admin/partners/projects/${row.id}/approve`, {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify({ tier: row.tier }),
-    // });
-
-    setRows((prev) =>
-      prev.map((item) =>
-        item.id === row.id ? { ...item, status: "approved" } : item
-      )
-    );
-
-    setBannerMessage(
-      `${row.companyName} project "${row.projectName}" approved for partner listing.`
-    );
-  }
-
-  async function handleReject(row: PartnerProjectRow) {
-    // TODO: replace with partner endpoint call.
-    // Example:
-    // await fetch(`/api/admin/partners/projects/${row.id}/reject`, {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    // });
-
-    setRows((prev) =>
-      prev.map((item) =>
-        item.id === row.id ? { ...item, status: "rejected" } : item
-      )
-    );
-
-    setBannerMessage(
-      `${row.companyName} project "${row.projectName}" rejected and hidden from partner feed.`
-    );
+  async function submitDecision(
+    row: PartnerProjectRow,
+    decision: "APPROVED" | "REJECTED",
+  ) {
+    setErrorMessage("");
+    try {
+      const res = await fetch(
+        `/api/admin/partner-projects/${row.id}/decision`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ decision }),
+        },
+      );
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setErrorMessage(body?.error ?? "Failed to update project.");
+        return;
+      }
+      const nextStatus: PartnerProjectStatus =
+        decision === "APPROVED" ? "approved" : "rejected";
+      setRows((prev) =>
+        prev.map((item) =>
+          item.id === row.id ? { ...item, status: nextStatus } : item,
+        ),
+      );
+      setBannerMessage(
+        decision === "APPROVED"
+          ? `${row.companyName} project "${row.projectName}" approved for partner listing.`
+          : `${row.companyName} project "${row.projectName}" rejected and hidden from partner feed.`,
+      );
+      onRowsChanged?.();
+    } catch {
+      setErrorMessage("Something went wrong. Please try again.");
+    }
   }
 
   return (
@@ -204,82 +192,101 @@ export default function PartnersTable() {
 
       {bannerMessage ? (
         <Box sx={{ px: 2, pt: 2 }}>
-          <Alert severity="success">{bannerMessage}</Alert>
+          <Alert severity="success" onClose={() => setBannerMessage("")}>
+            {bannerMessage}
+          </Alert>
         </Box>
       ) : null}
 
-<AdminDataTable
-        columns={columns}
-        rows={filteredRows}
-        getRowKey={(row) => row.id}
-        getCells={(row) => {
-          const isPending = row.status === "pending";
+      {errorMessage ? (
+        <Box sx={{ px: 2, pt: 2 }}>
+          <Alert severity="error" onClose={() => setErrorMessage("")}>
+            {errorMessage}
+          </Alert>
+        </Box>
+      ) : null}
 
-          return [
-            {
-              key: "companyName",
-              content: row.companyName,
-              sx: {
-                fontWeight: 600,
-                color: "#111827",
+      {loading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+          <CircularProgress size={22} />
+        </Box>
+      ) : (
+        <AdminDataTable
+          columns={columns}
+          rows={filteredRows}
+          getRowKey={(row) => row.id}
+          getCells={(row) => {
+            const isPending = row.status === "pending";
+            const tierLabel = row.tier ? row.tier : "-";
+
+            return [
+              {
+                key: "companyName",
+                content: row.companyName,
+                sx: { fontWeight: 600, color: "#111827" },
               },
-            },
-            { key: "projectName", content: row.projectName },
-            { key: "dateApplied", content: row.dateApplied },
-            {
-              key: "tier",
-              content: (
-                <Typography sx={{ fontSize: 12, color: "#1f2937", textTransform: "capitalize" }}>
-                  {row.tier}
-                </Typography>
-              ),
-            },
-            {
-              key: "status",
-              content: (
-                <Typography
-                  sx={{
-                    fontSize: 12,
-                    fontWeight: 600,
-                    textTransform: "capitalize",
-                    color: statusTextColor(row.status),
-                  }}
-                >
-                  {row.status}
-                </Typography>
-              ),
-            },
-            {
-              key: "action",
-              content: isPending ? (
-                <Stack direction="column" spacing={0.1} alignItems="flex-start">
-                  <Button
-                    size="small"
-                    onClick={() => handleApprove(row)}
-                    sx={actionTextButtonSx("#1f6a4f")}
+              { key: "projectName", content: row.projectName },
+              { key: "dateApplied", content: formatDate(row.dateApplied) },
+              {
+                key: "tier",
+                content: (
+                  <Typography
+                    sx={{
+                      fontSize: 12,
+                      color: "#1f2937",
+                      textTransform: "capitalize",
+                    }}
                   >
-                    Approve
-                  </Button>
-
-                  <Button
-                    size="small"
-                    onClick={() => handleReject(row)}
-                    sx={actionTextButtonSx("#a23b45")}
+                    {tierLabel}
+                  </Typography>
+                ),
+              },
+              {
+                key: "status",
+                content: (
+                  <Typography
+                    sx={{
+                      fontSize: 12,
+                      fontWeight: 600,
+                      textTransform: "capitalize",
+                      color: statusTextColor(row.status),
+                    }}
                   >
-                    Reject
-                  </Button>
-                </Stack>
-              ) : (
-                <Typography sx={{ fontSize: 11, color: "#4b5563" }}>
-                  {row.status === "approved"
-                    ? "Published to partner listings"
-                    : "Hidden from partner listings"}
-                </Typography>
-              ),
-            },
-          ];
-        }}
-      />
+                    {row.status}
+                  </Typography>
+                ),
+              },
+              {
+                key: "action",
+                content: isPending ? (
+                  <Stack direction="column" spacing={0.1} alignItems="flex-start">
+                    <Button
+                      size="small"
+                      onClick={() => submitDecision(row, "APPROVED")}
+                      sx={actionTextButtonSx("#1f6a4f")}
+                    >
+                      Approve
+                    </Button>
+                    <Button
+                      size="small"
+                      onClick={() => submitDecision(row, "REJECTED")}
+                      sx={actionTextButtonSx("#a23b45")}
+                    >
+                      Reject
+                    </Button>
+                  </Stack>
+                ) : (
+                  <Typography sx={{ fontSize: 11, color: "#4b5563" }}>
+                    {row.status === "approved"
+                      ? "Published to partner listings"
+                      : "Hidden from partner listings"}
+                  </Typography>
+                ),
+              },
+            ];
+          }}
+        />
+      )}
     </Card>
   );
 }
