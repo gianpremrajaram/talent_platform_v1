@@ -17,6 +17,7 @@ import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import HandshakeRoundedIcon from "@mui/icons-material/HandshakeRounded";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
+import RecommendRoundedIcon from "@mui/icons-material/RecommendRounded";
 import type { ReactNode } from "react";
 
 type NavItem = {
@@ -64,6 +65,17 @@ const navSections: NavSection[] = [
         href: "/membership-dashboard/student-users",
         adminOnly: true,
         icon: <SchoolRoundedIcon aria-hidden="true" />,
+      },
+    ],
+  },
+  {
+    title: "Matchmaking",
+    items: [
+      {
+        label: "Recommendations",
+        href: "/membership-dashboard/recommendations",
+        adminOnly: true,
+        icon: <RecommendRoundedIcon aria-hidden="true" />,
       },
     ],
   },

@@ -22,6 +22,11 @@ export const FEATURE_PERMISSIONS: Record<string, FeatureRule> = {
   'job-board-browse': { minTierRank: 2, allowedRoles: ['STUDENT'] },
   'student-profile': { minTierRank: null, allowedRoles: ['STUDENT'] },
   'admin-panel': { minTierRank: null, allowedRoles: ['ADMIN'] },
+  // Admin Recommendation Gateway (#35)
+  // Platinum-only tab that shows admin-curated recommendations for the recruiter's own firm.
+  'recommended-students': { minTierRank: 4, allowedRoles: [] },
+  // Proactive student search for recruiters (Silver and above), consent-scoped to own firm.
+  'talent-search': { minTierRank: 2, allowedRoles: [] },
 };
 
 // ─────────────────────────────────────────────

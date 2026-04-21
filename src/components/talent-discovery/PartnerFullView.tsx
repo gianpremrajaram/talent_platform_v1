@@ -1,314 +1,24 @@
 "use client";
 // src/components/talent-discovery/PartnerFullView.tsx
-// Gold/Platinum partner view with tabs: Job Board | Student Search.
-// Student search is consent-gated — only consented students appear.
-// Issue #34.
+// Recruiter view with three tabs: Job Board (Silver+), Talent Search (Silver+),
+// and Recommended Students (Platinum only). Each tab is gated twice: TierGate
+// on the button and panel for UX, and the API route re-checks server-side.
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useRef } from "react";
 import TierGate from "@/components/TierGate";
-import LoadingState from "@/components/ui/LoadingState";
-import EmptyState from "@/components/ui/EmptyState";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import RecruiterJobsPanel from "@/components/talent-discovery/RecruiterJobsPanel";
-import type { StudentSearchResult, PaginatedStudentResults } from "@/types/index";
+import RecruiterTalentSearchPanel from "@/components/talent-discovery/RecruiterTalentSearchPanel";
+import RecommendedStudentsPanel from "@/components/talent-discovery/RecommendedStudentsPanel";
 
-type Tab = "job-board" | "student-search";
+type Tab = "job-board" | "talent-search" | "recommended";
 
 type Props = {
   title: string;
   description: string;
 };
 
-// ─── Search filters state ─────────────────────────────────────────────────────
-
-type Filters = {
-  location: string;
-  degreeProgram: string;
-  skills: string;
-};
-
-const EMPTY_FILTERS: Filters = { location: "", degreeProgram: "", skills: "" };
-
-// ─── Student result card ──────────────────────────────────────────────────────
-
-function StudentCard({ student }: { student: StudentSearchResult }) {
-  return (
-    <article
-      style={{
-        border: "1px solid #e5e7eb",
-        borderRadius: "0.5rem",
-        padding: "1rem 1.25rem",
-        marginBottom: "0.75rem",
-        background: "#fff",
-      }}
-    >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "0.5rem" }}>
-        <div>
-          <strong>
-            {student.firstName} {student.lastName}
-          </strong>
-          {student.degreeProgram && (
-            <span style={{ marginLeft: "0.75rem", opacity: 0.7, fontSize: "0.875rem" }}>
-              {student.degreeProgram}
-            </span>
-          )}
-        </div>
-        {student.location && (
-          <span style={{ fontSize: "0.875rem", opacity: 0.65 }}>
-            <span aria-hidden="true">📍</span> {student.location}
-          </span>
-        )}
-      </div>
-      {student.skills.length > 0 && (
-        <div style={{ marginTop: "0.5rem", display: "flex", flexWrap: "wrap", gap: "0.375rem" }}>
-          {student.skills.map((skill) => (
-            <span
-              key={skill}
-              style={{
-                fontSize: "0.75rem",
-                background: "#f3f4f6",
-                border: "1px solid #e5e7eb",
-                borderRadius: "9999px",
-                padding: "0.125rem 0.625rem",
-              }}
-            >
-              {skill}
-            </span>
-          ))}
-        </div>
-      )}
-    </article>
-  );
-}
-
-// ─── Search panel ─────────────────────────────────────────────────────────────
-
-function StudentSearchPanel() {
-  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
-  const [students, setStudents] = useState<StudentSearchResult[]>([]);
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [searched, setSearched] = useState(false);
-
-  const buildUrl = useCallback(
-    (cursor?: string) => {
-      const params = new URLSearchParams();
-      if (filters.location) params.set("location", filters.location);
-      if (filters.degreeProgram) params.set("degreeProgram", filters.degreeProgram);
-      filters.skills
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean)
-        .forEach((s) => params.append("skills", s));
-      if (cursor) params.set("cursor", cursor);
-      return `/api/recruiter/search?${params.toString()}`;
-    },
-    [filters],
-  );
-
-  async function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    setStudents([]);
-    setNextCursor(null);
-    setSearched(false);
-
-    try {
-      const res = await fetch(buildUrl());
-      const data = await res.json();
-
-      if (!data.success) {
-        setError(data.error?.message ?? "Search failed.");
-        return;
-      }
-
-      const result: PaginatedStudentResults = data.data;
-      setStudents(result.students);
-      setNextCursor(result.nextCursor);
-      setSearched(true);
-    } catch {
-      setError("Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleLoadMore() {
-    if (!nextCursor) return;
-    setLoading(true);
-
-    try {
-      const res = await fetch(buildUrl(nextCursor));
-      const data = await res.json();
-
-      if (!data.success) {
-        setError(data.error?.message ?? "Failed to load more results.");
-        return;
-      }
-
-      const result: PaginatedStudentResults = data.data;
-      setStudents((prev) => [...prev, ...result.students]);
-      setNextCursor(result.nextCursor);
-    } catch {
-      setError("Something went wrong loading more results.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return (
-    <div>
-      <p style={{ marginBottom: "1.25rem", opacity: 0.8 }}>
-        Search students who have consented to share their profile with your
-        organisation. Contact details are available at the next tier of the
-        platform.
-      </p>
-
-      {/* Search filters */}
-      <form
-        onSubmit={handleSearch}
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-          gap: "0.75rem",
-          marginBottom: "1.25rem",
-          alignItems: "end",
-        }}
-      >
-        <div className="auth-field">
-          <label className="auth-label" htmlFor="search-location">
-            Location
-          </label>
-          <input
-            className="auth-input"
-            id="search-location"
-            type="text"
-            placeholder="e.g. London"
-            value={filters.location}
-            onChange={(e) =>
-              setFilters((f) => ({ ...f, location: e.target.value }))
-            }
-          />
-        </div>
-
-        <div className="auth-field">
-          <label className="auth-label" htmlFor="search-degree">
-            Degree programme
-          </label>
-          <input
-            className="auth-input"
-            id="search-degree"
-            type="text"
-            placeholder="e.g. Computer Science"
-            value={filters.degreeProgram}
-            onChange={(e) =>
-              setFilters((f) => ({ ...f, degreeProgram: e.target.value }))
-            }
-          />
-        </div>
-
-        <div className="auth-field">
-          <label className="auth-label" htmlFor="search-skills">
-            Skills{" "}
-            <span style={{ fontWeight: 400, opacity: 0.65 }}>
-              (comma-separated)
-            </span>
-          </label>
-          <input
-            className="auth-input"
-            id="search-skills"
-            type="text"
-            placeholder="e.g. Python, React"
-            value={filters.skills}
-            onChange={(e) =>
-              setFilters((f) => ({ ...f, skills: e.target.value }))
-            }
-          />
-        </div>
-
-        <div style={{ display: "flex", gap: "0.5rem", alignItems: "flex-end" }}>
-          <button
-            type="submit"
-            className="button-link button-link--primary"
-            disabled={loading}
-            style={{ whiteSpace: "nowrap" }}
-          >
-            {loading ? "Searching…" : "Search"}
-          </button>
-          {searched && (
-            <button
-              type="button"
-              className="button-link button-link--secondary"
-              onClick={() => {
-                setFilters(EMPTY_FILTERS);
-                setStudents([]);
-                setNextCursor(null);
-                setSearched(false);
-                setError(null);
-              }}
-            >
-              Clear
-            </button>
-          )}
-        </div>
-      </form>
-
-      {error && (
-        <p role="alert" className="small" style={{ marginBottom: "1rem" }}>
-          {error}
-        </p>
-      )}
-
-      {/* Results */}
-      {loading && students.length === 0 && (
-        <LoadingState message="Searching students…" />
-      )}
-
-      {searched && !loading && students.length === 0 && (
-        <EmptyState
-          message="No matching students found."
-          description="Try adjusting your search filters."
-          actionLabel="Clear filters"
-          onAction={() => {
-            setFilters(EMPTY_FILTERS);
-            setStudents([]);
-            setNextCursor(null);
-            setSearched(false);
-            setError(null);
-          }}
-        />
-      )}
-
-      {searched && students.length > 0 && (
-        <>
-          <p className="small" style={{ marginBottom: "0.75rem", opacity: 0.7 }}>
-            {`Showing ${students.length} result${students.length !== 1 ? "s" : ""}`}
-          </p>
-          {students.map((s) => (
-            <StudentCard key={s.id} student={s} />
-          ))}
-          {nextCursor && (
-            <button
-              type="button"
-              className="button-link button-link--secondary"
-              onClick={handleLoadMore}
-              disabled={loading}
-              style={{ marginTop: "0.5rem" }}
-            >
-              {loading ? "Loading…" : "Load more"}
-            </button>
-          )}
-        </>
-      )}
-    </div>
-  );
-}
-
-// ─── Main component ───────────────────────────────────────────────────────────
-
-const PARTNER_TABS: Tab[] = ["job-board", "student-search"];
+const ALL_TABS: Tab[] = ["job-board", "talent-search", "recommended"];
 
 export default function TalentDiscoveryPartnerFullView({ title, description }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>("job-board");
@@ -328,19 +38,19 @@ export default function TalentDiscoveryPartnerFullView({ title, description }: P
     let nextIndex: number | null = null;
     if (e.key === "ArrowRight") {
       e.preventDefault();
-      nextIndex = (currentIndex + 1) % PARTNER_TABS.length;
+      nextIndex = (currentIndex + 1) % ALL_TABS.length;
     } else if (e.key === "ArrowLeft") {
       e.preventDefault();
-      nextIndex = (currentIndex - 1 + PARTNER_TABS.length) % PARTNER_TABS.length;
+      nextIndex = (currentIndex - 1 + ALL_TABS.length) % ALL_TABS.length;
     } else if (e.key === "Home") {
       e.preventDefault();
       nextIndex = 0;
     } else if (e.key === "End") {
       e.preventDefault();
-      nextIndex = PARTNER_TABS.length - 1;
+      nextIndex = ALL_TABS.length - 1;
     }
     if (nextIndex !== null) {
-      setActiveTab(PARTNER_TABS[nextIndex]);
+      setActiveTab(ALL_TABS[nextIndex]);
       tabRefs.current[nextIndex]?.focus();
     }
   }
@@ -375,19 +85,40 @@ export default function TalentDiscoveryPartnerFullView({ title, description }: P
         >
           Job Board
         </button>
-        <button
-          ref={(el) => { tabRefs.current[1] = el; }}
-          id="tab-student-search"
-          role="tab"
-          aria-selected={activeTab === "student-search"}
-          aria-controls="panel-student-search"
-          tabIndex={activeTab === "student-search" ? 0 : -1}
-          style={tabStyle("student-search")}
-          onClick={() => setActiveTab("student-search")}
-          onKeyDown={(e) => handleTabKeyDown(e, 1)}
-        >
-          Student Search
-        </button>
+
+        {/* Talent Search tab: Silver and above */}
+        <TierGate requiredTier="SILVER">
+          <button
+            ref={(el) => { tabRefs.current[1] = el; }}
+            id="tab-talent-search"
+            role="tab"
+            aria-selected={activeTab === "talent-search"}
+            aria-controls="panel-talent-search"
+            tabIndex={activeTab === "talent-search" ? 0 : -1}
+            style={tabStyle("talent-search")}
+            onClick={() => setActiveTab("talent-search")}
+            onKeyDown={(e) => handleTabKeyDown(e, 1)}
+          >
+            Talent Search
+          </button>
+        </TierGate>
+
+        {/* Recommended Students tab: Platinum only */}
+        <TierGate requiredTier="PLATINUM">
+          <button
+            ref={(el) => { tabRefs.current[2] = el; }}
+            id="tab-recommended"
+            role="tab"
+            aria-selected={activeTab === "recommended"}
+            aria-controls="panel-recommended"
+            tabIndex={activeTab === "recommended" ? 0 : -1}
+            style={tabStyle("recommended")}
+            onClick={() => setActiveTab("recommended")}
+            onKeyDown={(e) => handleTabKeyDown(e, 2)}
+          >
+            Recommended Students
+          </button>
+        </TierGate>
       </div>
 
       {/* Tab panels */}
@@ -399,16 +130,37 @@ export default function TalentDiscoveryPartnerFullView({ title, description }: P
         </div>
       )}
 
-      {activeTab === "student-search" && (
-        <div role="tabpanel" id="panel-student-search" aria-labelledby="tab-student-search">
-          <TierGate requiredTier="gold" fallback={
-            <p>
-              Student search is available to <strong>Gold and Platinum</strong>{" "}
-              members only. Upgrade your membership to access this feature.
-            </p>
-          }>
+      {activeTab === "talent-search" && (
+        <div role="tabpanel" id="panel-talent-search" aria-labelledby="tab-talent-search">
+          <TierGate
+            requiredTier="SILVER"
+            fallback={
+              <p>
+                Talent Search is available to <strong>Silver, Gold, and Platinum</strong>{" "}
+                members. Upgrade your membership to access this feature.
+              </p>
+            }
+          >
             <ErrorBoundary>
-              <StudentSearchPanel />
+              <RecruiterTalentSearchPanel />
+            </ErrorBoundary>
+          </TierGate>
+        </div>
+      )}
+
+      {activeTab === "recommended" && (
+        <div role="tabpanel" id="panel-recommended" aria-labelledby="tab-recommended">
+          <TierGate
+            requiredTier="PLATINUM"
+            fallback={
+              <p>
+                Recommended Students is a <strong>Platinum-only</strong> feature.
+                Upgrade your membership to see students curated for your organisation.
+              </p>
+            }
+          >
+            <ErrorBoundary>
+              <RecommendedStudentsPanel />
             </ErrorBoundary>
           </TierGate>
         </div>

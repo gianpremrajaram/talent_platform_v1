@@ -62,9 +62,7 @@ export default async function TalentDiscoveryPage({
   const hasStudentRole = roleKeys.includes("STUDENT");
   const hasAdminRole = roleKeys.includes("ADMIN");
 
-  // ─────────────────────────────────────────
   // 3) Student view: only STUDENT or ADMIN
-  // ─────────────────────────────────────────
   if (view === "student") {
     if (!hasStudentRole && !hasAdminRole) {
       redirect(
@@ -74,11 +72,8 @@ export default async function TalentDiscoveryPage({
     redirect("/talent-discovery-standalone/student-dashboard");
   }
 
-  // ─────────────────────────────────────────
-  // 4) App-level gate for partner views
-  //    Defence-in-depth: DB-backed check via userCanAccessApp.
-  //    Admin bypass is handled inside userCanAccessApp.
-  // ─────────────────────────────────────────
+  // 4) App-level gate for partner views. Defence-in-depth: DB-backed check
+  //    via userCanAccessApp. Admin bypass is handled inside that function.
   if (!hasAdminRole) {
     const canAccessApp = await userCanAccessApp(userId, "TALENT_DISCOVERY");
     if (!canAccessApp) {
@@ -86,9 +81,7 @@ export default async function TalentDiscoveryPage({
     }
   }
 
-  // ─────────────────────────────────────────
   // 5) CV Library entry: requires Gold+ (via feature config)
-  // ─────────────────────────────────────────
   if (view === "cv-library") {
     const canAccess = await userCanAccessFeature(userId, "cv-library");
     if (!canAccess) {
@@ -105,10 +98,8 @@ export default async function TalentDiscoveryPage({
     );
   }
 
-  // ─────────────────────────────────────────
-  // 6) Job board or default entry for partners
-  //    Use centralised feature config for tier routing.
-  // ─────────────────────────────────────────
+  // 6) Job board or default entry for partners. Uses centralised feature
+  //    config for tier routing.
   if (hasAdminRole) {
     return (
       <TalentDiscoveryPartnerFullView
@@ -118,9 +109,11 @@ export default async function TalentDiscoveryPage({
     );
   }
 
-  // Gold+ → full partner view (job board + CV library + search)
-  const canAccessCvLibrary = await userCanAccessFeature(userId, "cv-library");
-  if (canAccessCvLibrary) {
+  // Silver and above: full partner view with tabbed Job Board, Talent Search,
+  // and Recommended Students. Each tab is independently TierGate-wrapped, and
+  // the backing API routes re-check permissions server-side.
+  const canAccessTalentSearch = await userCanAccessFeature(userId, "talent-search");
+  if (canAccessTalentSearch) {
     return (
       <TalentDiscoveryPartnerFullView
         title={copy.title}
@@ -129,7 +122,7 @@ export default async function TalentDiscoveryPage({
     );
   }
 
-  // Silver+ → job board only
+  // Bronze: job board only (no talent-search permission).
   const canAccessJobBoard = await userCanAccessFeature(
     userId,
     "job-board-browse",
@@ -143,8 +136,6 @@ export default async function TalentDiscoveryPage({
     );
   }
 
-  // ─────────────────────────────────────────
-  // 7) Fallback – should rarely be reached (middleware catches most cases)
-  // ─────────────────────────────────────────
+  // 7) Fallback: should rarely be reached (middleware catches most cases).
   redirect("/access-denied?reason=access-denied&appKey=TALENT_DISCOVERY");
 }
