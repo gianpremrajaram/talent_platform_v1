@@ -298,10 +298,7 @@ export async function createStudentCV(
 }
 
 // Function replacing student CV's and deleting the old file from the server.
-export async function replaceStudentCV(
-  cvId: string,
-  file: File
-) {
+export async function replaceStudentCV(cvId: string, file: File) {
   const existing = await prisma.studentCV.findUnique({
     where: { id: cvId },
   });
@@ -317,7 +314,7 @@ export async function replaceStudentCV(
   //ensures the file exists
   const uploadDir = path.join(process.cwd(), "public/uploads");
 
-  if(!fs.existsSync(uploadDir)){
+  if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
   }
 
@@ -325,13 +322,12 @@ export async function replaceStudentCV(
   const filePath = path.join(uploadDir, fileName);
 
   fs.writeFileSync(filePath, buffer);
-  
+
   const oldPath = path.join(process.cwd(), "public", existing.fileUrl);
 
   // Delete the old file if it exists
-  if(existing.fileUrl) {
-    const oldFilePath = path.join(process.cwd(), "public", existing.fileUrl);
-    if(fs.existsSync(oldPath)) {
+  if (existing.fileUrl) {
+    if (fs.existsSync(oldPath)) {
       fs.unlinkSync(oldPath);
     }
   }
@@ -375,9 +371,12 @@ export async function seedStudentConsentRows(studentId: string) {
       consented: true,
     })),
     skipDuplicates: true,
+  });
+}
+
 export async function updateStudentCVTags(
   cvId: string,
-  data: {label?: string; tags?: string[]}
+  data: { label?: string; tags?: string[] },
 ) {
   return prisma.studentCV.update({
     where: { id: cvId },
@@ -402,7 +401,11 @@ export async function getMembersWithConsentStatus(studentId: string) {
   // Lazy-seed: create missing consent rows so the DB and UI are always in sync.
   if (orgIds.length > 0) {
     await prisma.studentCompanyConsent.createMany({
-      data: orgIds.map((companyId) => ({ studentId, companyId, consented: true })),
+      data: orgIds.map((companyId) => ({
+        studentId,
+        companyId,
+        consented: true,
+      })),
       skipDuplicates: true,
     });
   }
