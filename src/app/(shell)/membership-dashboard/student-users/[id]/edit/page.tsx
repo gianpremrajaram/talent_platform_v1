@@ -194,6 +194,7 @@ export default async function StudentEditPage({
         userId={id}
         university={transformedUniversities}
         acheivementTags={acheivementTags}
+        studentName={fullName}
       />
     );
   }

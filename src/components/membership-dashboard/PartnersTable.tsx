@@ -173,19 +173,22 @@ export default function PartnersTable({ onRowsChanged }: Props) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search partner projects"
+          slotProps={{
+            htmlInput: { "aria-label": "Search partner projects" },
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchRoundedIcon fontSize="small" sx={{ color: "#4b5563" }} />
+                </InputAdornment>
+              ),
+            },
+          }}
           sx={{
             width: 220,
             "& .MuiOutlinedInput-root": {
               height: 34,
               backgroundColor: "#f9fafb",
             },
-          }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchRoundedIcon fontSize="small" sx={{ color: "#4b5563" }} />
-              </InputAdornment>
-            ),
           }}
         />
       </Stack>
@@ -263,6 +266,7 @@ export default function PartnersTable({ onRowsChanged }: Props) {
                     <Button
                       size="small"
                       onClick={() => submitDecision(row, "APPROVED")}
+                      aria-label={`Approve ${row.companyName} project ${row.projectName}`}
                       sx={actionTextButtonSx("#1f6a4f")}
                     >
                       Approve
@@ -270,6 +274,7 @@ export default function PartnersTable({ onRowsChanged }: Props) {
                     <Button
                       size="small"
                       onClick={() => submitDecision(row, "REJECTED")}
+                      aria-label={`Reject ${row.companyName} project ${row.projectName}`}
                       sx={actionTextButtonSx("#a23b45")}
                     >
                       Reject

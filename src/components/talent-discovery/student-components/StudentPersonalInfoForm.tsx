@@ -276,6 +276,10 @@ export default function StudentPersonalInfoForm({
   const [isEditingPersonal, setIsEditingPersonal] = React.useState(false);
   const [isEditingAddress, setIsEditingAddress] = React.useState(false);
 
+  const studentDisplayName =
+    `${savedValues.firstName ?? ""} ${savedValues.lastName ?? ""}`.trim() ||
+    "this student";
+
   React.useEffect(() => {
     setValues(mergedValues);
     setSavedValues(mergedValues);
@@ -542,6 +546,7 @@ export default function StudentPersonalInfoForm({
                   <Button
                     variant="outlined"
                     size="small"
+                    aria-label={`Edit ${studentDisplayName} personal information`}
                     onClick={() => {
                       setErrors({});
                       setIsEditingPersonal(true);
@@ -625,6 +630,11 @@ export default function StudentPersonalInfoForm({
                     value={values.gender}
                     onChange={handleChange("gender")}
                     disabled={!isEditingPersonal}
+                    slotProps={{
+                      select: {
+                        inputProps: { "aria-label": "Gender" },
+                      },
+                    }}
                     sx={isEditingPersonal ? inputSx : readOnlySx}
                   >
                     {genders.map((gender) => (
@@ -746,6 +756,7 @@ export default function StudentPersonalInfoForm({
                   <Button
                     variant="outlined"
                     size="small"
+                    aria-label={`Edit ${studentDisplayName} address`}
                     onClick={() => {
                       setErrors({});
                       setIsEditingAddress(true);

@@ -332,19 +332,22 @@ export default function AdminUserManagementPage({
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search users"
+                slotProps={{
+                  htmlInput: { "aria-label": "Search users" },
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchRoundedIcon fontSize="small" />
+                      </InputAdornment>
+                    ),
+                  },
+                }}
                 sx={{
                   width: 240,
                   "& .MuiOutlinedInput-root": {
                     height: 38,
                     backgroundColor: "#fff",
                   },
-                }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchRoundedIcon fontSize="small" />
-                    </InputAdornment>
-                  ),
                 }}
               />
 

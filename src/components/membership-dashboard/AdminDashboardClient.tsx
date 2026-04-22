@@ -351,6 +351,7 @@ export default function AdminDashboardClient(props: {
                     value={memberSearch}
                     onChange={(e) => setMemberSearch(e.target.value)}
                     placeholder="Search by company"
+                    slotProps={{ htmlInput: { "aria-label": "Search members by company" } }}
                     sx={{
                       width: 240,
                       "& .MuiOutlinedInput-root": {
@@ -399,6 +400,7 @@ export default function AdminDashboardClient(props: {
                         <Button
                           size="small"
                           variant="outlined"
+                          aria-label={`View details for ${row.organisationName}`}
                           onClick={(e) => {
                             e.stopPropagation();
                             setLocalSelectedUserId(row.userId);
@@ -480,7 +482,25 @@ export default function AdminDashboardClient(props: {
                   </li>
                 </ul>
 
-                <div style={{ marginTop: "1rem" }}>
+                <div
+                  style={{
+                    marginTop: "1rem",
+                    display: "flex",
+                    gap: "0.75rem",
+                    alignItems: "center",
+                  }}
+                >
+                  <button
+                    type="button"
+                    className="button-link button-link--secondary"
+                    onClick={() => {
+                      setLocalSelectedUserId("");
+                      setSelectedUser("");
+                    }}
+                    aria-label="Back to members list"
+                  >
+                    Back
+                  </button>
                   <Link
                     className="button-link button-link--secondary"
                     href={`/account?userId=${encodeURIComponent(selectedUserId ?? "")}`}

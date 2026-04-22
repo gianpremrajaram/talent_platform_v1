@@ -60,6 +60,7 @@ type StudentAcademicInformationFormProps = {
   userId: string;
   university: UniversityFromServer[];
   acheivementTags: { id: string; name: string }[];
+  studentName?: string;
 };
 
 const emptyCollege: CollegeForm = {
@@ -101,8 +102,11 @@ export default function StudentAcademicInformationForm({
   userId,
   university,
   acheivementTags,
+  studentName,
 }: StudentAcademicInformationFormProps) {
   const theme = useTheme();
+
+  const studentDisplayName = studentName?.trim() || "this student";
 
   const [colleges, setColleges] = useState<CollegeForm[]>(
     university.map((uni) => ({
@@ -293,6 +297,7 @@ export default function StudentAcademicInformationForm({
             <Button
               variant="outlined"
               startIcon={<Add />}
+              aria-label={`Add university for ${studentDisplayName}`}
               onClick={openAddCollegeDialog}
             >
               Add University
@@ -420,6 +425,7 @@ export default function StudentAcademicInformationForm({
               <Button
                 variant="outlined"
                 startIcon={<Add />}
+                aria-label={`Add achievement tag for ${studentDisplayName}`}
                 onClick={() => setTagDialogOpen(true)}
                 sx={{ px: 2.25, py: 1 }}
               >
