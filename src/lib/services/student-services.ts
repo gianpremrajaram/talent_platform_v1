@@ -355,6 +355,16 @@ export async function deleteStudentCV(id: string) {
   });
 }
 
+export async function updateStudentCVTags(
+  cvId: string,
+  data: {label?: string; tags?: string[]}
+) {
+  return prisma.studentCV.update({
+    where: { id: cvId },
+    data,
+  });
+}
+
 export async function getMembersWithConsentStatus(studentId: string) {
   const members = await prisma.membershipDashboardMember.findMany({
     include: {
