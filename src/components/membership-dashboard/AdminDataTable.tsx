@@ -265,12 +265,17 @@ export default function AdminDataTable<T>({
                 jumpToPage(pageInput);
               }
             }}
-            inputProps={{
-              min: 1,
-              max: totalPages,
-              inputMode: "numeric",
-              pattern: "[0-9]*",
-              style: { textAlign: "center" },
+            slotProps={{
+              htmlInput: {
+                min: 1,
+                max: totalPages,
+                inputMode: "numeric",
+                pattern: "[0-9]*",
+                style: { textAlign: "center" },
+                "aria-label": `Go to page, currently ${pageInput || 1} of ${totalPages}`,
+                "aria-valuemin": 1,
+                "aria-valuemax": totalPages,
+              },
             }}
             sx={{
               width: 72,

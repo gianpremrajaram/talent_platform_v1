@@ -229,6 +229,13 @@ export default function AdminRecommendationPage() {
             size="small"
             value={firmId}
             onChange={(e) => handleFirmChange(e.target.value)}
+            slotProps={{
+              select: {
+                inputProps: {
+                  "aria-label": "Select firm to view and manage recommendations",
+                },
+              },
+            }}
             sx={{ minWidth: 260 }}
           >
             {firms.length === 0 ? (
@@ -317,6 +324,7 @@ export default function AdminRecommendationPage() {
               variant="contained"
               onClick={handleSearch}
               disabled={typeof firmId !== "number" || loadingCandidates}
+              aria-label="Search consented candidates with current filters"
               sx={{ textTransform: "none" }}
             >
               Search
@@ -326,6 +334,7 @@ export default function AdminRecommendationPage() {
               onClick={recommendShortlist}
               disabled={shortlist.size === 0 || busyId === "__batch__"}
               startIcon={<PersonAddAltRoundedIcon />}
+              aria-label={`Recommend ${shortlist.size} shortlisted candidate${shortlist.size === 1 ? "" : "s"} to selected firm`}
               sx={{ textTransform: "none" }}
             >
               Recommend shortlist ({shortlist.size})
@@ -381,6 +390,11 @@ export default function AdminRecommendationPage() {
                           size="small"
                           variant={isShortlisted ? "contained" : "outlined"}
                           onClick={() => toggleShortlist(c.id)}
+                          aria-label={
+                            isShortlisted
+                              ? `Remove ${c.firstName} ${c.lastName} from shortlist`
+                              : `Add ${c.firstName} ${c.lastName} to shortlist`
+                          }
                           sx={{ textTransform: "none", minWidth: 96 }}
                         >
                           {isShortlisted ? "Shortlisted" : "Shortlist"}
@@ -391,6 +405,11 @@ export default function AdminRecommendationPage() {
                           color="success"
                           onClick={() => recommendStudent(c.id)}
                           disabled={busyId === c.id || alreadyRecommended}
+                          aria-label={
+                            alreadyRecommended
+                              ? `${c.firstName} ${c.lastName} already recommended`
+                              : `Recommend ${c.firstName} ${c.lastName} to selected firm`
+                          }
                           sx={{ textTransform: "none", minWidth: 96 }}
                         >
                           {alreadyRecommended
@@ -416,6 +435,7 @@ export default function AdminRecommendationPage() {
               <Button
                 onClick={handleLoadMore}
                 variant="text"
+                aria-label="Load more consented candidates"
                 sx={{ textTransform: "none" }}
               >
                 Load more
@@ -476,7 +496,7 @@ export default function AdminRecommendationPage() {
                     color="error"
                     onClick={() => revokeRow(r.id)}
                     disabled={busyId === r.id}
-                    aria-label="Revoke recommendation"
+                    aria-label={`Revoke recommendation for ${r.student.firstName} ${r.student.lastName}`}
                   >
                     <DeleteOutlineRoundedIcon fontSize="small" />
                   </IconButton>

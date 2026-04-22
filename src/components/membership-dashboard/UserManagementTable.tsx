@@ -125,19 +125,22 @@ export default function UserManagementTable({
           value={search}
           onChange={(e) => onSearchChange?.(e.target.value)}
           placeholder={searchPlaceholder}
+          slotProps={{
+            htmlInput: { "aria-label": searchPlaceholder },
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchRoundedIcon fontSize="small" sx={{ color: "#4b5563" }} />
+                </InputAdornment>
+              ),
+            },
+          }}
           sx={{
             width: 220,
             "& .MuiOutlinedInput-root": {
               height: 34,
               backgroundColor: "#f9fafb",
             },
-          }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchRoundedIcon fontSize="small" sx={{ color: "#4b5563" }} />
-              </InputAdornment>
-            ),
           }}
         />
       </Stack>
@@ -210,6 +213,7 @@ export default function UserManagementTable({
               content: (
                 <Button
                   size="small"
+                  aria-label={`Edit user ${row.name}`}
                   onClick={(e) => {
                     e.stopPropagation();
                     window.location.href =

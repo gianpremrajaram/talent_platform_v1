@@ -273,6 +273,21 @@ const isAdmin = roleKeys.includes("ADMIN");
               </ul>
             </li>
 
+            {/* Admin dashboard: only visible to users with ADMIN role. */}
+            {isAuthenticated && isAdmin && (
+              <li className="nav-item">
+                <Link
+                  className="nav-link"
+                  href="/membership-dashboard"
+                  aria-current={
+                    pathname.startsWith("/membership-dashboard") ? "page" : undefined
+                  }
+                >
+                  Admin dashboard
+                </Link>
+              </li>
+            )}
+
             {/* Account / Sign in */}
             {isAuthenticated ? (
               <li className="nav-item has-submenu">

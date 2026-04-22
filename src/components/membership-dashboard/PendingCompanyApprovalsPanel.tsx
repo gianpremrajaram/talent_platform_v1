@@ -196,6 +196,9 @@ export default function PendingCompanyApprovalsPanel() {
                   displayEmpty
                   value={selectedTiers[company.id] || ""}
                   onChange={(e) => handleTierChange(company.id, e.target.value)}
+                  inputProps={{
+                    "aria-label": `Select tier for ${company.name}`,
+                  }}
                   sx={{ minWidth: 120, fontSize: 14 }}
                 >
                   <MenuItem value="" disabled>Select Tier</MenuItem>
@@ -207,8 +210,26 @@ export default function PendingCompanyApprovalsPanel() {
               </TableCell>
               <TableCell align="right">
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
-                  <Button variant="outlined" color="error" size="small" onClick={() => handleReject(company.id)} sx={{ textTransform: "none" }}>Reject</Button>
-                  <Button variant="contained" color="success" size="small" onClick={() => handleApprove(company.id)} sx={{ textTransform: "none", boxShadow: "none" }}>Approve</Button>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    size="small"
+                    onClick={() => handleReject(company.id)}
+                    aria-label={`Reject registration for ${company.name}`}
+                    sx={{ textTransform: "none" }}
+                  >
+                    Reject
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="success"
+                    size="small"
+                    onClick={() => handleApprove(company.id)}
+                    aria-label={`Approve registration for ${company.name}`}
+                    sx={{ textTransform: "none", boxShadow: "none" }}
+                  >
+                    Approve
+                  </Button>
                 </Stack>
               </TableCell>
             </TableRow>
