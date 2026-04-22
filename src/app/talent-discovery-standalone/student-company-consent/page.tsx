@@ -20,7 +20,7 @@ export default async function StudentCVFunctionsPage() {
       <StudentSideBar />
 
       <Box sx={{ flexGrow: 1, bgcolor: "#fafafb", minWidth: 0 }}>
-        <DashboardTopBar title="Student Company Consent" />
+        <DashboardTopBar title="Student Company Consent" userInitial={sessionUser.name?.charAt(0).toUpperCase() ?? ""} />
 
         <Box
           sx={{

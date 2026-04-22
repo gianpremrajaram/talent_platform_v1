@@ -10,15 +10,16 @@ import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import RecruiterJobsPanel from "@/components/talent-discovery/RecruiterJobsPanel";
 import RecruiterTalentSearchPanel from "@/components/talent-discovery/RecruiterTalentSearchPanel";
 import RecommendedStudentsPanel from "@/components/talent-discovery/RecommendedStudentsPanel";
+import RecruiterApplicationsPanel from "@/components/talent-discovery/RecruiterApplicationsPanel";
 
-type Tab = "job-board" | "talent-search" | "recommended";
+type Tab = "job-board" | "talent-search" | "recommended" | "applications";
 
 type Props = {
   title: string;
   description: string;
 };
 
-const ALL_TABS: Tab[] = ["job-board", "talent-search", "recommended"];
+const ALL_TABS: Tab[] = ["job-board", "talent-search", "recommended", "applications"];
 
 export default function TalentDiscoveryPartnerFullView({ title, description }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>("job-board");
@@ -119,6 +120,21 @@ export default function TalentDiscoveryPartnerFullView({ title, description }: P
             Recommended Students
           </button>
         </TierGate>
+
+        {/* Applications tab: all recruiters */}
+        <button
+          ref={(el) => { tabRefs.current[3] = el; }}
+          id="tab-applications"
+          role="tab"
+          aria-selected={activeTab === "applications"}
+          aria-controls="panel-applications"
+          tabIndex={activeTab === "applications" ? 0 : -1}
+          style={tabStyle("applications")}
+          onClick={() => setActiveTab("applications")}
+          onKeyDown={(e) => handleTabKeyDown(e, 3)}
+        >
+          Applications
+        </button>
       </div>
 
       {/* Tab panels */}
@@ -163,6 +179,14 @@ export default function TalentDiscoveryPartnerFullView({ title, description }: P
               <RecommendedStudentsPanel />
             </ErrorBoundary>
           </TierGate>
+        </div>
+      )}
+
+      {activeTab === "applications" && (
+        <div role="tabpanel" id="panel-applications" aria-labelledby="tab-applications">
+          <ErrorBoundary>
+            <RecruiterApplicationsPanel />
+          </ErrorBoundary>
         </div>
       )}
     </section>

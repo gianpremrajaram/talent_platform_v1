@@ -190,3 +190,32 @@ export interface StudentRegistrationInput {
   lastName: string;
   password: string;
 }
+
+// ─────────────────────────────────────────────
+// JOB APPLICATIONS
+// ─────────────────────────────────────────────
+
+export interface JobApplicationInput {
+  cvId?: string;
+  coverLetter?: string;
+}
+
+export interface JobApplicationResult {
+  id: string;
+  jobId: string;
+  studentId: string;
+  cvId: string | null;
+  coverLetter: string | null;
+  appliedAt: string; // ISO string
+  student: { firstName: string; lastName: string; email: string };
+  job: { title: string; organisation: { name: string } };
+  cv: { id: string; label: string; fileUrl: string } | null;
+}
+
+/** Grouped view for recruiter: one job with all its applicants. */
+export interface JobApplicationsForJob {
+  jobId: string;
+  jobTitle: string;
+  organisationName: string;
+  applications: JobApplicationResult[];
+}

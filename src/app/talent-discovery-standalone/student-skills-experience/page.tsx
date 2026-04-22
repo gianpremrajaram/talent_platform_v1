@@ -78,7 +78,7 @@ export default async function StudentCVFunctionsPage() {
       <StudentSideBar />
 
       <Box sx={{ flexGrow: 1, bgcolor: "#fafafb", minWidth: 0 }}>
-        <DashboardTopBar title="Student Skills and Experience" />
+        <DashboardTopBar title="Student Skills and Experience" userInitial={sessionUser.name?.charAt(0).toUpperCase() ?? ""} />
 
         <Box
           sx={{

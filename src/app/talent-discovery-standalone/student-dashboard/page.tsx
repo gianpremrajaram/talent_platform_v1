@@ -5,6 +5,7 @@ import StatisticsCard from "@/components/talent-discovery/student-components/Sta
 import JobOpeningsTable from "@/components/talent-discovery/student-components/JobOpeningsTable";
 import { getServerAuthSession } from "@/lib/getServerAuthSession";
 import { getStudentCVs } from "@/lib/services/student-services";
+import { getStudentApplications } from "@/lib/services/applications";
 import { redirect } from "next/navigation";
 
 export default async function StudentDashboardPage() {
@@ -12,13 +13,18 @@ export default async function StudentDashboardPage() {
   const sessionUser = session?.user;
   if (!sessionUser?.id) redirect("/sign-in");
 
-  const cvs = await getStudentCVs(sessionUser.id);
+  const [cvs, applications] = await Promise.all([
+    getStudentCVs(sessionUser.id),
+    getStudentApplications(sessionUser.id),
+  ]);
+  const cvProps = cvs.map((cv) => ({ id: cv.id, label: cv.label, fileUrl: cv.fileUrl }));
+  const appliedJobIds = applications.map((a) => a.jobId);
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
       <StudentSideBar />
       <Box sx={{ flexGrow: 1, bgcolor: "#fafafb" }}>
-        <DashboardTopBar title="Student Dashboard" />
+        <DashboardTopBar title="Student Dashboard" userInitial={sessionUser.name?.charAt(0).toUpperCase() ?? ""} />
         <Box sx={{ p: 3 }}>
           <Typography variant="h5" sx={{ mb: 3 }}>
             Current Job Openings
@@ -31,8 +37,7 @@ export default async function StudentDashboardPage() {
             />
           </Box>
           <Divider sx={{ mb: 3 }} />
-          {/* render the job table */}
-          <JobOpeningsTable />
+          <JobOpeningsTable cvs={cvProps} initialAppliedJobIds={appliedJobIds} />
         </Box>
       </Box>
     </Box>

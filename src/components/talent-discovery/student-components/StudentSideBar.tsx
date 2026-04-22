@@ -20,6 +20,7 @@ import UploadFileOutlinedIcon from "@mui/icons-material/UploadFileOutlined";
 import FolderOpenOutlinedIcon from "@mui/icons-material/FolderOpenOutlined";
 import TagOutlinedIcon from "@mui/icons-material/TagOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
 
 type NavItem = {
   label: string;
@@ -32,6 +33,11 @@ const profileItems: NavItem[] = [
     label: "Dashboard",
     href: "/talent-discovery-standalone/student-dashboard",
     icon: <DashboardOutlinedIcon />,
+  },
+  {
+    label: "My Applications",
+    href: "/talent-discovery-standalone/student-applications",
+    icon: <AssignmentOutlinedIcon />,
   },
   {
     label: "Personal Info",
