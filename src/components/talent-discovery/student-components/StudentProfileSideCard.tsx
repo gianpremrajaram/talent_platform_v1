@@ -15,7 +15,6 @@ import XIcon from "@mui/icons-material/X";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import GitHubIcon from "@mui/icons-material/GitHub";
-import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 
 type MenuItem = {
@@ -75,13 +74,9 @@ export default function StudentProfileSideCard({
   socialLinks = [],
   menuItems = [
     {
-      label: "Personal Information",
-      icon: <PersonOutlineIcon fontSize="small" />,
-      active: true,
-    },
-    {
       label: "Settings",
       icon: <SettingsOutlinedIcon fontSize="small" />,
+      href: "/talent-discovery-standalone/student-security-settings",
     },
   ],
 }: ProfileSidebarCardProps) {

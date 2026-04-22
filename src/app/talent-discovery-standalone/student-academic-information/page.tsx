@@ -8,6 +8,7 @@ import {
   getStudentAcheivementTags,
   getStudentUniversities,
   getStudentSocialLinks,
+  getStudentProjectCount,
 } from "@/lib/services/student-services";
 import { redirect } from "next/navigation";
 
@@ -35,9 +36,13 @@ export default async function StudentAcademicInformationPage() {
   }
 
   const userId = sessionUser.id;
-  const universities = await getStudentUniversities(userId);
-  const acheivementTags = await getStudentAcheivementTags(userId);
-  const socialLinks = await getStudentSocialLinks(userId);
+  const userName = sessionUser.name ?? "";
+  const [universities, acheivementTags, socialLinks, projectCount] = await Promise.all([
+    getStudentUniversities(userId),
+    getStudentAcheivementTags(userId),
+    getStudentSocialLinks(userId),
+    getStudentProjectCount(userId),
+  ]);
   const sidebarSocialLinks = socialLinks.map((link) => ({
     platform: mapDbPlatformToSidebarPlatform(link.platform),
     href: link.url,
@@ -80,9 +85,9 @@ export default async function StudentAcademicInformationPage() {
             }}
           >
             <StudentProfileSideCard
-              name="Sadhana"
+              name={userName}
               role="Student"
-              projectCount={3}
+              projectCount={projectCount}
               socialLinks={sidebarSocialLinks}
             />
 

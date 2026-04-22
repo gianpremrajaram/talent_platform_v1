@@ -19,6 +19,10 @@ export async function getStudentProjects(userId: string) {
   });
 }
 
+export async function getStudentProjectCount(userId: string) {
+  return prisma.studentProjects.count({ where: { userId } });
+}
+
 export async function getStudentTechnicalSkills(userId: string) {
   return prisma.studentSkill.findMany({
     where: { userId },
