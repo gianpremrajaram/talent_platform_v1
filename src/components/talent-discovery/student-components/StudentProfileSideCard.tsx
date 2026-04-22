@@ -72,14 +72,15 @@ export default function StudentProfileSideCard({
   avatarSrc,
   projectCount,
   socialLinks = [],
-  menuItems = [
+  menuItems,
+}: ProfileSidebarCardProps) {
+  const resolvedMenuItems: MenuItem[] = menuItems ?? [
     {
       label: "Settings",
       icon: <SettingsOutlinedIcon fontSize="small" />,
       href: "/talent-discovery-standalone/student-security-settings",
     },
-  ],
-}: ProfileSidebarCardProps) {
+  ];
   const clickableSocialLinks = socialLinks.filter((item) => !!item.href);
 
   return (
@@ -184,7 +185,7 @@ export default function StudentProfileSideCard({
 
         <Box sx={{ px: 2, pb: 2 }}>
           <Stack spacing={0.5}>
-            {menuItems.map((item, index) => (
+            {resolvedMenuItems.map((item, index) => (
               <Box
                 key={`${item.label}-${index}`}
                 component={item.href ? "a" : item.onClick ? "button" : "div"}

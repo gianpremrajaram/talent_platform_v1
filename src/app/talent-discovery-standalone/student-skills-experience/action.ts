@@ -57,8 +57,8 @@ export async function addStudentProjectAction(
   const created = await addStudentProject(userId, {
     title: data.title,
     description: data.description || undefined,
-    startDate: data.startDate ? new Date(`${data.startDate}-01`) : undefined,
-    endDate: data.endDate ? new Date(`${data.endDate}-01`) : undefined,
+    startDate: data.startDate ? new Date(data.startDate) : undefined,
+    endDate: data.endDate ? new Date(data.endDate) : undefined,
     projectLink: data.projectLink || undefined,
   });
   revalidatePath("/talent-discovery-standalone/student-skills-experience");
