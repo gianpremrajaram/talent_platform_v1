@@ -67,6 +67,7 @@ model User {
   adminRecsAsAdmin       AdminRecommendation[]   @relation("RecommendingAdmin")
   appSuspensions         AppSuspension[]
   studentCVs             StudentCV[]
+  jobApplications        JobApplication[]        @relation("StudentApplications")
 }
 
 model Organisation {
@@ -477,9 +478,10 @@ model JobPosting {
   reviewedAt      DateTime?
   reviewedById    String?
 
-  organisation Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
-  createdBy    User         @relation("JobPostingCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
-  reviewedBy   User?        @relation("JobPostingReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  organisation Organisation    @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  createdBy    User            @relation("JobPostingCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
+  reviewedBy   User?           @relation("JobPostingReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  applications JobApplication[]
 
   @@index([organisationId])
   @@index([createdByUserId])
@@ -535,7 +537,28 @@ model StudentCV {
   tags       String[]
   uploadedAt DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applications JobApplication[]
 
   @@index([userId])
+}
+
+/// A student's application for a specific job posting.
+/// One application per student per job (enforced via @@unique).
+/// cvId is optional — students may apply without attaching a CV.
+model JobApplication {
+  id          String   @id @default(cuid())
+  jobId       String
+  studentId   String
+  cvId        String?
+  coverLetter String?
+  appliedAt   DateTime @default(now())
+
+  job     JobPosting @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  student User       @relation("StudentApplications", fields: [studentId], references: [id], onDelete: Cascade)
+  cv      StudentCV? @relation(fields: [cvId], references: [id], onDelete: SetNull)
+
+  @@unique([jobId, studentId])
+  @@index([studentId])
+  @@index([jobId])
 }

@@ -1,22 +1,29 @@
 "use client";
 
+import { useState } from "react";
+import { signOut } from "next-auth/react";
 import {
   AppBar,
   Avatar,
-  Badge,
   Box,
   IconButton,
+  ListItemIcon,
+  Menu,
+  MenuItem,
   Toolbar,
   Typography,
 } from "@mui/material";
-import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 
 type DashboardTopBarProps = {
   title: string;
+  userInitial?: string;
 };
 
-export default function DashboardTopBar({ title }: DashboardTopBarProps) {
+export default function DashboardTopBar({ title, userInitial = "S" }: DashboardTopBarProps) {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
   return (
     <AppBar
       position="static"
@@ -47,21 +54,43 @@ export default function DashboardTopBar({ title }: DashboardTopBarProps) {
         </Typography>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <IconButton color="inherit" aria-label="Notifications — 9 unread">
-            <Badge badgeContent={9} color="primary" aria-hidden="true">
-              <NotificationsNoneOutlinedIcon aria-hidden="true" />
-            </Badge>
-          </IconButton>
-
-          <IconButton color="inherit" aria-label="Settings">
+          <IconButton
+            color="inherit"
+            aria-label="Settings"
+            aria-controls={anchorEl ? "settings-menu" : undefined}
+            aria-haspopup="true"
+            aria-expanded={anchorEl ? "true" : undefined}
+            onClick={(e) => setAnchorEl(e.currentTarget)}
+          >
             <SettingsOutlinedIcon aria-hidden="true" />
           </IconButton>
 
+          <Menu
+            id="settings-menu"
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={() => setAnchorEl(null)}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            transformOrigin={{ vertical: "top", horizontal: "right" }}
+            slotProps={{ paper: { sx: { mt: 0.5, minWidth: 140 } } }}
+          >
+            <MenuItem
+              onClick={() => signOut({ callbackUrl: "/sign-in" })}
+              sx={{ color: "error.main" }}
+            >
+              <ListItemIcon sx={{ color: "error.main" }}>
+                <LogoutOutlinedIcon fontSize="small" />
+              </ListItemIcon>
+              Logout
+            </MenuItem>
+          </Menu>
+
           <Avatar
             alt="Your profile"
-            src="/images/avatar/avatar-1.png"
-            sx={{ width: 40, height: 40, ml: 1 }}
-          />
+            sx={{ width: 40, height: 40, ml: 1, bgcolor: "primary.main", fontWeight: 700 }}
+          >
+            {userInitial}
+          </Avatar>
         </Box>
       </Toolbar>
     </AppBar>

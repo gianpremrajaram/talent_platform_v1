@@ -69,7 +69,7 @@ export default async function StudentPersonalInformationPage() {
       <StudentSideBar />
 
       <Box sx={{ flexGrow: 1, bgcolor: "#fafafb" }}>
-        <DashboardTopBar title="Student Personal Information" />
+        <DashboardTopBar title="Student Personal Information" userInitial={sessionUser.name?.charAt(0).toUpperCase() ?? ""} />
 
         <Box
           sx={{

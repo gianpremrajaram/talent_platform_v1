@@ -2,12 +2,14 @@
 // src/components/talent-discovery/student-components/JobOpeningsTable.tsx
 // Job listings table for students — Issue #28.
 // Fetches active, non-expired postings from /api/jobs on mount.
-// Cursor-paginated with "Load more". Application tracking deferred to L5.
+// Cursor-paginated with "Load more". Apply modal wired in for each row.
 
 import { useMemo, useState, useEffect } from "react";
 import {
   Avatar,
   Box,
+  Button,
+  Chip,
   InputAdornment,
   MenuItem,
   Stack,
@@ -18,6 +20,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import LoadingState from "@/components/ui/LoadingState";
 import EmptyState from "@/components/ui/EmptyState";
+import ApplyJobModal, { type CV } from "@/components/talent-discovery/student-components/ApplyJobModal";
 import type { JobPostingResult, PaginatedJobPostings } from "@/types/index";
 
 // ─── Row shape ────────────────────────────────────────────────────────────────
@@ -29,7 +32,7 @@ type JobRow = {
   roleType: string;
   location: string;
   salaryBand: string;
-  postedAt: string; // ISO
+  postedAt: string;
 };
 
 function formatPostedDate(iso: string): string {
@@ -58,7 +61,12 @@ function toRow(job: JobPostingResult): JobRow {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function JobOpeningsTable() {
+type Props = {
+  cvs: CV[];
+  initialAppliedJobIds?: string[];
+};
+
+export default function JobOpeningsTable({ cvs, initialAppliedJobIds = [] }: Props) {
   const [rows, setRows] = useState<JobRow[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -66,6 +74,11 @@ export default function JobOpeningsTable() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("default");
+
+  // Apply modal state
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<JobRow | null>(null);
+  const [appliedJobIds, setAppliedJobIds] = useState<Set<string>>(new Set(initialAppliedJobIds));
 
   useEffect(() => {
     async function fetchJobs() {
@@ -101,10 +114,19 @@ export default function JobOpeningsTable() {
       setRows((prev) => [...prev, ...result.jobs.map(toRow)]);
       setNextCursor(result.nextCursor);
     } catch {
-      // silent — user can retry by scrolling and clicking Load more again
+      // silent — user can retry by clicking Load more again
     } finally {
       setLoadingMore(false);
     }
+  }
+
+  function openApplyModal(job: JobRow) {
+    setSelectedJob(job);
+    setModalOpen(true);
+  }
+
+  function handleApplied(jobId: string) {
+    setAppliedJobIds((prev) => new Set([...prev, jobId]));
   }
 
   const filteredRows = useMemo(() => {
@@ -133,9 +155,8 @@ export default function JobOpeningsTable() {
     {
       field: "companyName",
       headerName: "Company",
-      flex: 1.6,
-      minWidth: 180,
-      sortable: true,
+      flex: 1.4,
+      minWidth: 160,
       renderCell: (params) => (
         <Stack
           direction="row"
@@ -151,12 +172,7 @@ export default function JobOpeningsTable() {
           </Avatar>
           <Typography
             variant="body2"
-            sx={{
-              fontWeight: 600,
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
+            sx={{ fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
           >
             {params.row.companyName}
           </Typography>
@@ -167,30 +183,59 @@ export default function JobOpeningsTable() {
       field: "roleType",
       headerName: "Role type",
       flex: 1,
-      minWidth: 130,
+      minWidth: 120,
     },
     {
       field: "location",
       headerName: "Location",
       flex: 1,
-      minWidth: 130,
+      minWidth: 120,
     },
     {
       field: "salaryBand",
       headerName: "Salary band",
       flex: 1,
-      minWidth: 140,
+      minWidth: 130,
     },
     {
       field: "postedAt",
       headerName: "Posted",
       flex: 0.9,
-      minWidth: 110,
+      minWidth: 100,
       renderCell: (params) => (
         <Typography variant="body2" sx={{ color: "text.secondary" }}>
           {formatPostedDate(params.row.postedAt)}
         </Typography>
       ),
+    },
+    {
+      field: "apply",
+      headerName: "",
+      flex: 0.9,
+      minWidth: 110,
+      sortable: false,
+      renderCell: (params) => {
+        const applied = appliedJobIds.has(params.row.id);
+        return applied ? (
+          <Chip
+            label="Applied"
+            size="small"
+            color="success"
+            variant="outlined"
+            sx={{ fontSize: 11, fontWeight: 600 }}
+          />
+        ) : (
+          <Button
+            size="small"
+            variant="contained"
+            disableElevation
+            onClick={() => openApplyModal(params.row)}
+            sx={{ fontSize: 12, fontWeight: 600, borderRadius: 1.5, minWidth: 80 }}
+          >
+            Apply
+          </Button>
+        );
+      },
     },
   ];
 
@@ -200,15 +245,7 @@ export default function JobOpeningsTable() {
 
   if (error) {
     return (
-      <Box
-        sx={{
-          p: 2.5,
-          border: "1px solid",
-          borderColor: "divider",
-          borderRadius: 3,
-          bgcolor: "background.paper",
-        }}
-      >
+      <Box sx={{ p: 2.5, border: "1px solid", borderColor: "divider", borderRadius: 3, bgcolor: "background.paper" }}>
         <Typography role="alert" sx={{ fontSize: 13, color: "error.main" }}>
           {error}
         </Typography>
@@ -218,14 +255,7 @@ export default function JobOpeningsTable() {
 
   if (rows.length === 0) {
     return (
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: 300,
-        }}
-      >
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 300 }}>
         <EmptyState
           message="No open positions at the moment."
           description="Check back later for new opportunities from our industry partners."
@@ -235,109 +265,84 @@ export default function JobOpeningsTable() {
   }
 
   return (
-    <Box
-      sx={{
-        p: 2.5,
-        border: "1px solid",
-        borderColor: "divider",
-        borderRadius: 3,
-        bgcolor: "background.paper",
-      }}
-    >
-      <Box
-        sx={{
-          mb: 2,
-          display: "flex",
-          justifyContent: "space-between",
-          gap: 2,
-          flexWrap: "wrap",
-        }}
-      >
-        <TextField
-          placeholder="Search by company, role, or type"
-          size="small"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          sx={{ minWidth: 280 }}
-          inputProps={{ "aria-label": "Search jobs" }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon fontSize="small" aria-hidden="true" />
-              </InputAdornment>
-            ),
-          }}
-        />
+    <>
+      <Box sx={{ p: 2.5, border: "1px solid", borderColor: "divider", borderRadius: 3, bgcolor: "background.paper" }}>
+        <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between", gap: 2, flexWrap: "wrap" }}>
+          <TextField
+            placeholder="Search by company, role, or type"
+            size="small"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            sx={{ minWidth: 280 }}
+            inputProps={{ "aria-label": "Search jobs" }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon fontSize="small" aria-hidden="true" />
+                </InputAdornment>
+              ),
+            }}
+          />
 
-        <TextField
-          select
-          label="Sort by"
-          InputLabelProps={{
-            shrink: true,
-            sx: {
-              position: "absolute",
-              width: 1,
-              height: 1,
-              overflow: "hidden",
-              clip: "rect(0 0 0 0)",
-              clipPath: "inset(50%)",
-              whiteSpace: "nowrap",
-            },
-          }}
-          InputProps={{ notched: false }}
-          size="small"
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          sx={{ minWidth: 140 }}
-        >
-          <MenuItem value="default">Sort by</MenuItem>
-          <MenuItem value="company">Company</MenuItem>
-          <MenuItem value="title">Role title</MenuItem>
-        </TextField>
-      </Box>
-
-      <Box sx={{ height: 540, width: "100%" }}>
-        <DataGrid
-          rows={filteredRows}
-          columns={columns}
-          aria-label="Job openings"
-          disableRowSelectionOnClick
-          rowHeight={72}
-          pagination
-          pageSizeOptions={[10, 25, 50]}
-          initialState={{
-            pagination: { paginationModel: { pageSize: 10, page: 0 } },
-          }}
-          sx={{
-            border: 0,
-            "& .MuiDataGrid-cell": {
-              display: "flex",
-              alignItems: "center",
-              borderBottom: "1px solid",
-              borderColor: "divider",
-            },
-            "& .MuiDataGrid-columnHeaders": {
-              bgcolor: "#fafafa",
-              borderBottom: "1px solid",
-              borderColor: "divider",
-            },
-            "& .MuiDataGrid-columnHeaderTitle": { fontWeight: 600 },
-          }}
-        />
-      </Box>
-
-      {nextCursor && (
-        <Box sx={{ mt: 1.5, display: "flex", justifyContent: "center" }}>
-          <button
-            type="button"
-            className="button-link button-link--secondary"
-            onClick={handleLoadMore}
-            disabled={loadingMore}
+          <TextField
+            select
+            label="Sort by"
+            InputLabelProps={{
+              shrink: true,
+              sx: { position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)", clipPath: "inset(50%)", whiteSpace: "nowrap" },
+            }}
+            InputProps={{ notched: false }}
+            size="small"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            sx={{ minWidth: 140 }}
           >
-            {loadingMore ? "Loading…" : "Load more positions"}
-          </button>
+            <MenuItem value="default">Sort by</MenuItem>
+            <MenuItem value="company">Company</MenuItem>
+            <MenuItem value="title">Role title</MenuItem>
+          </TextField>
         </Box>
-      )}
-    </Box>
+
+        <Box sx={{ height: 540, width: "100%" }}>
+          <DataGrid
+            rows={filteredRows}
+            columns={columns}
+            aria-label="Job openings"
+            disableRowSelectionOnClick
+            rowHeight={72}
+            pagination
+            pageSizeOptions={[10, 25, 50]}
+            initialState={{ pagination: { paginationModel: { pageSize: 10, page: 0 } } }}
+            sx={{
+              border: 0,
+              "& .MuiDataGrid-cell": { display: "flex", alignItems: "center", borderBottom: "1px solid", borderColor: "divider" },
+              "& .MuiDataGrid-columnHeaders": { bgcolor: "#fafafa", borderBottom: "1px solid", borderColor: "divider" },
+              "& .MuiDataGrid-columnHeaderTitle": { fontWeight: 600 },
+            }}
+          />
+        </Box>
+
+        {nextCursor && (
+          <Box sx={{ mt: 1.5, display: "flex", justifyContent: "center" }}>
+            <button
+              type="button"
+              className="button-link button-link--secondary"
+              onClick={handleLoadMore}
+              disabled={loadingMore}
+            >
+              {loadingMore ? "Loading…" : "Load more positions"}
+            </button>
+          </Box>
+        )}
+      </Box>
+
+      <ApplyJobModal
+        open={modalOpen}
+        job={selectedJob}
+        cvs={cvs}
+        onClose={() => setModalOpen(false)}
+        onApplied={handleApplied}
+      />
+    </>
   );
 }

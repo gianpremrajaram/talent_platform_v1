@@ -20,7 +20,7 @@ export default async function StudentCVLibraryPage() {
   const serializedCVs = cvs.map((cv) => ({
     id: cv.id,
     title: cv.label,
-    fileName: cv.fileUrl.split("/").pop() ?? cv.fileUrl,
+    fileName: (cv.fileUrl.split("/").pop() ?? cv.fileUrl).replace(/^\d+_/, ""),
     fileUrl: cv.fileUrl,
     uploadedAt: cv.uploadedAt.toLocaleDateString("en-GB", {
       day: "numeric",
@@ -35,7 +35,7 @@ export default async function StudentCVLibraryPage() {
       <StudentSideBar />
 
       <Box sx={{ flexGrow: 1, bgcolor: "#fafafb", minWidth: 0 }}>
-        <DashboardTopBar title="Student CV Library" />
+        <DashboardTopBar title="Student CV Library" userInitial={sessionUser.name?.charAt(0).toUpperCase() ?? ""} />
 
         <Box sx={{ p: 3, maxWidth: 1200, width: "100%", mx: "auto" }}>
           <StudentCVLibraryList initialCVs={serializedCVs} />
