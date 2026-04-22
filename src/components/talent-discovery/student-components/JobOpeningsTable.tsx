@@ -202,7 +202,6 @@ export default function JobOpeningsTable() {
     return (
       <Box
         sx={{
-          mt: 3,
           p: 2.5,
           border: "1px solid",
           borderColor: "divider",
@@ -219,7 +218,14 @@ export default function JobOpeningsTable() {
 
   if (rows.length === 0) {
     return (
-      <Box sx={{ mt: 3 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: 300,
+        }}
+      >
         <EmptyState
           message="No open positions at the moment."
           description="Check back later for new opportunities from our industry partners."
@@ -231,7 +237,6 @@ export default function JobOpeningsTable() {
   return (
     <Box
       sx={{
-        mt: 3,
         p: 2.5,
         border: "1px solid",
         borderColor: "divider",
