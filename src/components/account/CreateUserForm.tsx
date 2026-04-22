@@ -62,11 +62,15 @@ export default function CreateUserForm(props: { meta: Meta }) {
 
   // Admin selections
   const [organisationChoice, setOrganisationChoice] = useState<
-    { kind: "existing"; id: number } | { kind: "pending"; clientId: string } | null
+    | { kind: "existing"; id: number }
+    | { kind: "pending"; clientId: string }
+    | null
   >(null);
 
   const [roleChoices, setRoleChoices] = useState<
-    Array<{ kind: "existing"; key: string } | { kind: "pending"; clientId: string }>
+    Array<
+      { kind: "existing"; key: string } | { kind: "pending"; clientId: string }
+    >
   >([]);
 
   // Pending additions
@@ -76,7 +80,8 @@ export default function CreateUserForm(props: { meta: Meta }) {
   // Modals
   const [orgModalOpen, setOrgModalOpen] = useState(false);
   const [orgModalName, setOrgModalName] = useState("");
-  const [orgModalType, setOrgModalType] = useState<PendingOrg["type"]>("INDUSTRY");
+  const [orgModalType, setOrgModalType] =
+    useState<PendingOrg["type"]>("INDUSTRY");
 
   const [roleModalOpen, setRoleModalOpen] = useState(false);
   const [roleModalLabel, setRoleModalLabel] = useState("");
@@ -111,10 +116,16 @@ export default function CreateUserForm(props: { meta: Meta }) {
       return;
     }
     if (optionId.startsWith("existing:")) {
-      setOrganisationChoice({ kind: "existing", id: Number(optionId.replace("existing:", "")) });
+      setOrganisationChoice({
+        kind: "existing",
+        id: Number(optionId.replace("existing:", "")),
+      });
       return;
     }
-    setOrganisationChoice({ kind: "pending", clientId: optionId.replace("pending:", "") });
+    setOrganisationChoice({
+      kind: "pending",
+      clientId: optionId.replace("pending:", ""),
+    });
   }
 
   function roleChecked(optionKey: string) {
@@ -213,13 +224,13 @@ export default function CreateUserForm(props: { meta: Meta }) {
       });
 
       const data1 = await r1.json();
-      if (!r1.ok || !data1.ok) {
-        setMessage(data1.error ?? "Could not create user.");
+      if (!r1.ok || !data1.success) {
+        setMessage(data1.error?.message ?? "Could not create user.");
         return;
       }
 
-      const newUserId = String(data1.userId ?? "");
-      const tempPassword = String(data1.tempPassword ?? "");
+      const newUserId = String(data1.data.userId ?? "");
+      const tempPassword = String(data1.data.tempPassword ?? "");
       if (!newUserId) {
         setMessage("User created, but no user ID was returned.");
         return;
@@ -258,7 +269,10 @@ export default function CreateUserForm(props: { meta: Meta }) {
 
       const data2 = await r2.json();
       if (!r2.ok || !data2.ok) {
-        setMessage(data2.error ?? "User created, but could not apply organisation/roles.");
+        setMessage(
+          data2.error ??
+            "User created, but could not apply organisation/roles.",
+        );
         return;
       }
 
@@ -280,21 +294,40 @@ export default function CreateUserForm(props: { meta: Meta }) {
           <label className="auth-label" htmlFor="firstName">
             First name
           </label>
-          <input className="auth-input" id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
+          <input
+            className="auth-input"
+            id="firstName"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            required
+          />
         </div>
 
         <div className="auth-field">
           <label className="auth-label" htmlFor="lastName">
             Last name
           </label>
-          <input className="auth-input" id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
+          <input
+            className="auth-input"
+            id="lastName"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            required
+          />
         </div>
 
         <div className="auth-field">
           <label className="auth-label" htmlFor="email">
             Email
           </label>
-          <input className="auth-input" id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <input
+            className="auth-input"
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
         </div>
 
         <div className="auth-field">
@@ -339,8 +372,20 @@ export default function CreateUserForm(props: { meta: Meta }) {
 
           <div className="tile" style={{ padding: "0.75rem" }}>
             {roleOptions.map((r) => (
-              <label key={r.key} style={{ display: "flex", gap: "0.5rem", alignItems: "center", padding: "0.25rem 0" }}>
-                <input type="checkbox" checked={roleChecked(r.key)} onChange={() => toggleRole(r.key)} />
+              <label
+                key={r.key}
+                style={{
+                  display: "flex",
+                  gap: "0.5rem",
+                  alignItems: "center",
+                  padding: "0.25rem 0",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={roleChecked(r.key)}
+                  onChange={() => toggleRole(r.key)}
+                />
                 <span>{r.label}</span>
               </label>
             ))}
@@ -354,7 +399,12 @@ export default function CreateUserForm(props: { meta: Meta }) {
         )}
 
         <div className="auth-actions">
-          <button type="button" className="button-link button-link--primary" onClick={() => void save()} disabled={saving}>
+          <button
+            type="button"
+            className="button-link button-link--primary"
+            onClick={() => void save()}
+            disabled={saving}
+          >
             {saving ? "Saving…" : "Save and continue"}
           </button>
         </div>
@@ -372,14 +422,26 @@ export default function CreateUserForm(props: { meta: Meta }) {
             <label className="auth-label" htmlFor="orgName">
               Organisation name
             </label>
-            <input id="orgName" className="auth-input" value={orgModalName} onChange={(e) => setOrgModalName(e.target.value)} />
+            <input
+              id="orgName"
+              className="auth-input"
+              value={orgModalName}
+              onChange={(e) => setOrgModalName(e.target.value)}
+            />
           </div>
 
           <div className="auth-field">
             <label className="auth-label" htmlFor="orgType">
               Type
             </label>
-            <select id="orgType" className="auth-input" value={orgModalType} onChange={(e) => setOrgModalType(e.target.value as PendingOrg["type"])}>
+            <select
+              id="orgType"
+              className="auth-input"
+              value={orgModalType}
+              onChange={(e) =>
+                setOrgModalType(e.target.value as PendingOrg["type"])
+              }
+            >
               <option value="INDUSTRY">Industry</option>
               <option value="UNIVERSITY">University</option>
               <option value="OTHER">Other</option>
@@ -387,10 +449,18 @@ export default function CreateUserForm(props: { meta: Meta }) {
           </div>
 
           <div className="auth-actions">
-            <button type="button" className="button-link" onClick={() => setOrgModalOpen(false)}>
+            <button
+              type="button"
+              className="button-link"
+              onClick={() => setOrgModalOpen(false)}
+            >
               Cancel
             </button>
-            <button type="button" className="button-link button-link--primary" onClick={confirmAddOrg}>
+            <button
+              type="button"
+              className="button-link button-link--primary"
+              onClick={confirmAddOrg}
+            >
               Add organisation
             </button>
           </div>
@@ -417,15 +487,24 @@ export default function CreateUserForm(props: { meta: Meta }) {
               placeholder="e.g. Module leader"
             />
             <p className="small" style={{ margin: 0 }}>
-              Role key preview: <strong>{labelToRoleKey(roleModalLabel || "—") || "—"}</strong>
+              Role key preview:{" "}
+              <strong>{labelToRoleKey(roleModalLabel || "—") || "—"}</strong>
             </p>
           </div>
 
           <div className="auth-actions">
-            <button type="button" className="button-link" onClick={() => setRoleModalOpen(false)}>
+            <button
+              type="button"
+              className="button-link"
+              onClick={() => setRoleModalOpen(false)}
+            >
               Cancel
             </button>
-            <button type="button" className="button-link button-link--primary" onClick={confirmAddRole}>
+            <button
+              type="button"
+              className="button-link button-link--primary"
+              onClick={confirmAddRole}
+            >
               Add role
             </button>
           </div>

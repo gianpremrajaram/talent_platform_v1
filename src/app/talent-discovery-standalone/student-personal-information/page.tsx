@@ -8,6 +8,7 @@ import { getServerAuthSession } from "@/lib/getServerAuthSession";
 import {
   getStudentPersonalInfo,
   getStudentSocialLinks,
+  getStudentProjectCount,
 } from "@/lib/services/student-services";
 
 function mapDbPlatformToSidebarPlatform(
@@ -37,8 +38,11 @@ export default async function StudentPersonalInformationPage() {
 
   const [firstName, ...rest] = fullName.split(" ");
   const lastName = rest.join(" ");
-  const personalInfo = await getStudentPersonalInfo(userId);
-  const socialLinks = await getStudentSocialLinks(userId);
+  const [personalInfo, socialLinks, projectCount] = await Promise.all([
+    getStudentPersonalInfo(userId),
+    getStudentSocialLinks(userId),
+    getStudentProjectCount(userId),
+  ]);
   const sidebarSocialLinks = socialLinks.map((link) => ({
     platform: mapDbPlatformToSidebarPlatform(link.platform),
     href: link.url,
@@ -87,9 +91,9 @@ export default async function StudentPersonalInformationPage() {
             }}
           >
             <StudentProfileSideCard
-              name="Sadhana"
+              name={fullName}
               role="Student"
-              projectCount={3}
+              projectCount={projectCount}
               socialLinks={sidebarSocialLinks}
             />
             <StudentPersonalInfoForm

@@ -102,7 +102,7 @@ export default async function StudentCVFunctionsPage() {
             <StudentProfileSideCard
               name={userName}
               role={roleName}
-              projectCount={3}
+              projectCount={projects.length}
               socialLinks={sidebarSocialLinks}
             />
 

@@ -17,6 +17,10 @@ import {
   Typography,
 } from "@mui/material";
 import { Add, Delete, GitHub } from "@mui/icons-material";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import type { Dayjs } from "dayjs";
 import {
   addStudentProjectAction,
   deleteProjectAction,
@@ -56,6 +60,8 @@ export default function StudentProjectsSection({
     description: "",
     projectLink: undefined,
   });
+  const [startDateValue, setStartDateValue] = useState<Dayjs | null>(null);
+  const [endDateValue, setEndDateValue] = useState<Dayjs | null>(null);
 
   const handleChange = (
     field: keyof Omit<ProjectItem, "id">,
@@ -69,8 +75,8 @@ export default function StudentProjectsSection({
       const created = await addStudentProjectAction(userId, {
         title: newProject.title,
         description: newProject.description,
-        startDate: newProject.startDate as string | undefined,
-        endDate: newProject.endDate as string | undefined,
+        startDate: startDateValue?.isValid() ? startDateValue.toISOString() : undefined,
+        endDate: endDateValue?.isValid() ? endDateValue.toISOString() : undefined,
         projectLink: newProject.projectLink,
       });
 
@@ -83,6 +89,8 @@ export default function StudentProjectsSection({
         description: "",
         projectLink: undefined,
       });
+      setStartDateValue(null);
+      setEndDateValue(null);
     });
   };
 
@@ -242,47 +250,48 @@ export default function StudentProjectsSection({
         <DialogTitle>Add Project</DialogTitle>
 
         <DialogContent>
-          <Stack spacing={2} sx={{ mt: 1 }}>
-            <TextField
-              label="Project Title"
-              fullWidth
-              value={newProject.title}
-              onChange={(e) => handleChange("title", e.target.value)}
-            />
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <Stack spacing={2} sx={{ mt: 1 }}>
+              <TextField
+                label="Project Title"
+                fullWidth
+                value={newProject.title}
+                onChange={(e) => handleChange("title", e.target.value)}
+              />
 
-            <TextField
-              label="Start Date"
-              placeholder="2023-08"
-              fullWidth
-              value={newProject.startDate || ""}
-              onChange={(e) => handleChange("startDate", e.target.value)}
-            />
+              <DatePicker
+                label="Start Date"
+                value={startDateValue}
+                onChange={(val) => setStartDateValue(val)}
+                slotProps={{ textField: { fullWidth: true } }}
+              />
 
-            <TextField
-              label="End Date"
-              placeholder="2025-08"
-              fullWidth
-              value={newProject.endDate || ""}
-              onChange={(e) => handleChange("endDate", e.target.value)}
-            />
+              <DatePicker
+                label="End Date"
+                value={endDateValue}
+                onChange={(val) => setEndDateValue(val)}
+                minDate={startDateValue ?? undefined}
+                slotProps={{ textField: { fullWidth: true } }}
+              />
 
-            <TextField
-              label="Project Link"
-              placeholder="https://github.com/username/project"
-              fullWidth
-              value={newProject.projectLink || ""}
-              onChange={(e) => handleChange("projectLink", e.target.value)}
-            />
+              <TextField
+                label="Project Link"
+                placeholder="https://github.com/username/project"
+                fullWidth
+                value={newProject.projectLink || ""}
+                onChange={(e) => handleChange("projectLink", e.target.value)}
+              />
 
-            <TextField
-              label="Description"
-              multiline
-              minRows={4}
-              fullWidth
-              value={newProject.description}
-              onChange={(e) => handleChange("description", e.target.value)}
-            />
-          </Stack>
+              <TextField
+                label="Description"
+                multiline
+                minRows={4}
+                fullWidth
+                value={newProject.description}
+                onChange={(e) => handleChange("description", e.target.value)}
+              />
+            </Stack>
+          </LocalizationProvider>
         </DialogContent>
 
         <DialogActions>

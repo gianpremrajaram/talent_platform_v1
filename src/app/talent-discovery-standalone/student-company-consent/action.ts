@@ -17,3 +17,14 @@ export async function toggleCompanyConsent(
     create: { studentId, companyId: organisationId, consented },
   });
 }
+
+export async function revokeAllConsent() {
+  const session = await getServerAuthSession();
+  const studentId = session?.user?.id;
+  if (!studentId) throw new Error("Unauthorized");
+
+  await prisma.studentCompanyConsent.updateMany({
+    where: { studentId },
+    data: { consented: false },
+  });
+}
