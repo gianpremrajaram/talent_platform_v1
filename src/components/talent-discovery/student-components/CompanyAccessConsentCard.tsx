@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { toggleCompanyConsent } from "@/app/talent-discovery-standalone/student-company-consent/action";
+import { toggleCompanyConsent, revokeAllConsent } from "@/app/talent-discovery-standalone/student-company-consent/action";
 import {
   Box,
   Typography,
@@ -288,6 +288,7 @@ export default function ConsentManagement({ members }: ConsentManagementProps) {
 
   const revokeAll = () => {
     setCompanies((prev) => prev.map((c) => ({ ...c, status: "denied" })));
+    revokeAllConsent();
     setToast({
       open: true,
       message: "All company access has been revoked",

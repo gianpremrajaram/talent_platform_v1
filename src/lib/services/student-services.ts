@@ -359,28 +359,62 @@ export async function deleteStudentCV(id: string) {
   });
 }
 
+/**
+ * Seeds StudentCompanyConsent rows (consented = true) for every organisation
+ * the student doesn't already have a row for. Safe to call multiple times —
+ * skipDuplicates means existing rows are never overwritten.
+ */
+export async function seedStudentConsentRows(studentId: string) {
+  const orgs = await prisma.organisation.findMany({ select: { id: true } });
+  if (orgs.length === 0) return;
+
+  await prisma.studentCompanyConsent.createMany({
+    data: orgs.map((o) => ({
+      studentId,
+      companyId: o.id,
+      consented: true,
+    })),
+    skipDuplicates: true,
+  });
+}
+
 export async function getMembersWithConsentStatus(studentId: string) {
   const members = await prisma.membershipDashboardMember.findMany({
     include: {
       membership: {
-        include: {
-          organisation: {
-            include: {
-              studentCompanyConsents: {
-                where: { studentId },
-              },
-            },
-          },
-        },
+        include: { organisation: true },
       },
     },
   });
+
+  // Collect org IDs that back these member entries.
+  const orgIds = members
+    .map((m) => m.membership?.organisation?.id)
+    .filter((id): id is number => id != null);
+
+  // Lazy-seed: create missing consent rows so the DB and UI are always in sync.
+  if (orgIds.length > 0) {
+    await prisma.studentCompanyConsent.createMany({
+      data: orgIds.map((companyId) => ({ studentId, companyId, consented: true })),
+      skipDuplicates: true,
+    });
+  }
+
+  // Read the now-guaranteed rows back as a map for O(1) lookup.
+  const consents = await prisma.studentCompanyConsent.findMany({
+    where: { studentId, companyId: { in: orgIds } },
+    select: { companyId: true, consented: true },
+  });
+  const consentMap = new Map(consents.map((c) => [c.companyId, c.consented]));
 
   return members.map((m) => ({
     id: m.id,
     memberKey: m.memberKey,
     organisationId: m.membership?.organisation?.id ?? null,
     name: m.membership?.organisation?.name ?? m.memberKey,
-    consented: m.membership?.organisation?.studentCompanyConsents[0]?.consented ?? true,
+    consented:
+      m.membership?.organisation?.id != null
+        ? (consentMap.get(m.membership.organisation.id) ?? true)
+        : true,
   }));
 }
