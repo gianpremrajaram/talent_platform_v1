@@ -375,6 +375,13 @@ export async function seedStudentConsentRows(studentId: string) {
       consented: true,
     })),
     skipDuplicates: true,
+export async function updateStudentCVTags(
+  cvId: string,
+  data: {label?: string; tags?: string[]}
+) {
+  return prisma.studentCV.update({
+    where: { id: cvId },
+    data,
   });
 }
 
