@@ -177,11 +177,11 @@ export default function AdminPartnerManagementPage() {
             </Box>
             
             <Box sx={{ width: "100%" }}>
-              <PendingCompanyApprovalsPanel />
+              <SuspensionHistoryPanel user={selectedUser} />
             </Box>
 
             <Box sx={{ width: "100%" }}>
-              <SuspensionHistoryPanel user={selectedUser} />
+              <PendingCompanyApprovalsPanel />
             </Box>
 
             <Box sx={{ width: "100%" }}>
