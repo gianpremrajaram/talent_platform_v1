@@ -73,13 +73,6 @@ const emptyCollege: CollegeForm = {
   endDate: null,
 };
 
-const inputSx = {
-  "& .MuiOutlinedInput-root": {
-    borderRadius: 1.5,
-    backgroundColor: "#fff",
-  },
-};
-
 function formatMonthYear(date: Dayjs | null) {
   if (!date) return "Not specified";
   return date.format("MMMM YYYY");
@@ -122,7 +115,6 @@ export default function StudentAcademicInformationForm({
   //initialize the acheivement tags
   const [achievements, setAchievements] =
     useState<AcheivementTag[]>(acheivementTags);
-  const [additionalInfo, setAdditionalInfo] = useState("");
   const [tagDialogOpen, setTagDialogOpen] = useState(false);
   const [newTag, setNewTag] = useState("");
   const [collegeDialogOpen, setCollegeDialogOpen] = useState(false);

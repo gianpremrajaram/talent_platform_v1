@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import {
   Box,
   Button,
@@ -33,11 +33,6 @@ type ProjectItem = {
   endDate?: Date | string;
   description: string;
   projectLink?: string;
-};
-
-type Props = {
-  userId: string;
-  initialExperiences?: ProjectItem[];
 };
 
 export default function StudentProjectsSection({

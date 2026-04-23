@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
@@ -73,9 +74,12 @@ const isAdmin = roleKeys.includes("ADMIN");
           className="logo"
           href="https://www.ucl.ac.uk/engineering/computer-science"
         >
-          <img 
+          <Image
             src="/images/UCL-Computer-Science-logo.jpg"
             alt="UCL Computer Science"
+            width={180}
+            height={48}
+            style={{ height: "auto" }}
           />
         </a>
         <div className="team-name">ALLIANCES</div>
