@@ -7,7 +7,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { ok, err } from "@/lib/api-response";
 import type { RecruiterRegistrationInput } from "@/types/index";
-import { userRegistrationSchema } from "@/lib/Validation/UserRegistration";
+import { userRegistrationSchema } from "@/lib/validation/UserRegistration";
 
 export const dynamic = "force-dynamic";
 

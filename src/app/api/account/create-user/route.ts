@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
 import { getServerAuthSession } from "@/lib/getServerAuthSession";
 import { ok, err } from "@/lib/api-response";
-import { adminCreateUserSchema } from "@/lib/Validation";
+import { adminCreateUserSchema } from "@/lib/validation";
 import { seedStudentConsentRows } from "@/lib/services/student-services";
 export const dynamic = "force-dynamic";
 

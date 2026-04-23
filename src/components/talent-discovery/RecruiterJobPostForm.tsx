@@ -15,7 +15,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { jobPostingSchema, updateJobPostingSchema } from "@/lib/Validation/JobPosting";
+import { jobPostingSchema, updateJobPostingSchema } from "@/lib/validation/JobPosting";
 import type { JobPostingResult } from "@/types/index";
 
 type Props = {
