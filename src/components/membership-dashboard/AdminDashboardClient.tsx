@@ -212,8 +212,6 @@ export default function AdminDashboardClient(props: {
     return `/membership-dashboard?${params.toString()}`;
   }
 
-  const isTocPage = handbook.active.slug === tocSlug;
-
   return (
     <>
       {/* Account selector */}

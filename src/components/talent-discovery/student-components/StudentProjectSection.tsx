@@ -35,11 +35,6 @@ type ProjectItem = {
   projectLink?: string;
 };
 
-type Props = {
-  userId: string;
-  initialExperiences?: ProjectItem[];
-};
-
 export default function StudentProjectsSection({
   userId,
   initialStudentProjects = [],

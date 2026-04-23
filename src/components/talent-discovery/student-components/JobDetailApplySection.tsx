@@ -41,7 +41,7 @@ export default function JobDetailApplySection({ job, cvs, alreadyApplied }: Prop
       >
         <CheckCircleOutlineIcon sx={{ color: "success.main", fontSize: 20 }} />
         <Typography variant="body2" fontWeight={600} color="success.dark">
-          You've already applied for this role
+          You&apos;ve already applied for this role
         </Typography>
       </Box>
     );

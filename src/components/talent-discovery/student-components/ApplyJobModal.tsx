@@ -20,7 +20,6 @@ import {
   Stack,
   TextField,
   Typography,
-  Chip,
 } from "@mui/material";
 import WorkOutlineOutlinedIcon from "@mui/icons-material/WorkOutlineOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
