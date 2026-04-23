@@ -49,9 +49,6 @@ export async function PATCH(
     if (e instanceof Error && e.message === "EXPIRED_JOB") {
       return err("BAD_REQUEST", "Cannot activate an expired job posting. Please edit and extend the expiry date first.");
     }
-    if (e instanceof Error && e.message === "APPROVED_JOB") {
-      return err("FORBIDDEN", "This job posting has been approved and cannot be edited.");
-    }
     return err("INTERNAL");
   }
 

@@ -1,6 +1,5 @@
 // src/app/api/admin/partner-projects/route.ts
-// Admin list of partner project submissions (JobPosting rows).
-// Returns rows ordered by postedAt desc. ADMIN only.
+// Admin read-only list of all job postings. ADMIN only.
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
@@ -17,17 +16,14 @@ export async function GET() {
   }
 
   const postings = await prisma.jobPosting.findMany({
-    orderBy: [{ approvalStatus: "asc" }, { postedAt: "desc" }],
+    orderBy: { postedAt: "desc" },
     select: {
       id: true,
       title: true,
       postedAt: true,
-      approvalStatus: true,
+      isActive: true,
       organisation: {
-        select: {
-          id: true,
-          name: true,
-        },
+        select: { id: true, name: true },
       },
       createdBy: {
         select: {
@@ -46,10 +42,10 @@ export async function GET() {
     return {
       id: j.id,
       companyName: j.organisation.name,
-      projectName: j.title,
-      dateApplied: j.postedAt.toISOString(),
+      jobTitle: j.title,
+      datePosted: j.postedAt.toISOString(),
       tier: tierKey,
-      status: j.approvalStatus.toLowerCase(),
+      isActive: j.isActive,
     };
   });
 

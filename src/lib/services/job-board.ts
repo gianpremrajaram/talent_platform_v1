@@ -26,7 +26,6 @@ const JOB_SELECT = {
   postedAt: true,
   expiresAt: true,
   isActive: true,
-  approvalStatus: true,
   organisationId: true,
   organisation: { select: { name: true } },
 } as const;
@@ -42,7 +41,6 @@ type JobPostingRow = {
   postedAt: Date;
   expiresAt: Date | null;
   isActive: boolean;
-  approvalStatus: "PENDING" | "APPROVED" | "REJECTED";
   organisationId: number;
   organisation: { name: string };
 };
@@ -58,7 +56,6 @@ function toJobResult(job: JobPostingRow): JobPostingResult {
     postedAt: job.postedAt.toISOString(),
     expiresAt: job.expiresAt ? job.expiresAt.toISOString() : null,
     isActive: job.isActive,
-    approvalStatus: job.approvalStatus,
     organisationId: job.organisationId,
     organisation: { name: job.organisation.name },
   };
@@ -126,7 +123,7 @@ export async function listJobsForFirm(
 
 export async function getJobById(jobId: string): Promise<JobPostingResult | null> {
   const job = await prisma.jobPosting.findUnique({
-    where: { id: jobId, approvalStatus: "APPROVED" },
+    where: { id: jobId },
     select: JOB_SELECT,
   });
   return job ? toJobResult(job) : null;
@@ -145,7 +142,6 @@ export async function listActiveJobs(
     ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
     where: {
       isActive: true,
-      approvalStatus: "APPROVED",
       OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
       ...(studentId
         ? {
@@ -182,16 +178,9 @@ export async function updateJobPosting(
 
   const existing = await prisma.jobPosting.findUnique({
     where: { id: jobId },
-    select: { organisationId: true, isActive: true, expiresAt: true, approvalStatus: true },
+    select: { organisationId: true, isActive: true, expiresAt: true },
   });
   if (!existing || existing.organisationId !== orgId) return null;
-
-  // Approved jobs are locked — only isActive (visibility toggle) is allowed.
-  if (existing.approvalStatus === "APPROVED") {
-    const contentKeys = ["title", "description", "location", "salaryBand", "roleType", "expiresAt"] as const;
-    const hasContentEdit = contentKeys.some((k) => patch[k] !== undefined);
-    if (hasContentEdit) throw new Error("APPROVED_JOB");
-  }
 
   // Guard: block explicit reactivation of an expired job.
   // The caller must extend the expiry date first (either in the same patch or
