@@ -35,6 +35,11 @@ export default async function PostSignInRouterPage() {
     redirect("/membership-dashboard");
   }
 
+  // Student always lands on their standalone dashboard
+  if (isStudent) {
+    redirect("/talent-discovery-standalone/student-dashboard");
+  }
+
   const userId = session.user.id;
 
   const user = await prisma.user.findUnique({
@@ -57,9 +62,8 @@ export default async function PostSignInRouterPage() {
   if (!basePath) redirect("/");
 
   // Role-aware entry points for Talent Discovery
+  // Students are handled earlier with a hard-coded redirect to their standalone dashboard.
   if (defaultAppKey === "TALENT_DISCOVERY") {
-    if (isStudent) redirect("/talent-discovery?view=student");
-    // Non-admins who are not students: lowest-threshold partner view by default
     redirect("/talent-discovery?view=job-board");
   }
 
