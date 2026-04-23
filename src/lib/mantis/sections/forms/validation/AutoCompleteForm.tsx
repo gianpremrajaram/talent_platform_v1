@@ -18,12 +18,12 @@ import { useFormik } from 'formik';
 import * as yup from 'yup';
 
 // project imports
-import MainCard from 'components/MainCard';
-import AnimateButton from 'components/@extended/AnimateButton';
-import { openSnackbar } from 'api/snackbar';
+import MainCard from '@/components/MainCard';
+import AnimateButton from '@/components/@extended/AnimateButton';
+import { openSnackbar } from '@/api/snackbar';
 
 // types
-import { SnackbarProps } from 'types/snackbar';
+import { SnackbarProps } from '@/types/snackbar';
 
 // assets
 import CloseOutlined from '@ant-design/icons/CloseOutlined';

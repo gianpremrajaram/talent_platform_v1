@@ -21,6 +21,7 @@
     ],
     "paths": {
       "@/*": ["*"],
+      "sections/*": ["sections/*"] ,
       "components/*": ["lib/mantis/components/*"],
       "utils/*": ["lib/mantis/utils/*"],
       "types/*": ["lib/mantis/types/*"],
