@@ -79,9 +79,10 @@ export async function middleware(request: NextRequest) {
 
   // ── Not authenticated → redirect to sign-in ──
   if (!token) {
-    const signInUrl = new URL('/sign-in', request.url);
-    signInUrl.searchParams.set('callbackUrl', request.nextUrl.href);
-    return NextResponse.redirect(signInUrl);
+  const signInUrl = new URL('/sign-in', request.url);
+  const callbackPath = `${request.nextUrl.pathname}${request.nextUrl.search}`.replace(/[\r\n]/g, '');
+  signInUrl.searchParams.set('callbackUrl', callbackPath || '/');
+  return NextResponse.redirect(signInUrl);
   }
 
   const roleKeys = (token.roleKeys as string[]) ?? [];
