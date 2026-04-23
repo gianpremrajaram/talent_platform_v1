@@ -123,7 +123,7 @@ export async function listJobsForFirm(
 
 export async function getJobById(jobId: string): Promise<JobPostingResult | null> {
   const job = await prisma.jobPosting.findUnique({
-    where: { id: jobId },
+    where: { id: jobId, approvalStatus: "APPROVED" },
     select: JOB_SELECT,
   });
   return job ? toJobResult(job) : null;
@@ -141,6 +141,7 @@ export async function listActiveJobs(
     ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
     where: {
       isActive: true,
+      approvalStatus: "APPROVED",
       OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
     },
     orderBy: { postedAt: "desc" },
