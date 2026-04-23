@@ -175,6 +175,15 @@ export default function RecruiterJobsPanel() {
 
 // ─── Job posting card ─────────────────────────────────────────────────────────
 
+const APPROVAL_CHIP: Record<
+  "PENDING" | "APPROVED" | "REJECTED",
+  { label: string; color: "warning" | "success" | "error" }
+> = {
+  PENDING:  { label: "Pending approval", color: "warning" },
+  APPROVED: { label: "Approved",         color: "success" },
+  REJECTED: { label: "Rejected",         color: "error"   },
+};
+
 function JobPostingCard({
   job,
   onEdit,
@@ -191,6 +200,9 @@ function JobPostingCard({
     month: "short",
     year: "numeric",
   });
+
+  const isApproved = job.approvalStatus === "APPROVED";
+  const approvalChip = APPROVAL_CHIP[job.approvalStatus];
 
   return (
     <Box
@@ -217,6 +229,13 @@ function JobPostingCard({
               {job.title}
             </Typography>
             <Chip label={job.roleType} size="small" sx={{ fontSize: 11, height: 20 }} />
+            <Chip
+              label={approvalChip.label}
+              size="small"
+              color={approvalChip.color}
+              variant="outlined"
+              sx={{ fontSize: 11, height: 20 }}
+            />
             {!job.isActive && (
               <Chip
                 label="Inactive"
@@ -241,10 +260,17 @@ function JobPostingCard({
         </Box>
 
         <Stack direction="row" spacing={0.5}>
-          <Tooltip title="Edit">
-            <IconButton size="small" onClick={onEdit} aria-label="Edit job posting">
-              <EditOutlinedIcon fontSize="small" />
-            </IconButton>
+          <Tooltip title={isApproved ? "Approved postings cannot be edited" : "Edit"}>
+            <span>
+              <IconButton
+                size="small"
+                onClick={onEdit}
+                aria-label="Edit job posting"
+                disabled={isApproved}
+              >
+                <EditOutlinedIcon fontSize="small" />
+              </IconButton>
+            </span>
           </Tooltip>
           <Tooltip title={job.isActive ? "Deactivate" : "Reactivate"}>
             <IconButton

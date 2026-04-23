@@ -144,6 +144,7 @@ export interface JobPostingResult {
   postedAt: string;       // ISO string
   expiresAt: string | null; // ISO string or null
   isActive: boolean;
+  approvalStatus: "PENDING" | "APPROVED" | "REJECTED";
   organisationId: number;
   organisation: { name: string };
 }

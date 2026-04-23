@@ -132,7 +132,7 @@ export async function getApplicationsForFirm(
   if (!recruiter?.organisationId) return [];
 
   const jobs = await prisma.jobPosting.findMany({
-    where: { organisationId: recruiter.organisationId },
+    where: { organisationId: recruiter.organisationId, approvalStatus: "APPROVED" },
     orderBy: { postedAt: "desc" },
     select: {
       id: true,

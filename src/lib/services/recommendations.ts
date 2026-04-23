@@ -66,7 +66,15 @@ export async function getRecommendedStudentsForFirm(
   firmId: number,
 ): Promise<RecommendationRow[]> {
   const rows = await prisma.adminRecommendation.findMany({
-    where: { firmId, revokedAt: null },
+    where: {
+      firmId,
+      revokedAt: null,
+      student: {
+        studentCompanyConsents: {
+          some: { companyId: firmId, consented: true },
+        },
+      },
+    },
     orderBy: { createdAt: "desc" },
     include: {
       student: { select: { firstName: true, lastName: true, email: true } },
