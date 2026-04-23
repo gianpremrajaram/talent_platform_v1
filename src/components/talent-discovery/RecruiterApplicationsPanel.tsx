@@ -17,10 +17,12 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import Link from "next/link";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import LoadingState from "@/components/ui/LoadingState";
 import EmptyState from "@/components/ui/EmptyState";
 import type { JobApplicationsForJob, JobApplicationResult } from "@/types/index";
@@ -208,6 +210,17 @@ function ApplicantRow({ application }: { application: JobApplicationResult }) {
               {appliedDate}
             </Typography>
           </Stack>
+
+          <Button
+            component={Link}
+            href={`/talent-discovery/student-profile/${application.studentId}`}
+            size="small"
+            variant="outlined"
+            startIcon={<PersonOutlineIcon fontSize="small" />}
+            sx={{ fontSize: 11, borderRadius: 1.5, height: 28 }}
+          >
+            View Profile
+          </Button>
 
           {application.cv ? (
             <Tooltip title="Download CV">
