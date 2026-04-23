@@ -649,129 +649,134 @@ export default function AdminDashboardClient(props: {
           </div>
 
           {/* Handbook panel */}
-          <div
+          <Box
             role="tabpanel"
             id="panel-handbook"
             aria-labelledby="tab-handbook"
-            className="tab-panel tab-panel--scroll"
             hidden={activeTab !== "handbook"}
+            sx={{
+              display: activeTab === "handbook" ? "grid" : "none",
+              gridTemplateColumns: { xs: "1fr", md: "220px 1fr" },
+              gap: 3,
+              alignItems: "start",
+              pt: 1,
+            }}
           >
-            {/* ToC page = two column layout; chapter pages = pager + content only */}
-            {isTocPage ? (
-              <div className="handbook-grid">
-                <nav className="handbook-toc">
-                  <h4 style={{ marginTop: 0 }}>Contents</h4>
-                  <ol>
-                    {handbook.chapters.map((c, idx) => (
-                      <li key={c.slug}>
-                        {c.slug === handbook.active.slug ? (
-                          <strong aria-current="page">
-                            {idx + 1}. {c.title}
-                          </strong>
-                        ) : (
-                          <Link href={handbookHref(c.slug)}>
-                            {idx + 1}. {c.title}
-                          </Link>
-                        )}
-                      </li>
-                    ))}
-                  </ol>
-                </nav>
-
-                <article className="handbook-content">
-                  <div className="handbook-pager">
-                    <button
-                      className="button-link button-link--secondary"
-                      disabled
-                      aria-disabled="true"
+            {/* TOC sidebar */}
+            <Box
+              component="nav"
+              aria-label="Handbook contents"
+              sx={{
+                border: "1px solid",
+                borderColor: "divider",
+                borderRadius: 2,
+                overflow: "hidden",
+              }}
+            >
+              <Box
+                sx={{
+                  px: 2,
+                  py: 1.25,
+                  bgcolor: "grey.50",
+                  borderBottom: "1px solid",
+                  borderColor: "divider",
+                }}
+              >
+                <Typography
+                  variant="caption"
+                  fontWeight={700}
+                  color="text.secondary"
+                  sx={{ textTransform: "uppercase", letterSpacing: 0.5 }}
+                >
+                  Contents
+                </Typography>
+              </Box>
+              <Box component="ol" sx={{ m: 0, pl: 0, listStyle: "none" }}>
+                {handbook.chapters.map((c, idx) => {
+                  const isActive = c.slug === handbook.active.slug;
+                  return (
+                    <Box
+                      key={c.slug}
+                      component="li"
+                      sx={{ borderBottom: "1px solid", borderColor: "divider", "&:last-child": { borderBottom: 0 } }}
                     >
-                      Previous
-                    </button>
+                      {isActive ? (
+                        <Box
+                          aria-current="page"
+                          sx={{
+                            display: "block",
+                            px: 2,
+                            py: 1,
+                            bgcolor: "primary.lighter",
+                            color: "primary.main",
+                            fontWeight: 700,
+                            fontSize: "0.8125rem",
+                          }}
+                        >
+                          {idx + 1}. {c.title}
+                        </Box>
+                      ) : (
+                        <Box
+                          component={Link}
+                          href={handbookHref(c.slug)}
+                          sx={{
+                            display: "block",
+                            px: 2,
+                            py: 1,
+                            fontSize: "0.8125rem",
+                            color: "text.primary",
+                            textDecoration: "none",
+                            "&:hover": { bgcolor: "action.hover", color: "primary.main" },
+                          }}
+                        >
+                          {idx + 1}. {c.title}
+                        </Box>
+                      )}
+                    </Box>
+                  );
+                })}
+              </Box>
+            </Box>
 
-                    <button
-                      className="button-link button-link--secondary"
-                      disabled
-                      aria-disabled="true"
-                    >
-                      Table of contents
-                    </button>
+            {/* Chapter content */}
+            <Box>
+              {/* Pager */}
+              <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 2 }}>
+                <Button
+                  component={handbook.prev ? Link : "button"}
+                  {...(handbook.prev ? { href: handbookHref(handbook.prev.slug) } : {})}
+                  variant="outlined"
+                  size="small"
+                  disabled={!handbook.prev}
+                >
+                  ← Previous
+                </Button>
+                <Button
+                  component={Link}
+                  href={handbookHref(tocSlug)}
+                  variant="outlined"
+                  size="small"
+                >
+                  Contents
+                </Button>
+                <Button
+                  component={handbook.next ? Link : "button"}
+                  {...(handbook.next ? { href: handbookHref(handbook.next.slug) } : {})}
+                  variant="outlined"
+                  size="small"
+                  disabled={!handbook.next}
+                >
+                  Next →
+                </Button>
+              </Stack>
 
-                    {handbook.next ? (
-                      <Link
-                        className="button-link button-link--secondary"
-                        href={handbookHref(handbook.next.slug)}
-                      >
-                        Next
-                      </Link>
-                    ) : (
-                      <button
-                        className="button-link button-link--secondary"
-                        disabled
-                        aria-disabled="true"
-                      >
-                        Next
-                      </button>
-                    )}
-                  </div>
-
-                  <div
-                    className="markdown-content"
-                    dangerouslySetInnerHTML={{ __html: handbook.html }}
-                  />
-                </article>
-              </div>
-            ) : (
-              <article className="handbook-content">
-                <div className="handbook-pager">
-                  {handbook.prev ? (
-                    <Link
-                      className="button-link button-link--secondary"
-                      href={handbookHref(handbook.prev.slug)}
-                    >
-                      Previous
-                    </Link>
-                  ) : (
-                    <button
-                      className="button-link button-link--secondary"
-                      disabled
-                      aria-disabled="true"
-                    >
-                      Previous
-                    </button>
-                  )}
-
-                  <Link
-                    className="button-link button-link--secondary"
-                    href={handbookHref(tocSlug)}
-                  >
-                    Table of contents
-                  </Link>
-
-                  {handbook.next ? (
-                    <Link
-                      className="button-link button-link--secondary"
-                      href={handbookHref(handbook.next.slug)}
-                    >
-                      Next
-                    </Link>
-                  ) : (
-                    <button
-                      className="button-link button-link--secondary"
-                      disabled
-                      aria-disabled="true"
-                    >
-                      Next
-                    </button>
-                  )}
-                </div>
-                {/* No extra title here; Markdown owns the chapter heading */}
-                <div
-                  className="markdown-content"
-                  dangerouslySetInnerHTML={{ __html: handbook.html }}
-                />
-              </article>
-            )}
-          </div>
+              <Box
+                component="article"
+                className="handbook-prose"
+                dangerouslySetInnerHTML={{ __html: handbook.html }}
+              />
+            </Box>
+          </Box>
           <div
             role="tabpanel"
             id="panel-metrics"
