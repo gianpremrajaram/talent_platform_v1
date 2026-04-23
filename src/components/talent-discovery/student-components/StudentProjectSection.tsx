@@ -25,6 +25,7 @@ import {
   addStudentProjectAction,
   deleteProjectAction,
 } from "@/app/talent-discovery-standalone/student-skills-experience/action";
+import { title } from "process";
 //TODO: show confirmation for delete action!
 type ProjectItem = {
   id: string;
@@ -66,14 +67,23 @@ export default function StudentProjectsSection({
   };
 
   const handleAddProject = () => {
-    startTransition(async () => {
-      const created = await addStudentProjectAction(userId, {
-        title: newProject.title,
-        description: newProject.description,
-        startDate: startDateValue?.isValid() ? startDateValue.toISOString() : undefined,
-        endDate: endDateValue?.isValid() ? endDateValue.toISOString() : undefined,
-        projectLink: newProject.projectLink,
-      });
+      const newErrors = {title: !newProject.title.trim()
+        , startDate: !startDateValue || !startDateValue.isValid()
+        , endDate: !endDateValue || !endDateValue.isValid()
+      };
+
+      setErrors(newErrors);
+
+      if(newErrors.title || newErrors.startDate || newErrors.endDate) return;
+
+      startTransition(async () => {
+        const created = await addStudentProjectAction(userId, {
+          title: newProject.title,
+          description: newProject.description,
+          startDate: startDateValue?.isValid() ? startDateValue.toISOString() : undefined,
+          endDate: endDateValue?.isValid() ? endDateValue.toISOString() : undefined,
+          projectLink: newProject.projectLink,
+        });
 
       setProjects((prev) => [...prev, created as ProjectItem]);
       setDialogOpen(false);
@@ -86,6 +96,7 @@ export default function StudentProjectsSection({
       });
       setStartDateValue(null);
       setEndDateValue(null);
+      setErrors({title: false, startDate: false, endDate: false});
     });
   };
 
@@ -95,6 +106,11 @@ export default function StudentProjectsSection({
       setProjects((prev) => prev.filter((project) => project.id !== id));
     });
   };
+
+  const [errors, setErrors] = useState({
+  title: false,
+  startDate: false,
+  endDate: false,});
 
   return (
     <>
@@ -252,6 +268,9 @@ export default function StudentProjectsSection({
               <TextField
                 label="Project Title"
                 fullWidth
+                required
+                error={errors.title}
+                helperText={errors.title ? "Project Title is required" : ""}
                 value={newProject.title}
                 onChange={(e) => handleChange("title", e.target.value)}
               />
@@ -260,7 +279,7 @@ export default function StudentProjectsSection({
                 label="Start Date"
                 value={startDateValue}
                 onChange={(val) => setStartDateValue(val)}
-                slotProps={{ textField: { fullWidth: true } }}
+                slotProps={{ textField: { fullWidth: true, required: true, error: errors.startDate, helperText: errors.startDate ? "Start Date is required" : "" } }}
               />
 
               <DatePicker
@@ -268,7 +287,7 @@ export default function StudentProjectsSection({
                 value={endDateValue}
                 onChange={(val) => setEndDateValue(val)}
                 minDate={startDateValue ?? undefined}
-                slotProps={{ textField: { fullWidth: true } }}
+                slotProps={{ textField: { fullWidth: true, required: true, error: errors.endDate, helperText: errors.endDate ? "End Date is required" : "" } }}
               />
 
               <TextField
