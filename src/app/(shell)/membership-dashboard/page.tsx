@@ -76,6 +76,9 @@ export default async function MembershipDashboardPage(props: Props) {
   if (!isAdmin) {
     const canAccess = await userCanAccessApp(userId, "MEMBERSHIP_DASHBOARD");
     if (!canAccess) {
+      if (roleKeys.includes("STUDENT")) {
+        redirect("/talent-discovery-standalone/student-dashboard");
+      }
       redirect(
         "/access-denied?reason=access-denied&appKey=MEMBERSHIP_DASHBOARD",
       );
