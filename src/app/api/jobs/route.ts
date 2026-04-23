@@ -29,6 +29,7 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const cursor = url.searchParams.get("cursor") ?? undefined;
 
-  const results = await listActiveJobs(cursor);
+  const isStudent = roleKeys.includes("STUDENT");
+  const results = await listActiveJobs(cursor, isStudent ? userId : undefined);
   return ok(results);
 }

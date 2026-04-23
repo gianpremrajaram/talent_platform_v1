@@ -176,7 +176,7 @@ export default function PartnersTable({ onRowsChanged }: Props) {
         sx={{ px: 2, py: 1.4, borderBottom: "1px solid #eceef2" }}
       >
         <Typography sx={{ fontSize: 15, fontWeight: 600, color: "#111827" }}>
-          Partner Project Approvals
+          Job Postings Approvals
         </Typography>
         <TextField
           size="small"
@@ -295,8 +295,8 @@ export default function PartnersTable({ onRowsChanged }: Props) {
                 ) : (
                   <Typography sx={{ fontSize: 11, color: "#4b5563" }}>
                     {row.status === "approved"
-                      ? "Published to partner listings"
-                      : "Hidden from partner listings"}
+                      ? "Published to job portal"
+                      : "Hidden from job portal"}
                   </Typography>
                 ),
               },

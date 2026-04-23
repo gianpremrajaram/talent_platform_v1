@@ -47,11 +47,11 @@ const navSections: NavSection[] = [
         ariaLabel: "Home. Opens Membership Dashboard, Admin View",
       },
       {
-        label: "Project",
+        label: "Job Postings Approvals",
         href: "/membership-dashboard/project",
         adminOnly: true,
         icon: <HandshakeRoundedIcon aria-hidden="true" />,
-        ariaLabel: "Project. Opens Partner Project Approvals page",
+        ariaLabel: "Job Postings Approvals. Opens Job Postings Approvals page",
       },
     ],
   },

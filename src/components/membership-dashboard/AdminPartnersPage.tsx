@@ -95,10 +95,10 @@ export default function AdminPartnersPage({
           <Box>
             <Typography
               component="h1"
-              aria-label="Partner Project Approvals page. Review project submissions from partner companies and decide whether to publish them on the partner listings."
+              aria-label="Job Postings Approvals page. Review job postings submitted by partner companies and decide whether to publish them on the job portal."
               sx={{ fontSize: 21, fontWeight: 600, color: "#1f2937" }}
             >
-              Partner Project Approvals
+              Job Postings Approvals
             </Typography>
           </Box>
         </Stack>

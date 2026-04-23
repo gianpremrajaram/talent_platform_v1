@@ -133,6 +133,7 @@ export async function getJobById(jobId: string): Promise<JobPostingResult | null
 
 export async function listActiveJobs(
   cursor?: string,
+  studentId?: string,
 ): Promise<PaginatedJobPostings> {
   const now = new Date();
 
@@ -143,6 +144,17 @@ export async function listActiveJobs(
       isActive: true,
       approvalStatus: "APPROVED",
       OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+      ...(studentId
+        ? {
+            NOT: {
+              organisation: {
+                studentCompanyConsents: {
+                  some: { studentId, consented: false },
+                },
+              },
+            },
+          }
+        : {}),
     },
     orderBy: { postedAt: "desc" },
     select: JOB_SELECT,
