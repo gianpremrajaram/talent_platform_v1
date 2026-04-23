@@ -202,6 +202,7 @@ export default function TalentPortalShell({ children }: Props) {
                   height: 36,
                   ml: 0.5,
                   bgcolor: "primary.main",
+                  color: "#fff",
                   fontWeight: 700,
                   fontSize: "0.9375rem",
                 }}
