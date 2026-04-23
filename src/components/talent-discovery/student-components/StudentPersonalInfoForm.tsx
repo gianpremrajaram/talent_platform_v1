@@ -176,8 +176,8 @@ function validatePersonalInfo(
 
   if (!values.phoneNumber.trim()) {
     errors.phoneNumber = "Phone number is required";
-  } else if (!/^[0-9+\-()\s]{7,20}$/.test(values.phoneNumber)) {
-    errors.phoneNumber = "Enter a valid phone number";
+  } else if (!/^\d{7,15}$/.test(values.phoneNumber)) {
+    errors.phoneNumber = "Enter a valid phone number (digits only)";
   }
 
   return errors;
@@ -684,11 +684,17 @@ export default function StudentPersonalInfoForm({
                       id="field-phone-number"
                       fullWidth
                       value={values.phoneNumber}
-                      onChange={handleChange("phoneNumber")}
+                      onChange={(e) => {
+                        const digits = e.target.value.replace(/\D/g, "");
+                        handleChange("phoneNumber")({
+                          ...e,
+                          target: { ...e.target, value: digits },
+                        } as React.ChangeEvent<HTMLInputElement>);
+                      }}
                       error={!!errors.phoneNumber}
                       helperText={errors.phoneNumber}
                       disabled={!isEditingPersonal}
-                      inputProps={{ "aria-label": "Phone number" }}
+                      inputProps={{ "aria-label": "Phone number", inputMode: "numeric" }}
                       sx={isEditingPersonal ? inputSx : readOnlySx}
                     />
                   </Stack>

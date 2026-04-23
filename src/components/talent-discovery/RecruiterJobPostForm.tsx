@@ -181,14 +181,16 @@ export default function RecruiterJobPostForm({ open, editJob, onClose, onSaved }
 
             <TextField
               label="Salary band (optional)"
-              placeholder="e.g. £30,000 – £40,000"
+              placeholder="e.g. 40000"
               fullWidth
               size="small"
               value={form.salaryBand}
-              onChange={(e) => handleChange("salaryBand", e.target.value)}
+              onChange={(e) =>
+                handleChange("salaryBand", e.target.value.replace(/\D/g, ""))
+              }
               error={!!fieldErrors.salaryBand}
               helperText={fieldErrors.salaryBand}
-              inputProps={{ "aria-label": "Salary band" }}
+              inputProps={{ "aria-label": "Salary band", inputMode: "numeric" }}
             />
 
             <TextField
