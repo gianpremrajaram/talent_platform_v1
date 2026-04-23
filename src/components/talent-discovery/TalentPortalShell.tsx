@@ -64,7 +64,7 @@ export default function TalentPortalShell({ children }: Props) {
   const toggleDrawer = () => setMobileOpen((prev) => !prev);
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+    <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
       {/* Skip to main content */}
       <a href="#main-content" className="skip-link" aria-label="Skip to main content">
         Skip to main content
@@ -78,6 +78,8 @@ export default function TalentPortalShell({ children }: Props) {
           width: SIDEBAR_WIDTH,
           flexShrink: 0,
           display: { xs: "none", md: "block" },
+          height: "100vh",
+          overflowY: "auto",
         }}
       >
         <RecruiterSideBar />
@@ -107,7 +109,8 @@ export default function TalentPortalShell({ children }: Props) {
           minWidth: 0,
           display: "flex",
           flexDirection: "column",
-          minHeight: "100vh",
+          height: "100vh",
+          overflow: "hidden",
           bgcolor: "background.default",
         }}
       >
@@ -266,6 +269,7 @@ export default function TalentPortalShell({ children }: Props) {
           sx={{
             flexGrow: 1,
             outline: "none",
+            overflowY: "auto",
             p: { xs: 2, md: 3 },
           }}
         >

@@ -51,7 +51,7 @@ export default function AdminPortalShell({ children }: Props) {
     roleKeys.map((k) => roleLabel[k] ?? k).join(", ") || "Member";
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+    <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
       {/* Skip to main content — screen reader / keyboard shortcut */}
       <a href="#main-content" className="skip-link" aria-label="Skip to main content">
         Skip to main content
@@ -65,6 +65,8 @@ export default function AdminPortalShell({ children }: Props) {
           width: DRAWER_WIDTH,
           flexShrink: 0,
           display: { xs: "none", md: "block" },
+          height: "100vh",
+          overflowY: "auto",
         }}
       >
         <AdminSidebar />
@@ -97,7 +99,8 @@ export default function AdminPortalShell({ children }: Props) {
           display: "flex",
           flexDirection: "column",
           bgcolor: "background.default",
-          minHeight: "100vh",
+          height: "100vh",
+          overflow: "hidden",
         }}
       >
         {/* Sticky top bar — same pattern as StudentTopNavBar */}
@@ -213,7 +216,7 @@ export default function AdminPortalShell({ children }: Props) {
           component="main"
           id="main-content"
           tabIndex={-1}
-          sx={{ flexGrow: 1, outline: "none", p: { xs: 2, md: 3 } }}
+          sx={{ flexGrow: 1, outline: "none", overflowY: "auto", p: { xs: 2, md: 3 } }}
         >
           {children}
         </Box>

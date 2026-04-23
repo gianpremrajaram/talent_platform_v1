@@ -25,7 +25,7 @@ export default function StudentPortalShell({ title, userInitial, children }: Pro
   const toggleDrawer = () => setMobileOpen((v) => !v);
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+    <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
       {/* ── Skip to main content (screen-reader / keyboard user helper) ─── */}
       <a
         href="#main-content"
@@ -44,6 +44,8 @@ export default function StudentPortalShell({ title, userInitial, children }: Pro
           width: DRAWER_WIDTH,
           flexShrink: 0,
           display: { xs: "none", md: "block" },
+          height: "100vh",
+          overflowY: "auto",
         }}
       >
         <StudentSideBar />
@@ -77,7 +79,8 @@ export default function StudentPortalShell({ title, userInitial, children }: Pro
           minWidth: 0,
           display: "flex",
           flexDirection: "column",
-          minHeight: "100vh",
+          height: "100vh",
+          overflow: "hidden",
         }}
       >
         <DashboardTopBar
@@ -93,6 +96,7 @@ export default function StudentPortalShell({ title, userInitial, children }: Pro
           sx={{
             flexGrow: 1,
             outline: "none", // suppress focus ring on programmatic focus from skip link
+            overflowY: "auto",
           }}
         >
           {children}

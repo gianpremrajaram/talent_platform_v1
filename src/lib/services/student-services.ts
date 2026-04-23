@@ -374,6 +374,110 @@ export async function seedStudentConsentRows(studentId: string) {
   });
 }
 
+// ─── Public profile (privacy-safe, recruiter/admin view) ─────────────────────
+
+/**
+ * Returns all information a recruiter or admin is allowed to see.
+ * Deliberately excludes: email, phone, address, date of birth, gender.
+ */
+export async function getStudentPublicProfile(studentId: string) {
+  const [user, profile, universities, workExperiences, skills, achievements, projects, socialLinks] =
+    await Promise.all([
+      prisma.user.findUnique({
+        where: { id: studentId },
+        select: { id: true, firstName: true, lastName: true },
+      }),
+      prisma.studentProfile.findUnique({
+        where: { userId: studentId },
+        select: { bio: true },
+      }),
+      prisma.studentUniversity.findMany({
+        where: { userId: studentId },
+        orderBy: { startDate: "desc" },
+      }),
+      prisma.studentWorkExperience.findMany({
+        where: { userId: studentId },
+        orderBy: { startDate: "desc" },
+      }),
+      prisma.studentSkill.findMany({ where: { userId: studentId } }),
+      prisma.studentAcheivementTag.findMany({ where: { userId: studentId } }),
+      prisma.studentProjects.findMany({
+        where: { userId: studentId },
+        orderBy: { startDate: "desc" },
+      }),
+      prisma.studentSocialLink.findMany({ where: { userId: studentId } }),
+    ]);
+
+  if (!user) return null;
+
+  return {
+    id: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    bio: profile?.bio ?? null,
+    universities,
+    workExperiences,
+    skills,
+    achievements,
+    projects,
+    socialLinks,
+  };
+}
+
+export type StudentPublicProfile = NonNullable<
+  Awaited<ReturnType<typeof getStudentPublicProfile>>
+>;
+
+/**
+ * Access control for the student public profile view.
+ * - ADMIN: always allowed.
+ * - RECRUITER: allowed if the student has applied to any of their org's jobs
+ *              OR has an active consent record for their organisation.
+ */
+export async function canViewStudentProfile(
+  viewerId: string,
+  studentId: string,
+): Promise<boolean> {
+  const viewer = await prisma.user.findUnique({
+    where: { id: viewerId },
+    select: {
+      organisationId: true,
+      roles: { select: { role: { select: { key: true } } } },
+    },
+  });
+  if (!viewer) return false;
+
+  const roleKeys = viewer.roles.map((r) => r.role.key);
+
+  if (roleKeys.includes("ADMIN")) return true;
+
+  if (roleKeys.includes("RECRUITER") && viewer.organisationId) {
+    // Applicant check — student explicitly applied to one of their jobs
+    const application = await prisma.jobApplication.findFirst({
+      where: {
+        studentId,
+        job: { organisationId: viewer.organisationId },
+      },
+      select: { id: true },
+    });
+    if (application) return true;
+
+    // Consent check — student has given explicit consent for this org
+    const consent = await prisma.studentCompanyConsent.findUnique({
+      where: {
+        studentId_companyId: {
+          studentId,
+          companyId: viewer.organisationId,
+        },
+      },
+      select: { consented: true },
+    });
+    return consent?.consented === true;
+  }
+
+  return false;
+}
+
 export async function updateStudentCVTags(
   cvId: string,
   data: { label?: string; tags?: string[] },
