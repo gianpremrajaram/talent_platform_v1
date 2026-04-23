@@ -9,6 +9,7 @@ import {
   AppBar,
   Avatar,
   Box,
+  Chip,
   Drawer,
   IconButton,
   ListItemIcon,
@@ -34,6 +35,13 @@ const roleLabel: Record<string, string> = {
   MODULE_LEADER: "Module Leader",
 };
 
+const TIER_CHIP: Record<string, { label: string; color: string; bg: string }> = {
+  BRONZE:   { label: "Bronze",   color: "#7c4a1e", bg: "#fde8d0" },
+  SILVER:   { label: "Silver",   color: "#4a5568", bg: "#e8edf2" },
+  GOLD:     { label: "Gold",     color: "#7a5800", bg: "#fff3cd" },
+  PLATINUM: { label: "Platinum", color: "#4b0082", bg: "#ede7f6" },
+};
+
 type Props = { children: React.ReactNode };
 
 export default function TalentPortalShell({ children }: Props) {
@@ -46,9 +54,12 @@ export default function TalentPortalShell({ children }: Props) {
   const { data: session } = useSession();
   const name = session?.user?.name ?? "";
   const roleKeys: string[] = session?.user?.roleKeys ?? [];
+  const tierKey: string = (session?.user as Record<string, unknown>)?.membershipTierKey as string ?? "";
+  const isAdmin = roleKeys.includes("ADMIN");
   const userInitial = name.trim().charAt(0).toUpperCase() || "U";
   const displayRole =
     roleKeys.map((k) => roleLabel[k] ?? k).join(", ") || "Member";
+  const tierChip = !isAdmin && tierKey ? TIER_CHIP[tierKey] ?? null : null;
 
   const toggleDrawer = () => setMobileOpen((prev) => !prev);
 
@@ -120,7 +131,7 @@ export default function TalentPortalShell({ children }: Props) {
               gap: 1,
             }}
           >
-            {/* Left: hamburger (mobile) + app name */}
+            {/* Left: hamburger (mobile) + app name + tier chip */}
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               {isMobile && (
                 <IconButton
@@ -140,6 +151,24 @@ export default function TalentPortalShell({ children }: Props) {
               >
                 Talent Discovery
               </Typography>
+
+              {tierChip && (
+                <Chip
+                  label={tierChip.label}
+                  size="small"
+                  aria-label={`Membership tier: ${tierChip.label}`}
+                  sx={{
+                    display: { xs: "none", sm: "inline-flex" },
+                    bgcolor: tierChip.bg,
+                    color: tierChip.color,
+                    fontWeight: 700,
+                    fontSize: "0.7rem",
+                    height: 22,
+                    borderRadius: "6px",
+                    letterSpacing: 0.4,
+                  }}
+                />
+              )}
             </Box>
 
             {/* Right: settings + avatar */}
@@ -182,6 +211,22 @@ export default function TalentPortalShell({ children }: Props) {
                   <Typography variant="caption" color="text.secondary">
                     {displayRole}
                   </Typography>
+                  {tierChip && (
+                    <Chip
+                      label={tierChip.label}
+                      size="small"
+                      aria-label={`Membership tier: ${tierChip.label}`}
+                      sx={{
+                        mt: 0.5,
+                        bgcolor: tierChip.bg,
+                        color: tierChip.color,
+                        fontWeight: 700,
+                        fontSize: "0.7rem",
+                        height: 20,
+                        borderRadius: "6px",
+                      }}
+                    />
+                  )}
                 </MenuItem>
 
                 <MenuItem
