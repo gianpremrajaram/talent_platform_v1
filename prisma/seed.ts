@@ -284,9 +284,6 @@ async function seedSpecificRolesAndUsers() {
   // ORGANISATIONS (used for blocking + consent testing)
   // ─────────────────────────────
   const orgs = await prisma.organisation.findMany();
-  const orgMap = Object.fromEntries(orgs.map((o) => [o.slug, o.id]));
-
-  const getOrgId = (slug: string) => orgMap[slug];
 
   // ─────────────────────────────
   // ADMIN

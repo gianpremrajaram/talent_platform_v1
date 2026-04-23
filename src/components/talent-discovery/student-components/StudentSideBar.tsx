@@ -20,6 +20,7 @@ import UploadFileOutlinedIcon from "@mui/icons-material/UploadFileOutlined";
 import FolderOpenOutlinedIcon from "@mui/icons-material/FolderOpenOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
+import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 
 type NavItem = {
   label: string;
@@ -160,6 +161,35 @@ export default function StudentSidebar() {
       </Toolbar>
 
       <Divider />
+
+      <List disablePadding sx={{ px: 2, pt: 1 }}>
+        <ListItemButton
+          component={Link}
+          href="/"
+          aria-label="Back to Alliances home page"
+          sx={{
+            minHeight: 44,
+            borderRadius: 2,
+            mb: 0.5,
+            color: "text.secondary",
+            "&:hover": {
+              bgcolor: "action.hover",
+              color: "primary.main",
+              "& .MuiListItemIcon-root": { color: "primary.main" },
+            },
+          }}
+        >
+          <ListItemIcon sx={{ minWidth: 40, color: "text.secondary" }} aria-hidden="true">
+            <ArrowBackRoundedIcon />
+          </ListItemIcon>
+          <ListItemText
+            primary="Back to Alliances"
+            primaryTypographyProps={{ fontSize: 14, fontWeight: 500 }}
+          />
+        </ListItemButton>
+      </List>
+
+      <Divider sx={{ mt: 1 }} />
 
       <SectionTitle>Profile</SectionTitle>
       <NavSection items={profileItems} />

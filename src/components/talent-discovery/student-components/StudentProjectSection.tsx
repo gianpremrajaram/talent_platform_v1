@@ -25,7 +25,6 @@ import {
   addStudentProjectAction,
   deleteProjectAction,
 } from "@/app/talent-discovery-standalone/student-skills-experience/action";
-import { title } from "process";
 //TODO: show confirmation for delete action!
 type ProjectItem = {
   id: string;

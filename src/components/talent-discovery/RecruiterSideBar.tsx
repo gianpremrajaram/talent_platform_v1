@@ -22,6 +22,7 @@ import WorkOutlineIcon from "@mui/icons-material/WorkOutline";
 import SearchIcon from "@mui/icons-material/Search";
 import RecommendOutlinedIcon from "@mui/icons-material/RecommendOutlined";
 import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
+import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 
 // Canonical tier-rank values — matches TIER_RANK_MAP in TierGate.tsx
 const TIER_RANK_MAP: Record<string, number> = {
@@ -131,6 +132,35 @@ export default function RecruiterSideBar() {
       </Toolbar>
 
       <Divider />
+
+      <List disablePadding sx={{ px: 2, pt: 1 }}>
+        <ListItemButton
+          component={Link}
+          href="/"
+          aria-label="Back to Alliances home page"
+          sx={{
+            minHeight: 44,
+            borderRadius: 2,
+            mb: 0.5,
+            color: "text.secondary",
+            "&:hover": {
+              bgcolor: "action.hover",
+              color: "primary.main",
+              "& .MuiListItemIcon-root": { color: "primary.main" },
+            },
+          }}
+        >
+          <ListItemIcon sx={{ minWidth: 40, color: "text.secondary" }} aria-hidden="true">
+            <ArrowBackRoundedIcon />
+          </ListItemIcon>
+          <ListItemText
+            primary="Back to Alliances"
+            primaryTypographyProps={{ fontSize: 14, fontWeight: 500 }}
+          />
+        </ListItemButton>
+      </List>
+
+      <Divider sx={{ mt: 1 }} />
 
       <SectionTitle>Talent Discovery</SectionTitle>
       <List disablePadding sx={{ px: 2 }}>
