@@ -58,7 +58,11 @@ export default function AdminStudentManagementPage() {
             sx={{ mb: 2.5 }}
           >
             <Box>
-              <Typography sx={{ fontSize: 21, fontWeight: 600, color: "#1f2937" }}>
+              <Typography
+                component="h1"
+                aria-label="Student access management page. Review registered students and manage their Talent Platform access status."
+                sx={{ fontSize: 21, fontWeight: 600, color: "#1f2937" }}
+              >
                 Student access management
               </Typography>
             </Box>
@@ -109,6 +113,7 @@ export default function AdminStudentManagementPage() {
             ].map((card) => (
               <Card
                 key={card.title}
+                aria-label={`${card.value} ${card.title}. ${card.note}.`}
                 sx={{
                   borderRadius: "8px",
                   border: "1px solid #e8eaef",

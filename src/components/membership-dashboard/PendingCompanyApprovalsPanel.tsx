@@ -153,7 +153,11 @@ export default function PendingCompanyApprovalsPanel() {
 
   if (pendingCompanies.length === 0) {
     return (
-      <Card sx={{ borderRadius: "8px", border: "1px solid #e8eaef", boxShadow: "none", mb: 2, p: 3, textAlign: "center" }}>
+      <Card
+        role="region"
+        aria-label="Pending Company Registrations panel. No new recruiter accounts are awaiting review at the moment."
+        sx={{ borderRadius: "8px", border: "1px solid #e8eaef", boxShadow: "none", mb: 2, p: 3, textAlign: "center" }}
+      >
         <Typography sx={{ color: "#4b5563" }}>
           No pending company registrations at the moment.
         </Typography>
@@ -162,7 +166,11 @@ export default function PendingCompanyApprovalsPanel() {
   }
 
   return (
-    <Card sx={{ borderRadius: "8px", border: "1px solid #e8eaef", boxShadow: "none", mb: 2 }}>
+    <Card
+      role="region"
+      aria-label={`Pending Company Registrations panel. ${pendingCompanies.length} newly registered recruiter account${pendingCompanies.length === 1 ? "" : "s"} awaiting your review. For each row, choose a membership tier and then approve or reject.`}
+      sx={{ borderRadius: "8px", border: "1px solid #e8eaef", boxShadow: "none", mb: 2 }}
+    >
       <Box sx={{ px: 3, py: 2, borderBottom: "1px solid #e8eaef" }}>
         <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#1f2937" }}>
           Pending Company Registrations

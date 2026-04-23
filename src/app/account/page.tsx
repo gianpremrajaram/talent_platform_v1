@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getServerAuthSession } from "@/lib/getServerAuthSession";
 import prisma from "@/lib/prisma";
 import AccountPageClient from "./ui/AccountPageClient";
+import BackLink from "@/components/account/BackLink";
 
 type AccountPageProps = {
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -32,6 +33,7 @@ export default async function AccountPage(props: AccountPageProps) {
   if (!me) {
     return (
       <section className="content-section">
+        <BackLink />
         <header className="content-header">
           <h1>Edit profile</h1>
         </header>
@@ -91,6 +93,7 @@ export default async function AccountPage(props: AccountPageProps) {
 
   return (
     <section className="content-section">
+      <BackLink />
       <header className="content-header">
         <h1>Edit profile</h1>
         {isAdmin ? (

@@ -59,7 +59,11 @@ export default function AdminPartnerManagementPage() {
             sx={{ mb: 2.5 }}
           >
             <Box>
-              <Typography sx={{ fontSize: 21, fontWeight: 600, color: "#1f2937" }}>
+              <Typography
+                component="h1"
+                aria-label="Partner access management page. Review partner companies, manage their access status, and approve pending company registrations."
+                sx={{ fontSize: 21, fontWeight: 600, color: "#1f2937" }}
+              >
                 Partner access management
               </Typography>
             </Box>
@@ -117,6 +121,7 @@ export default function AdminPartnerManagementPage() {
             ].map((card) => (
               <Card
                 key={card.title}
+                aria-label={`${card.value} ${card.title}.${card.note ? ` ${card.note}.` : ""}`}
                 sx={{
                   borderRadius: "8px",
                   border: "1px solid #e8eaef",

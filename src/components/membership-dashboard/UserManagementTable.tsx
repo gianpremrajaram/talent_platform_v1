@@ -102,8 +102,22 @@ export default function UserManagementTable({
   onSearchChange,
   searchPlaceholder = "Search users",
 }: Props) {
+  const totalCount = rows.length;
+  const userTypeWord =
+    rows[0]?.userType === "Student" ? "student" : "partner";
+  const suspendedCount = rows.filter((r) => r.status === "suspended").length;
+  const bannedCount = rows.filter((r) => r.status === "banned").length;
+  const pendingCount = rows.filter((r) => r.status === "pending_approval").length;
+
+  const tableAriaLabel =
+    totalCount === 0
+      ? `User management panel. No ${userTypeWord} accounts to manage.`
+      : `User management panel. ${totalCount} ${userTypeWord} account${totalCount === 1 ? "" : "s"} listed: ${suspendedCount} suspended, ${bannedCount} banned, ${pendingCount} pending approval. Use the Edit button on any row to manage that account.`;
+
   return (
     <Card
+      role="region"
+      aria-label={tableAriaLabel}
       sx={{
         borderRadius: "8px",
         border: "1px solid #e7e9ee",
@@ -126,7 +140,9 @@ export default function UserManagementTable({
           onChange={(e) => onSearchChange?.(e.target.value)}
           placeholder={searchPlaceholder}
           slotProps={{
-            htmlInput: { "aria-label": searchPlaceholder },
+            htmlInput: {
+              "aria-label": `${searchPlaceholder}. ${totalCount} ${userTypeWord} account${totalCount === 1 ? "" : "s"} currently shown.`,
+            },
             input: {
               startAdornment: (
                 <InputAdornment position="start">

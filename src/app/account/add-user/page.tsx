@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getServerAuthSession } from "@/lib/getServerAuthSession";
 import prisma from "@/lib/prisma";
 import CreateUserForm from "@/components/account/CreateUserForm";
+import BackLink from "@/components/account/BackLink";
 
 export default async function AddUserPage() {
   const session = await getServerAuthSession();
@@ -33,6 +34,7 @@ export default async function AddUserPage() {
 
   return (
     <section className="content-section">
+      <BackLink />
       <header className="content-header">
         <h1>Add user</h1>
         <p>Create a new user profile.</p>
