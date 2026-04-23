@@ -8,6 +8,7 @@ import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined
 import BusinessOutlinedIcon from "@mui/icons-material/BusinessOutlined";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import Link from "next/link";
+import CoverLetterPreview from "@/components/talent-discovery/student-components/CoverLetterPreview";
 
 export default async function StudentApplicationsPage() {
   const session = await getServerAuthSession();
@@ -135,19 +136,7 @@ export default async function StudentApplicationsPage() {
                       <Typography variant="body2" color="text.secondary" fontWeight={600} mb={0.5}>
                         Cover letter
                       </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          whiteSpace: "pre-wrap",
-                          color: "text.primary",
-                          bgcolor: "grey.50",
-                          borderRadius: 1.5,
-                          p: 1.5,
-                          fontSize: 13,
-                        }}
-                      >
-                        {app.coverLetter}
-                      </Typography>
+                      <CoverLetterPreview text={app.coverLetter} />
                     </>
                   )}
                 </Box>

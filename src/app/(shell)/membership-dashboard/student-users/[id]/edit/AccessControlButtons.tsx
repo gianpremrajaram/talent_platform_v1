@@ -72,7 +72,7 @@ export default function AccessControlButtons({
         disabled={loading}
         sx={{ justifyContent: "flex-start", px: 3 }}
       >
-        {loading ? <CircularProgress size={24} color="inherit" /> : "Permanently Ban Partner"}
+        {loading ? <CircularProgress size={24} color="inherit" /> : "Permanently Ban Student"}
       </Button>
     </Stack>
   );
