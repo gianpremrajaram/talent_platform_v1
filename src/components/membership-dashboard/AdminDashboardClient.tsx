@@ -740,35 +740,124 @@ export default function AdminDashboardClient(props: {
 
             {/* Chapter content */}
             <Box>
-              {/* Pager */}
-              <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 2 }}>
-                <Button
-                  component={handbook.prev ? Link : "button"}
-                  {...(handbook.prev ? { href: handbookHref(handbook.prev.slug) } : {})}
-                  variant="outlined"
-                  size="small"
-                  disabled={!handbook.prev}
-                >
-                  ← Previous
-                </Button>
-                <Button
-                  component={Link}
-                  href={handbookHref(tocSlug)}
-                  variant="outlined"
-                  size="small"
-                >
-                  Contents
-                </Button>
-                <Button
-                  component={handbook.next ? Link : "button"}
-                  {...(handbook.next ? { href: handbookHref(handbook.next.slug) } : {})}
-                  variant="outlined"
-                  size="small"
-                  disabled={!handbook.next}
-                >
-                  Next →
-                </Button>
-              </Stack>
+              {/* Pagination bar */}
+              {(() => {
+                const activeIdx = handbook.chapters.findIndex(
+                  (c) => c.slug === handbook.active.slug,
+                );
+                const total = handbook.chapters.length;
+                return (
+                  <Box
+                    aria-label="Handbook pagination"
+                    sx={{
+                      mb: 3,
+                      p: 2,
+                      border: "1px solid",
+                      borderColor: "divider",
+                      borderRadius: 2,
+                      bgcolor: "grey.50",
+                    }}
+                  >
+                    {/* Prev / chapter label / Next */}
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      justifyContent="space-between"
+                      spacing={1}
+                      sx={{ mb: 1.5 }}
+                    >
+                      <Button
+                        component={handbook.prev ? Link : "button"}
+                        {...(handbook.prev ? { href: handbookHref(handbook.prev.slug) } : {})}
+                        variant="outlined"
+                        size="small"
+                        disabled={!handbook.prev}
+                        aria-label={handbook.prev ? `Previous: ${handbook.prev.title}` : "No previous chapter"}
+                      >
+                        ← Prev
+                      </Button>
+
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        fontWeight={600}
+                        sx={{ textAlign: "center", flex: 1 }}
+                      >
+                        Chapter {activeIdx + 1} of {total}
+                        <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
+                          {" "}— {handbook.active.title}
+                        </Box>
+                      </Typography>
+
+                      <Button
+                        component={handbook.next ? Link : "button"}
+                        {...(handbook.next ? { href: handbookHref(handbook.next.slug) } : {})}
+                        variant="outlined"
+                        size="small"
+                        disabled={!handbook.next}
+                        aria-label={handbook.next ? `Next: ${handbook.next.title}` : "No next chapter"}
+                      >
+                        Next →
+                      </Button>
+                    </Stack>
+
+                    {/* Numbered chapter steps */}
+                    <Stack
+                      direction="row"
+                      spacing={0.75}
+                      flexWrap="wrap"
+                      justifyContent="center"
+                      role="list"
+                      aria-label="Jump to chapter"
+                    >
+                      {handbook.chapters.map((c, idx) => {
+                        const isCurrent = idx === activeIdx;
+                        return (
+                          <Box
+                            key={c.slug}
+                            role="listitem"
+                            component={isCurrent ? "span" : Link}
+                            {...(!isCurrent ? { href: handbookHref(c.slug) } : {})}
+                            aria-label={`Chapter ${idx + 1}: ${c.title}${isCurrent ? " (current)" : ""}`}
+                            aria-current={isCurrent ? "page" : undefined}
+                            sx={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              width: 32,
+                              height: 32,
+                              borderRadius: "50%",
+                              fontSize: "0.8125rem",
+                              fontWeight: 700,
+                              textDecoration: "none",
+                              transition: "all 0.15s",
+                              ...(isCurrent
+                                ? {
+                                    bgcolor: "primary.main",
+                                    color: "#fff",
+                                    cursor: "default",
+                                  }
+                                : {
+                                    border: "1px solid",
+                                    borderColor: "divider",
+                                    color: "text.secondary",
+                                    bgcolor: "background.paper",
+                                    "&:hover": {
+                                      borderColor: "primary.main",
+                                      color: "primary.main",
+                                      bgcolor: "primary.lighter",
+                                    },
+                                  }),
+                            }}
+                          >
+                            {idx + 1}
+                          </Box>
+                        );
+                      })}
+                    </Stack>
+                  </Box>
+                );
+              })()}
 
               <Box
                 component="article"
