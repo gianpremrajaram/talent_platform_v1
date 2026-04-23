@@ -150,8 +150,18 @@ export default function PartnersTable({ onRowsChanged }: Props) {
     }
   }
 
+  const pendingCount = filteredRows.filter((r) => r.status === "pending").length;
+  const totalCount = filteredRows.length;
+  const tableAriaLabel = loading
+    ? "Partner project approvals table. Loading projects."
+    : totalCount === 0
+      ? "Partner project approvals table. No partner projects to review yet."
+      : `Partner project approvals table. ${totalCount} project${totalCount === 1 ? "" : "s"} listed, ${pendingCount} pending your decision.`;
+
   return (
     <Card
+      role="region"
+      aria-label={tableAriaLabel}
       sx={{
         borderRadius: "8px",
         border: "1px solid #e7e9ee",
@@ -174,7 +184,9 @@ export default function PartnersTable({ onRowsChanged }: Props) {
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search partner projects"
           slotProps={{
-            htmlInput: { "aria-label": "Search partner projects" },
+            htmlInput: {
+              "aria-label": `Search partner projects by company or project name. ${rows.length} project${rows.length === 1 ? "" : "s"} total, ${rows.filter((r) => r.status === "pending").length} pending approval.`,
+            },
             input: {
               startAdornment: (
                 <InputAdornment position="start">

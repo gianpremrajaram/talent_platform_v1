@@ -68,7 +68,11 @@ export default function SuspensionHistoryPanel({ user }: Props) {
 
   if (!user) {
     return (
-      <Card sx={{ borderRadius: "8px", border: "1px solid #e7e9ee", boxShadow: "none", p: 2 }}>
+      <Card
+        role="region"
+        aria-label="Suspension history panel. No user is currently selected. Select a user from the table above to view their suspension and audit records."
+        sx={{ borderRadius: "8px", border: "1px solid #e7e9ee", boxShadow: "none", p: 2 }}
+      >
         <Typography sx={{ fontWeight: 600, color: "#111827" }}>Suspension history</Typography>
         <Typography sx={{ mt: 1, fontSize: 14, color: "#4b5563" }}>
           Select a user from the table to view suspension history and audit records.
@@ -77,8 +81,26 @@ export default function SuspensionHistoryPanel({ user }: Props) {
     );
   }
 
+  const statusPhrase: Record<ManagedUser["status"], string> = {
+    active: "currently active with access allowed",
+    suspended: "currently suspended with access temporarily blocked",
+    banned: "currently banned with access permanently revoked",
+    pending_approval: "currently pending admin approval",
+  };
+  const currentStatus = statusPhrase[user.status] ?? `currently ${user.status}`;
+
+  const historyAriaLabel = loading
+    ? `Suspension history panel for ${user.name}, ${user.userType.toLowerCase()} account, ${currentStatus}. Loading audit records.`
+    : history.length === 0
+      ? `Suspension history panel for ${user.name}, ${user.userType.toLowerCase()} account, ${currentStatus}. Clean record. No suspension or ban entries in the audit trail.`
+      : `Suspension history panel for ${user.name}, ${user.userType.toLowerCase()} account, ${currentStatus}. ${history.length} audit record${history.length === 1 ? "" : "s"} in the trail, showing suspend, lift, and ban actions in reverse chronological order.`;
+
   return (
-    <Card sx={{ borderRadius: "8px", border: "1px solid #e7e9ee", boxShadow: "none", overflow: "hidden" }}>
+    <Card
+      role="region"
+      aria-label={historyAriaLabel}
+      sx={{ borderRadius: "8px", border: "1px solid #e7e9ee", boxShadow: "none", overflow: "hidden" }}
+    >
       <Box sx={{ px: 2, py: 1.6, borderBottom: "1px solid #eceef2" }}>
         <Typography sx={{ fontSize: 17, fontWeight: 600, color: "#111827" }}>
           Suspension history

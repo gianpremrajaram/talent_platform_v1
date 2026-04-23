@@ -93,7 +93,11 @@ export default function AdminPartnersPage({
           sx={{ mb: 2.5 }}
         >
           <Box>
-            <Typography sx={{ fontSize: 21, fontWeight: 600, color: "#1f2937" }}>
+            <Typography
+              component="h1"
+              aria-label="Partner Project Approvals page. Review project submissions from partner companies and decide whether to publish them on the partner listings."
+              sx={{ fontSize: 21, fontWeight: 600, color: "#1f2937" }}
+            >
               Partner Project Approvals
             </Typography>
           </Box>
@@ -108,9 +112,12 @@ export default function AdminPartnersPage({
           mb: 2.5,
         }}
       >
-        {statCards.map((card) => (
+        {statCards.map((card) => {
+          const valueText = statsLoading ? "Loading" : String(card.value ?? 0);
+          return (
           <Card
             key={card.title}
+            aria-label={`${valueText} ${card.title}. ${card.note}.`}
             sx={{
               borderRadius: "8px",
               border: "1px solid #e8eaef",
@@ -156,7 +163,8 @@ export default function AdminPartnersPage({
               </Typography>
             </CardContent>
           </Card>
-        ))}
+          );
+        })}
       </Box>
 
       {showPartnersTable ? <PartnersTable onRowsChanged={loadStats} /> : null}
