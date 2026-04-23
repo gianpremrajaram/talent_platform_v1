@@ -8,7 +8,7 @@ import { userCanAccessFeature } from "@/lib/access-control";
 import { checkRecruiterAccess } from "@/lib/services/company-services";
 import { createJobPosting, listJobsForFirm } from "@/lib/services/job-board";
 import { ok, err } from "@/lib/api-response";
-import { jobPostingSchema } from "@/lib/Validation/JobPosting";
+import { jobPostingSchema } from "@/lib/validation/JobPosting";
 
 export const dynamic = "force-dynamic";
 

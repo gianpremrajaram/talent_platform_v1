@@ -7,14 +7,17 @@
 // server-side from the session, so this panel cannot be tricked into
 // showing another firm's recommendations.
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   Box,
+  Button,
   Card,
   CircularProgress,
   Stack,
   Typography,
 } from "@mui/material";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import type { RecommendationRow } from "@/types/index";
 
 export default function RecommendedStudentsPanel() {
@@ -100,18 +103,17 @@ export default function RecommendedStudentsPanel() {
                   {new Date(r.createdAt).toLocaleDateString()}.
                 </Typography>
               </Box>
-              <a
-                href={`mailto:${r.student.email}`}
-                style={{
-                  fontSize: 13,
-                  fontWeight: 500,
-                  textDecoration: "none",
-                  color: "#1d4ed8",
-                  whiteSpace: "nowrap",
-                }}
+              <Button
+                component={Link}
+                href={`/talent-discovery/student-profile/${r.studentId}`}
+                size="small"
+                variant="outlined"
+                startIcon={<PersonOutlineIcon fontSize="small" aria-hidden="true" />}
+                aria-label={`View profile for ${r.student.firstName} ${r.student.lastName}`}
+                sx={{ fontSize: 12, borderRadius: 1.5, whiteSpace: "nowrap", textTransform: "none" }}
               >
-                Contact
-              </a>
+                View Profile
+              </Button>
             </Box>
           ))}
         </Stack>

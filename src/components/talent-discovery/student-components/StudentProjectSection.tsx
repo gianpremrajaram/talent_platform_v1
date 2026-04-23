@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import {
   Box,
   Button,
@@ -33,11 +33,6 @@ type ProjectItem = {
   endDate?: Date | string;
   description: string;
   projectLink?: string;
-};
-
-type Props = {
-  userId: string;
-  initialExperiences?: ProjectItem[];
 };
 
 export default function StudentProjectsSection({
@@ -129,7 +124,7 @@ export default function StudentProjectsSection({
           </Typography>
 
           <Button
-            variant="contained"
+            variant="outlined"
             startIcon={<Add />}
             onClick={() => setDialogOpen(true)}
             sx={{
@@ -137,7 +132,6 @@ export default function StudentProjectsSection({
               px: 2.5,
               py: 1,
               textTransform: "none",
-              boxShadow: "none",
             }}
           >
             Add Project
@@ -202,6 +196,7 @@ export default function StudentProjectsSection({
                         >
                           <GitHub
                             sx={{ fontSize: 18, color: "text.secondary" }}
+                            aria-hidden="true"
                           />
                           <Link
                             href={project.projectLink}
@@ -230,8 +225,9 @@ export default function StudentProjectsSection({
                     <IconButton
                       color="error"
                       onClick={() => handleRemoveProject(project.id)}
+                      aria-label={`Delete project: ${project.title}`}
                     >
-                      <Delete />
+                      <Delete aria-hidden="true" />
                     </IconButton>
                   </Stack>
                 </CardContent>
@@ -246,8 +242,9 @@ export default function StudentProjectsSection({
         onClose={() => setDialogOpen(false)}
         fullWidth
         maxWidth="sm"
+        aria-labelledby="project-dialog-title"
       >
-        <DialogTitle>Add Project</DialogTitle>
+        <DialogTitle id="project-dialog-title">Add Project</DialogTitle>
 
         <DialogContent>
           <LocalizationProvider dateAdapter={AdapterDayjs}>

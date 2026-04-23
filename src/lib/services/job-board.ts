@@ -119,6 +119,16 @@ export async function listJobsForFirm(
   return jobs.map(toJobResult);
 }
 
+// ─── GET SINGLE JOB ──────────────────────────────────────────────────────────
+
+export async function getJobById(jobId: string): Promise<JobPostingResult | null> {
+  const job = await prisma.jobPosting.findUnique({
+    where: { id: jobId },
+    select: JOB_SELECT,
+  });
+  return job ? toJobResult(job) : null;
+}
+
 // ─── LIST ACTIVE JOBS (public browse) ────────────────────────────────────────
 
 export async function listActiveJobs(

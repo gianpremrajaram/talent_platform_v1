@@ -20,7 +20,6 @@ import {
   Stack,
   TextField,
   Typography,
-  Chip,
 } from "@mui/material";
 import WorkOutlineOutlinedIcon from "@mui/icons-material/WorkOutlineOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
@@ -100,8 +99,8 @@ export default function ApplyJobModal({ open, job, cvs, onClose, onApplied }: Pr
   if (!job) return null;
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ pb: 1 }}>
+    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth aria-labelledby="apply-dialog-title">
+      <DialogTitle id="apply-dialog-title" sx={{ pb: 1 }}>
         Apply for Position
       </DialogTitle>
 
@@ -122,15 +121,15 @@ export default function ApplyJobModal({ open, job, cvs, onClose, onApplied }: Pr
           </Typography>
           <Stack spacing={0.5}>
             <Stack direction="row" spacing={1} alignItems="center">
-              <BusinessOutlinedIcon sx={{ fontSize: 15, color: "text.secondary" }} />
+              <BusinessOutlinedIcon sx={{ fontSize: 15, color: "text.secondary" }} aria-hidden="true" />
               <Typography variant="body2" color="text.secondary">{job.companyName}</Typography>
             </Stack>
             <Stack direction="row" spacing={1} alignItems="center">
-              <LocationOnOutlinedIcon sx={{ fontSize: 15, color: "text.secondary" }} />
+              <LocationOnOutlinedIcon sx={{ fontSize: 15, color: "text.secondary" }} aria-hidden="true" />
               <Typography variant="body2" color="text.secondary">{job.location}</Typography>
             </Stack>
             <Stack direction="row" spacing={1} alignItems="center">
-              <WorkOutlineOutlinedIcon sx={{ fontSize: 15, color: "text.secondary" }} />
+              <WorkOutlineOutlinedIcon sx={{ fontSize: 15, color: "text.secondary" }} aria-hidden="true" />
               <Typography variant="body2" color="text.secondary">
                 {job.roleType}{job.salaryBand && job.salaryBand !== "—" ? ` · ${job.salaryBand}` : ""}
               </Typography>
@@ -140,7 +139,7 @@ export default function ApplyJobModal({ open, job, cvs, onClose, onApplied }: Pr
 
         {success ? (
           <Stack alignItems="center" spacing={1.5} py={2}>
-            <CheckCircleOutlineIcon sx={{ fontSize: 48, color: "success.main" }} />
+            <CheckCircleOutlineIcon sx={{ fontSize: 48, color: "success.main" }} aria-hidden="true" />
             <Typography variant="subtitle1" fontWeight={600}>Application submitted!</Typography>
             <Typography variant="body2" color="text.secondary" textAlign="center">
               Your application has been sent to {job.companyName}. Good luck!

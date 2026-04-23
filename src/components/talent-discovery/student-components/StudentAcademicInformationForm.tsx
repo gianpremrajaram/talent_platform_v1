@@ -73,13 +73,6 @@ const emptyCollege: CollegeForm = {
   endDate: null,
 };
 
-const inputSx = {
-  "& .MuiOutlinedInput-root": {
-    borderRadius: 1.5,
-    backgroundColor: "#fff",
-  },
-};
-
 function formatMonthYear(date: Dayjs | null) {
   if (!date) return "Not specified";
   return date.format("MMMM YYYY");
@@ -122,7 +115,6 @@ export default function StudentAcademicInformationForm({
   //initialize the acheivement tags
   const [achievements, setAchievements] =
     useState<AcheivementTag[]>(acheivementTags);
-  const [additionalInfo, setAdditionalInfo] = useState("");
   const [tagDialogOpen, setTagDialogOpen] = useState(false);
   const [newTag, setNewTag] = useState("");
   const [collegeDialogOpen, setCollegeDialogOpen] = useState(false);
@@ -462,8 +454,9 @@ export default function StudentAcademicInformationForm({
           }}
           fullWidth
           maxWidth="md"
+          aria-labelledby="college-dialog-title"
         >
-          <DialogTitle>
+          <DialogTitle id="college-dialog-title">
             {editingCollegeIndex !== null
               ? "Edit University"
               : "Add University"}
@@ -586,10 +579,11 @@ export default function StudentAcademicInformationForm({
         <Dialog
           open={tagDialogOpen}
           onClose={() => setTagDialogOpen(false)}
+          aria-labelledby="achievement-dialog-title"
           fullWidth
           maxWidth="xs"
         >
-          <DialogTitle>Add Academic Achievement</DialogTitle>
+          <DialogTitle id="achievement-dialog-title">Add Academic Achievement</DialogTitle>
           <DialogContent>
             <TextField
               autoFocus

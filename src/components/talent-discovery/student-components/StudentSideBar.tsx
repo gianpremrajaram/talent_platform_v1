@@ -18,7 +18,6 @@ import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import WorkOutlineOutlinedIcon from "@mui/icons-material/WorkOutlineOutlined";
 import UploadFileOutlinedIcon from "@mui/icons-material/UploadFileOutlined";
 import FolderOpenOutlinedIcon from "@mui/icons-material/FolderOpenOutlined";
-import TagOutlinedIcon from "@mui/icons-material/TagOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
 
@@ -129,7 +128,7 @@ function NavSection({ items }: { items: NavItem[] }) {
               },
             }}
           >
-            <ListItemIcon sx={{ minWidth: 40, color: "text.secondary" }}>
+            <ListItemIcon sx={{ minWidth: 40, color: "text.secondary" }} aria-hidden="true">
               {item.icon}
             </ListItemIcon>
             <ListItemText primary={item.label} />

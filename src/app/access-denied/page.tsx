@@ -31,9 +31,6 @@ export default async function AccessDeniedPage({
   const serviceSlug = getFirst(sp.service);
   const appKey = getFirst(sp.appKey);
 
-  // For the debug block, we can just dump the object
-  const debugParams: Record<string, string | string[] | undefined> = { ...sp };
-
   // ─────────────────────────────────────────────
   // 1) "Coming soon" branch (service-level)
   // ─────────────────────────────────────────────

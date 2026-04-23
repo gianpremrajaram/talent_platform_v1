@@ -234,7 +234,6 @@ function CompanyRow({ company, onToggle }: CompanyRowProps) {
 const PAGE_SIZE = 5;
 
 export default function ConsentManagement({ members }: ConsentManagementProps) {
-  const theme = useTheme();
   const [companies, setCompanies] = useState<Company[]>(
     members.map((m) => ({
       id: m.id,

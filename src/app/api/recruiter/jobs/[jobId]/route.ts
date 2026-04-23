@@ -8,7 +8,7 @@ import { getServerAuthSession } from "@/lib/getServerAuthSession";
 import { checkRecruiterAccess } from "@/lib/services/company-services";
 import { updateJobPosting, deleteJobPosting } from "@/lib/services/job-board";
 import { ok, err } from "@/lib/api-response";
-import { updateJobPostingSchema } from "@/lib/Validation/JobPosting";
+import { updateJobPostingSchema } from "@/lib/validation/JobPosting";
 
 export const dynamic = "force-dynamic";
 

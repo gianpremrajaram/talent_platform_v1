@@ -5,6 +5,7 @@
 // Cursor-paginated with "Load more". Apply modal wired in for each row.
 
 import { useMemo, useState, useEffect } from "react";
+import Link from "next/link";
 import {
   Avatar,
   Box,
@@ -151,6 +152,20 @@ export default function JobOpeningsTable({ cvs, initialAppliedJobIds = [] }: Pro
       headerName: "Role / Position",
       flex: 1.6,
       minWidth: 200,
+      renderCell: (params) => (
+        <Link
+          href={`/talent-discovery-standalone/student-job/${params.row.id}`}
+          style={{
+            fontWeight: 600,
+            color: "inherit",
+            textDecoration: "none",
+          }}
+          onMouseEnter={(e) => ((e.target as HTMLElement).style.textDecoration = "underline")}
+          onMouseLeave={(e) => ((e.target as HTMLElement).style.textDecoration = "none")}
+        >
+          {params.row.title}
+        </Link>
+      ),
     },
     {
       field: "companyName",

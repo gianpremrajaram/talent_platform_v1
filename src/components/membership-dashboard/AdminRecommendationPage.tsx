@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Box,
@@ -7,14 +8,18 @@ import {
   Card,
   Chip,
   CircularProgress,
+  Divider,
   IconButton,
   MenuItem,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import PersonAddAltRoundedIcon from "@mui/icons-material/PersonAddAltRounded";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import type {
   PaginatedCandidates,
   RecommendationCandidate,
@@ -274,8 +279,11 @@ export default function AdminRecommendationPage() {
             p: 2,
           }}
         >
-          <Typography sx={{ fontSize: 16, fontWeight: 600, mb: 1.5 }}>
+          <Typography sx={{ fontSize: 16, fontWeight: 600, mb: 0.25 }}>
             Consented candidates
+          </Typography>
+          <Typography sx={{ fontSize: 12, color: "#6b7280", mb: 1.5 }}>
+            <b>Recommend now</b> — pushes one student to the firm immediately. <b>Add to shortlist</b> — batch-select multiple students, then use &ldquo;Recommend shortlist&rdquo; to send them all at once.
           </Typography>
 
           <Box
@@ -354,71 +362,82 @@ export default function AdminRecommendationPage() {
                   <Box
                     key={c.id}
                     sx={{
-                      border: "1px solid #e5e7eb",
+                      border: "1px solid",
+                      borderColor: isShortlisted ? "primary.main" : "#e5e7eb",
                       borderRadius: "8px",
                       p: 1.5,
                       backgroundColor: isShortlisted ? "#eef4ff" : "#fff",
                     }}
                   >
-                    <Stack
-                      direction="row"
-                      justifyContent="space-between"
-                      alignItems="flex-start"
-                      spacing={1.5}
-                    >
-                      <Box sx={{ minWidth: 0, flex: 1 }}>
-                        <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
-                          {c.firstName} {c.lastName}
-                        </Typography>
-                        <Typography sx={{ fontSize: 12, color: "#6b7280" }}>
-                          {c.degreeProgram ?? "Degree not set"}. {c.location ?? "Location not set"}. {c.cvCount} CV(s).
-                        </Typography>
-                        {c.skills.length > 0 && (
-                          <Stack direction="row" spacing={0.5} sx={{ mt: 0.75, flexWrap: "wrap", gap: 0.5 }}>
-                            {c.skills.slice(0, 6).map((s) => (
-                              <Chip key={s} label={s} size="small" />
-                            ))}
-                            {c.skills.length > 6 && (
-                              <Chip label={`+${c.skills.length - 6}`} size="small" />
-                            )}
-                          </Stack>
+                    {/* Student info */}
+                    <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
+                      {c.firstName} {c.lastName}
+                    </Typography>
+                    <Typography sx={{ fontSize: 12, color: "#6b7280" }}>
+                      {c.degreeProgram ?? "Degree not set"} &middot; {c.location ?? "Location not set"} &middot; {c.cvCount} CV(s)
+                    </Typography>
+                    {c.skills.length > 0 && (
+                      <Stack direction="row" spacing={0.5} sx={{ mt: 0.75, flexWrap: "wrap", gap: 0.5 }}>
+                        {c.skills.slice(0, 5).map((s) => (
+                          <Chip key={s} label={s} size="small" />
+                        ))}
+                        {c.skills.length > 5 && (
+                          <Chip label={`+${c.skills.length - 5}`} size="small" />
                         )}
-                      </Box>
+                      </Stack>
+                    )}
 
-                      <Stack spacing={0.75} alignItems="flex-end">
+                    {/* Action row */}
+                    <Stack direction="row" spacing={1} sx={{ mt: 1.25 }} flexWrap="wrap">
+                      <Button
+                        component={Link}
+                        href={`/membership-dashboard/student-profile/${c.id}`}
+                        size="small"
+                        variant="outlined"
+                        startIcon={<PersonOutlineIcon fontSize="small" />}
+                        sx={{ fontSize: 11, borderRadius: 1.5, textTransform: "none", height: 28 }}
+                      >
+                        View Profile
+                      </Button>
+
+                      <Tooltip title="Add to batch selection — send all shortlisted students at once using 'Recommend shortlist' above">
                         <Button
                           size="small"
                           variant={isShortlisted ? "contained" : "outlined"}
                           onClick={() => toggleShortlist(c.id)}
                           aria-label={
                             isShortlisted
-                              ? `Remove ${c.firstName} ${c.lastName} from shortlist`
-                              : `Add ${c.firstName} ${c.lastName} to shortlist`
+                              ? `Remove ${c.firstName} from shortlist`
+                              : `Add ${c.firstName} to shortlist for batch send`
                           }
-                          sx={{ textTransform: "none", minWidth: 96 }}
+                          sx={{ fontSize: 11, borderRadius: 1.5, textTransform: "none", height: 28 }}
                         >
-                          {isShortlisted ? "Shortlisted" : "Shortlist"}
+                          {isShortlisted ? "✓ In shortlist" : "Add to shortlist"}
                         </Button>
-                        <Button
+                      </Tooltip>
+
+                      {alreadyRecommended ? (
+                        <Chip
+                          icon={<CheckCircleOutlineIcon sx={{ fontSize: "14px !important" }} />}
+                          label="Already recommended"
                           size="small"
-                          variant="contained"
-                          color="success"
-                          onClick={() => recommendStudent(c.id)}
-                          disabled={busyId === c.id || alreadyRecommended}
-                          aria-label={
-                            alreadyRecommended
-                              ? `${c.firstName} ${c.lastName} already recommended`
-                              : `Recommend ${c.firstName} ${c.lastName} to selected firm`
-                          }
-                          sx={{ textTransform: "none", minWidth: 96 }}
-                        >
-                          {alreadyRecommended
-                            ? "Recommended"
-                            : busyId === c.id
-                              ? "..."
-                              : "Recommend"}
-                        </Button>
-                      </Stack>
+                          sx={{ bgcolor: "#d1fae5", color: "#065f46", fontWeight: 600, fontSize: 11, height: 28, borderRadius: 1.5 }}
+                        />
+                      ) : (
+                        <Tooltip title="Recommend this student directly to the selected firm right now">
+                          <Button
+                            size="small"
+                            variant="contained"
+                            color="success"
+                            onClick={() => recommendStudent(c.id)}
+                            disabled={busyId === c.id}
+                            aria-label={`Recommend ${c.firstName} ${c.lastName} to selected firm`}
+                            sx={{ fontSize: 11, borderRadius: 1.5, textTransform: "none", height: 28 }}
+                          >
+                            {busyId === c.id ? "Sending…" : "Recommend now"}
+                          </Button>
+                        </Tooltip>
+                      )}
                     </Stack>
                   </Box>
                 );
@@ -469,37 +488,38 @@ export default function AdminRecommendationPage() {
               No active recommendations for this firm.
             </Typography>
           ) : (
-            <Stack spacing={1}>
+            <Stack spacing={1} divider={<Divider />}>
               {activeRecs.map((r) => (
-                <Box
-                  key={r.id}
-                  sx={{
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "8px",
-                    p: 1.25,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: 1.5,
-                  }}
-                >
-                  <Box sx={{ minWidth: 0 }}>
-                    <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
-                      {r.student.firstName} {r.student.lastName}
-                    </Typography>
-                    <Typography sx={{ fontSize: 12, color: "#6b7280" }}>
-                      {r.student.email}. Added {new Date(r.createdAt).toLocaleDateString()}.
-                    </Typography>
-                  </Box>
-                  <IconButton
+                <Box key={r.id} sx={{ pt: 1 }}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
+                        {r.student.firstName} {r.student.lastName}
+                      </Typography>
+                      <Typography sx={{ fontSize: 12, color: "#6b7280" }}>
+                        {r.student.email} &middot; Added {new Date(r.createdAt).toLocaleDateString()}
+                      </Typography>
+                    </Box>
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={() => revokeRow(r.id)}
+                      disabled={busyId === r.id}
+                      aria-label={`Revoke recommendation for ${r.student.firstName} ${r.student.lastName}`}
+                    >
+                      <DeleteOutlineRoundedIcon fontSize="small" aria-hidden="true" />
+                    </IconButton>
+                  </Stack>
+                  <Button
+                    component={Link}
+                    href={`/membership-dashboard/student-profile/${r.studentId}`}
                     size="small"
-                    color="error"
-                    onClick={() => revokeRow(r.id)}
-                    disabled={busyId === r.id}
-                    aria-label={`Revoke recommendation for ${r.student.firstName} ${r.student.lastName}`}
+                    variant="outlined"
+                    startIcon={<PersonOutlineIcon fontSize="small" />}
+                    sx={{ mt: 0.75, fontSize: 11, borderRadius: 1.5, textTransform: "none", height: 26 }}
                   >
-                    <DeleteOutlineRoundedIcon fontSize="small" />
-                  </IconButton>
+                    View Profile
+                  </Button>
                 </Box>
               ))}
             </Stack>

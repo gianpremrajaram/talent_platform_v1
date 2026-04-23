@@ -1,6 +1,5 @@
 // src/lib/membership-dashboard-admin.ts
 import { prisma } from "@/lib/prisma";
-import { getServerAuthSession } from "@/lib/getServerAuthSession";
 import { BENEFITS, MEMBERSHIP_TIER_RANK, type BenefitId, type MembershipTierKey } from "@/content/benefits";
 
 export type AdminMemberListItem = {
@@ -31,13 +30,6 @@ export type AdminSelectedMember = {
 
   redeemedBenefitCodes: BenefitId[];
 };
-
-function requireAdmin(roleKeys: unknown): asserts roleKeys is string[] {
-  const keys = Array.isArray(roleKeys) ? roleKeys : [];
-  if (!keys.includes("ADMIN")) {
-    throw new Error("Admin access required.");
-  }
-}
 
 export async function getAdminMemberList(): Promise<AdminMemberListItem[]> {
   const memberRole = await prisma.role.findUnique({ where: { key: "MEMBER" } });
