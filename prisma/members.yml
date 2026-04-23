@@ -1,38 +1,90 @@
-# Helper note: expiry uses ISO dates (YYYY-MM-DD)
+# UCL CS Alliances — Partner Company Seed Data
+# All recruiter passwords: password123
 # tiers: bronze | silver | gold | platinum
-- id: chanel
+
+# ── Platinum Partners ───────────────────────────────────────────────────────────
+
+- id: deepmind
   credentials:
-    email: partnerships@chanel.example.com
-    password: chanel-demo
+    email: j.mitchell@deepmind.example.com
+    password: password123
   company:
-    name: Chanel
-    contact_first: Claire
-    contact_last: Martin
+    name: Google DeepMind
+    contact_first: James
+    contact_last: Mitchell
   membership:
     tier: platinum
     status: active
-    expiry: 2026-03-05
-    manager: Tim Bodley-Scott
+    expiry: 2027-03-31
+    manager: Demis Hassabis
+  redeemed_benefits: [B01, B02, B03, B07, B11]
+
+- id: goldman-sachs
+  credentials:
+    email: o.walsh@goldmansachs.example.com
+    password: password123
+  company:
+    name: Goldman Sachs
+    contact_first: Oliver
+    contact_last: Walsh
+  membership:
+    tier: platinum
+    status: active
+    expiry: 2027-01-31
+    manager: David Solomon
+  redeemed_benefits: [B01, B05, B09]
+
+- id: palantir
+  credentials:
+    email: r.holt@palantir.example.com
+    password: password123
+  company:
+    name: Palantir Technologies
+    contact_first: Ryan
+    contact_last: Holt
+  membership:
+    tier: platinum
+    status: active
+    expiry: 2027-05-31
+    manager: Alex Karp
+  redeemed_benefits: [B02, B04, B07, B12]
+
+- id: bloomberg
+  credentials:
+    email: m.taylor@bloomberg.example.com
+    password: password123
+  company:
+    name: Bloomberg LP
+    contact_first: Megan
+    contact_last: Taylor
+  membership:
+    tier: platinum
+    status: active
+    expiry: 2027-06-30
+    manager: Mike Bloomberg
   redeemed_benefits: [B03, B08]
+
+# ── Gold Partners ───────────────────────────────────────────────────────────────
 
 - id: microsoft
   credentials:
-    email: engage@microsoft.example.com
-    password: msft-demo
+    email: s.chen@microsoft.example.com
+    password: password123
   company:
     name: Microsoft
-    contact_first: Arun
-    contact_last: Desai
+    contact_first: Sarah
+    contact_last: Chen
   membership:
-    tier: silver
+    tier: gold
     status: active
-    expiry: 2026-01-28
-  redeemed_benefits: [B07, B11, B12]
+    expiry: 2026-12-31
+    manager: Satya Nadella
+  redeemed_benefits: [B04, B08, B12]
 
 - id: google
   credentials:
-    email: partnerships@google.example.com
-    password: google-demo
+    email: m.patel@google.example.com
+    password: password123
   company:
     name: Google
     contact_first: Mina
@@ -40,135 +92,197 @@
   membership:
     tier: gold
     status: active
-    expiry: 2025-12-04
-  redeemed_benefits: [B04, B10]
+    expiry: 2026-11-30
+  redeemed_benefits: [B02, B06]
 
-- id: amazon
+- id: deliveroo
   credentials:
-    email: collab@amazon.example.com
-    password: amazon-demo
+    email: t.lane@deliveroo.example.com
+    password: password123
   company:
-    name: Amazon
-    contact_first: Ben
-    contact_last: Hughes
-  membership:
-    tier: silver
-    status: active
-    expiry: 2026-02-16
-  redeemed_benefits: [B04]
-
-- id: meta
-  credentials:
-    email: labs@meta.example.com
-    password: meta-demo
-  company:
-    name: Meta
-    contact_first: Priya
-    contact_last: Rao
-  membership:
-    tier: silver
-    status: active
-    expiry: 2026-05-10
-  redeemed_benefits: []
-
-- id: apple
-  credentials:
-    email: talent@apple.example.com
-    password: apple-demo
-  company:
-    name: Apple
-    contact_first: Jamie
-    contact_last: Wong
-  membership:
-    tier: bronze
-    status: active
-    expiry: 2026-04-01
-  redeemed_benefits: [B15]
-
-- id: deepmind
-  credentials:
-    email: ai@deepmind.example.com
-    password: deepmind-demo
-  company:
-    name: Google DeepMind
-    contact_first: Sara
-    contact_last: Klein
-  membership:
-    tier: platinum
-    status: active
-    expiry: 2026-06-20
-  redeemed_benefits: [B11, B13]
-
-- id: chubb
-  credentials:
-    email: innovation@chubb.example.com
-    password: chubb-demo
-  company:
-    name: Chubb
-    contact_first: Tom
-    contact_last: Alvarez
-  membership:
-    tier: bronze
-    status: active
-    expiry: 2025-11-22
-  redeemed_benefits: []
-
-- id: siemens
-  credentials:
-    email: partners@siemens.example.com
-    password: siemens-demo
-  company:
-    name: Siemens
-    contact_first: Elke
-    contact_last: Fischer
+    name: Deliveroo
+    contact_first: Thomas
+    contact_last: Lane
   membership:
     tier: gold
     status: active
-    expiry: 2026-03-30
-  redeemed_benefits: [B06, B09]
+    expiry: 2026-10-31
+  redeemed_benefits: [B01, B10]
+
+- id: revolut
+  credentials:
+    email: j.foster@revolut.example.com
+    password: password123
+  company:
+    name: Revolut
+    contact_first: Jenna
+    contact_last: Foster
+  membership:
+    tier: gold
+    status: pending
+  redeemed_benefits: []
+
+- id: wise
+  credentials:
+    email: k.prasad@wise.example.com
+    password: password123
+  company:
+    name: Wise
+    contact_first: Kiran
+    contact_last: Prasad
+  membership:
+    tier: gold
+    status: suspended
+  redeemed_benefits: []
+
+# ── Silver Partners ─────────────────────────────────────────────────────────────
 
 - id: bbc
   credentials:
-    email: rdi@bbc.example.com
-    password: bbc-demo
+    email: t.harrison@bbc.example.com
+    password: password123
   company:
     name: BBC
-    contact_first: Omar
-    contact_last: Haddad
+    contact_first: Tom
+    contact_last: Harrison
   membership:
     tier: silver
     status: active
-    expiry: 2025-12-14
+    expiry: 2026-09-30
   redeemed_benefits: [B04, B14]
 
-# ── Test fixtures (dev/staging) ──────────────────────────────────────────────
-# test-corp-active: APPROVED company, used to verify full recruiter access flow
-#   and student company consent page. Visible in MembershipDashboardMember.
-- id: test-corp-active
+- id: meta
   credentials:
-    email: recruiter.active@example.com
-    password: testcorp-demo
+    email: a.patel@meta.example.com
+    password: password123
   company:
-    name: Test Corp (Active)
-    contact_first: Test
-    contact_last: Recruiter
+    name: Meta
+    contact_first: Aisha
+    contact_last: Patel
   membership:
-    tier: gold
+    tier: silver
+    status: active
+    expiry: 2026-08-31
+  redeemed_benefits: []
+
+- id: monzo
+  credentials:
+    email: z.miles@monzo.example.com
+    password: password123
+  company:
+    name: Monzo Bank
+    contact_first: Zoe
+    contact_last: Miles
+  membership:
+    tier: silver
+    status: active
+  redeemed_benefits: [B07]
+
+- id: tesco
+  credentials:
+    email: h.bennett@tesco.example.com
+    password: password123
+  company:
+    name: Tesco Technology
+    contact_first: Harry
+    contact_last: Bennett
+  membership:
+    tier: silver
+    status: pending
+  redeemed_benefits: []
+
+- id: nvidia
+  credentials:
+    email: l.owens@nvidia.example.com
+    password: password123
+  company:
+    name: Nvidia
+    contact_first: Lily
+    contact_last: Owens
+  membership:
+    tier: silver
+    status: suspended
+  redeemed_benefits: []
+
+# ── Bronze Partners ─────────────────────────────────────────────────────────────
+
+- id: siemens
+  credentials:
+    email: e.fischer@siemens.example.com
+    password: password123
+  company:
+    name: Siemens
+    contact_first: Emma
+    contact_last: Fischer
+  membership:
+    tier: bronze
+    status: active
+    expiry: 2026-07-31
+  redeemed_benefits: [B15]
+
+- id: ocado
+  credentials:
+    email: m.arthur@ocado.example.com
+    password: password123
+  company:
+    name: Ocado Technology
+    contact_first: Mark
+    contact_last: Arthur
+  membership:
+    tier: bronze
     status: active
   redeemed_benefits: []
 
-# test-corp-pending: PENDING company, used to verify admin approval gating.
-#   Org status is overridden to PENDING and userStatus to PENDING_APPROVAL
-#   by the post-loop fixture block in seed.ts.
+- id: kaspersky
+  credentials:
+    email: s.vlad@kaspersky.example.com
+    password: password123
+  company:
+    name: Kaspersky Labs
+    contact_first: Sergei
+    contact_last: Vladimirov
+  membership:
+    tier: bronze
+    status: pending
+  redeemed_benefits: []
+
+- id: bt
+  credentials:
+    email: f.young@bt.example.com
+    password: password123
+  company:
+    name: BT
+    contact_first: Fiona
+    contact_last: Young
+  membership:
+    tier: bronze
+    status: suspended
+  redeemed_benefits: []
+
+# ── Test Fixtures ───────────────────────────────────────────────────────────────
+
 - id: test-corp-pending
   credentials:
-    email: recruiter.pending@example.com
-    password: testcorp-demo
+    email: recruiter.pending@innovatetech.example.com
+    password: password123
   company:
-    name: Test Corp (Pending)
-    contact_first: Test
-    contact_last: Recruiter
+    name: InnovateTech Ltd
+    contact_first: Alex
+    contact_last: Rivers
   membership:
     tier: gold
-    status: inactive
+    status: pending
+  redeemed_benefits: []
+
+- id: test-corp-suspended
+  credentials:
+    email: recruiter.suspended@velocityventures.example.com
+    password: password123
+  company:
+    name: Velocity Ventures
+    contact_first: Kim
+    contact_last: Stone
+  membership:
+    tier: silver
+    status: suspended
   redeemed_benefits: []
