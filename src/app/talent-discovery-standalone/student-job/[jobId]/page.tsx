@@ -219,44 +219,6 @@ export default async function StudentJobDetailPage({ params }: Props) {
           </Box>
         </Paper>
 
-        {/* Bottom CTA — only shown when not yet applied */}
-        {!alreadyApplied && (
-          <Box
-            sx={{
-              mt: 3,
-              p: 3,
-              bgcolor: "primary.main",
-              borderRadius: 3,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              flexWrap: "wrap",
-              gap: 2,
-            }}
-          >
-            <Box>
-              <Typography variant="subtitle1" fontWeight={700} color="#fff">
-                Interested in this role?
-              </Typography>
-              <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.8)" }}>
-                Submit your application with your CV and a cover letter.
-              </Typography>
-            </Box>
-
-            <JobDetailApplySection
-              job={{
-                id: job.id,
-                title: job.title,
-                companyName: job.organisation.name,
-                roleType: job.roleType,
-                location: job.location,
-                salaryBand: job.salaryBand ?? "—",
-              }}
-              cvs={cvProps}
-              alreadyApplied={false}
-            />
-          </Box>
-        )}
       </Box>
     </StudentPortalShell>
   );

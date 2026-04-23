@@ -4,7 +4,7 @@
 
 import { useState } from "react";
 import { Box, Button, Typography } from "@mui/material";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ApplyJobModal, { type CV } from "./ApplyJobModal";
 
 type Props = {
@@ -33,14 +33,14 @@ export default function JobDetailApplySection({ job, cvs, alreadyApplied }: Prop
           gap: 1,
           px: 2.5,
           py: 1.25,
-          bgcolor: "success.lighter",
+          bgcolor: "#ffffff",
           border: "1px solid",
-          borderColor: "success.light",
+          borderColor: "#bbf7d0",
           borderRadius: 2,
         }}
       >
-        <CheckCircleOutlineIcon sx={{ color: "success.main", fontSize: 20 }} />
-        <Typography variant="body2" fontWeight={600} color="success.dark">
+        <CheckCircleIcon sx={{ color: "#16a34a", fontSize: 20 }} />
+        <Typography variant="body2" fontWeight={600} color="text.primary">
           You&apos;ve already applied for this role
         </Typography>
       </Box>

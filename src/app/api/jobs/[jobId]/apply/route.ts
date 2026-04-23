@@ -26,7 +26,11 @@ export async function POST(
   try {
     body = await req.json();
   } catch {
-    // empty body is fine — CV and cover letter are both optional
+    // ignore parse error, validation below will catch missing cvId
+  }
+
+  if (!body.cvId) {
+    return err("BAD_REQUEST", "A CV is required to apply for a job.");
   }
 
   try {

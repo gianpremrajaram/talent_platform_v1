@@ -24,7 +24,7 @@ import {
 import WorkOutlineOutlinedIcon from "@mui/icons-material/WorkOutlineOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import BusinessOutlinedIcon from "@mui/icons-material/BusinessOutlined";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 export type CV = {
   id: string;
@@ -67,6 +67,10 @@ export default function ApplyJobModal({ open, job, cvs, onClose, onApplied }: Pr
 
   async function handleSubmit() {
     if (!job) return;
+    if (!selectedCvId) {
+      setError("Please select a CV before submitting your application.");
+      return;
+    }
     setSubmitting(true);
     setError(null);
 
@@ -138,37 +142,63 @@ export default function ApplyJobModal({ open, job, cvs, onClose, onApplied }: Pr
         </Box>
 
         {success ? (
-          <Stack alignItems="center" spacing={1.5} py={2}>
-            <CheckCircleOutlineIcon sx={{ fontSize: 48, color: "success.main" }} aria-hidden="true" />
-            <Typography variant="subtitle1" fontWeight={600}>Application submitted!</Typography>
-            <Typography variant="body2" color="text.secondary" textAlign="center">
+          <Box
+            sx={{
+              bgcolor: "#f0fdf4",
+              border: "1px solid",
+              borderColor: "#bbf7d0",
+              borderRadius: 2,
+              px: 3,
+              py: 4,
+              textAlign: "center",
+            }}
+          >
+            <Box
+              sx={{
+                width: 64,
+                height: 64,
+                borderRadius: "50%",
+                bgcolor: "#dcfce7",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                mx: "auto",
+                mb: 2,
+              }}
+            >
+              <CheckCircleIcon sx={{ fontSize: 36, color: "#16a34a" }} aria-hidden="true" />
+            </Box>
+            <Typography variant="subtitle1" fontWeight={700} color="text.primary" gutterBottom>
+              Application submitted!
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
               Your application has been sent to {job.companyName}. Good luck!
             </Typography>
-          </Stack>
+          </Box>
         ) : (
           <Stack spacing={2.5}>
             {/* CV selector */}
-            <FormControl fullWidth size="small">
-              <InputLabel id="cv-select-label">Attach a CV (optional)</InputLabel>
+            <FormControl fullWidth size="small" required error={cvs.length === 0}>
+              <InputLabel id="cv-select-label">Attach a CV *</InputLabel>
               <Select
                 labelId="cv-select-label"
                 value={selectedCvId}
-                label="Attach a CV (optional)"
+                label="Attach a CV *"
                 onChange={(e) => setSelectedCvId(e.target.value)}
+                displayEmpty={false}
               >
-                <MenuItem value="">
-                  <em>No CV — apply without one</em>
-                </MenuItem>
                 {cvs.map((cv) => (
                   <MenuItem key={cv.id} value={cv.id}>
                     {cv.label}
                   </MenuItem>
                 ))}
               </Select>
-              {cvs.length === 0 && (
+              {cvs.length === 0 ? (
                 <FormHelperText>
-                  No CVs uploaded yet. You can add one in your CV Library.
+                  You need to upload a CV before you can apply. Go to your CV Library to add one.
                 </FormHelperText>
+              ) : (
+                <FormHelperText> </FormHelperText>
               )}
             </FormControl>
 
@@ -211,7 +241,7 @@ export default function ApplyJobModal({ open, job, cvs, onClose, onApplied }: Pr
               onClick={handleSubmit}
               variant="contained"
               disableElevation
-              disabled={submitting}
+              disabled={submitting || cvs.length === 0}
             >
               {submitting ? "Submitting…" : "Submit Application"}
             </Button>
