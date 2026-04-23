@@ -1,6 +1,7 @@
 import { getServerAuthSession } from "@/lib/getServerAuthSession";
 import { redirect } from "next/navigation";
 import { userCanAccessApp } from "@/lib/access-control";
+import MuiThemeProvider from "@/components/MuiThemeProvider";
 
 export default async function TalentDiscoveryStandaloneLayout({
   children,
@@ -24,6 +25,9 @@ export default async function TalentDiscoveryStandaloneLayout({
     redirect("/access-denied?reason=access-denied&appKey=TALENT_DISCOVERY");
   }
 
-  // 3. All checks passed, allow access! Render the specific page in this directory
-  return <>{children}</>;
+  // 3. Wrap with MUI theme so all student portal pages share the same
+  //    design system (UCL colours, typography, component styles).
+  //    SessionProvider is not needed here — student components receive session
+  //    data as server-fetched props rather than using useSession().
+  return <MuiThemeProvider>{children}</MuiThemeProvider>;
 }

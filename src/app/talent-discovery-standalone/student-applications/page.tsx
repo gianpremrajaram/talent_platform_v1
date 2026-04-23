@@ -1,6 +1,5 @@
 import { Box, Chip, Divider, Stack, Typography } from "@mui/material";
-import StudentSideBar from "@/components/talent-discovery/student-components/StudentSideBar";
-import DashboardTopBar from "@/components/talent-discovery/student-components/StudentTopNavBar";
+import StudentPortalShell from "@/components/talent-discovery/student-components/StudentPortalShell";
 import { getServerAuthSession } from "@/lib/getServerAuthSession";
 import { redirect } from "next/navigation";
 import { getStudentApplications } from "@/lib/services/applications";
@@ -18,11 +17,11 @@ export default async function StudentApplicationsPage() {
   const applications = await getStudentApplications(sessionUser.id);
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh" }}>
-      <StudentSideBar />
-      <Box sx={{ flexGrow: 1, bgcolor: "#fafafb", minWidth: 0 }}>
-        <DashboardTopBar title="My Applications" userInitial={sessionUser.name?.charAt(0).toUpperCase() ?? ""} />
-        <Box sx={{ p: 3 }}>
+    <StudentPortalShell
+      title="My Applications"
+      userInitial={sessionUser.name?.charAt(0).toUpperCase() ?? ""}
+    >
+      <Box sx={{ p: 3 }}>
           <Stack direction="row" alignItems="center" justifyContent="space-between" mb={3}>
             <Typography variant="h5" fontWeight={700}>
               My Applications
@@ -155,8 +154,7 @@ export default async function StudentApplicationsPage() {
               ))}
             </Stack>
           )}
-        </Box>
       </Box>
-    </Box>
+    </StudentPortalShell>
   );
 }
