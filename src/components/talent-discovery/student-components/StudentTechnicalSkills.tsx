@@ -103,7 +103,7 @@ export default function StudentTechnicalSkills({
           </Typography>
 
           <Button
-            variant="contained"
+            variant="outlined"
             startIcon={<Add />}
             onClick={() => setDialogOpen(true)}
             sx={{
@@ -111,7 +111,6 @@ export default function StudentTechnicalSkills({
               px: 2.5,
               py: 1,
               textTransform: "none",
-              boxShadow: "none",
             }}
           >
             Add Skills

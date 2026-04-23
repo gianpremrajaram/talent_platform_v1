@@ -129,7 +129,7 @@ export default function StudentProjectsSection({
           </Typography>
 
           <Button
-            variant="contained"
+            variant="outlined"
             startIcon={<Add />}
             onClick={() => setDialogOpen(true)}
             sx={{
@@ -137,7 +137,6 @@ export default function StudentProjectsSection({
               px: 2.5,
               py: 1,
               textTransform: "none",
-              boxShadow: "none",
             }}
           >
             Add Project

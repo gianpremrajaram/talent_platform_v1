@@ -123,7 +123,7 @@ export default function StudentWorkExperience({
           </Typography>
 
           <Button
-            variant="contained"
+            variant="outlined"
             startIcon={<Add />}
             onClick={() => setDialogOpen(true)}
             sx={{
@@ -131,7 +131,6 @@ export default function StudentWorkExperience({
               px: 2.5,
               py: 1,
               textTransform: "none",
-              boxShadow: "none",
             }}
           >
             Add Experience
