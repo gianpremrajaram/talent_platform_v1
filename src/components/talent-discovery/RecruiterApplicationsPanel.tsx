@@ -12,7 +12,6 @@ import {
   Chip,
   Collapse,
   Divider,
-  IconButton,
   Stack,
   Tooltip,
   Typography,
@@ -109,26 +108,36 @@ function JobApplicationGroup({ group }: { group: JobApplicationsForJob }) {
         overflow: "hidden",
       }}
     >
-      {/* Job header row */}
-      <Stack
-        direction="row"
-        alignItems="center"
-        justifyContent="space-between"
-        sx={{ px: 2, py: 1.5, cursor: "pointer" }}
+      {/* Job header row — full row is a button for keyboard/screen-reader access */}
+      <Box
+        component="button"
         onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+        aria-controls={`job-applicants-${group.jobId}`}
+        aria-label={`${expanded ? "Collapse" : "Expand"} applicants for ${group.jobTitle}`}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+          px: 2,
+          py: 1.5,
+          cursor: "pointer",
+          background: "none",
+          border: "none",
+          textAlign: "left",
+          "&:focus-visible": { outline: "2px solid", outlineColor: "primary.main", outlineOffset: -2 },
+        }}
       >
         <Stack direction="row" spacing={1.5} alignItems="center" sx={{ minWidth: 0 }}>
           <Avatar
+            aria-hidden="true"
             sx={{ width: 34, height: 34, fontSize: 14, bgcolor: "primary.light", flexShrink: 0 }}
           >
             {group.jobTitle.charAt(0).toUpperCase()}
           </Avatar>
           <Box sx={{ minWidth: 0 }}>
-            <Typography
-              variant="subtitle2"
-              fontWeight={700}
-              noWrap
-            >
+            <Typography variant="subtitle2" fontWeight={700} noWrap>
               {group.jobTitle}
             </Typography>
             <Typography variant="caption" color="text.secondary">
@@ -143,15 +152,16 @@ function JobApplicationGroup({ group }: { group: JobApplicationsForJob }) {
             size="small"
             color={group.applications.length > 0 ? "primary" : "default"}
             sx={{ fontWeight: 600, fontSize: 11 }}
+            aria-hidden="true"
           />
-          <IconButton size="small" aria-label={expanded ? "Collapse" : "Expand"}>
-            {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
-          </IconButton>
+          {expanded
+            ? <ExpandLessIcon fontSize="small" aria-hidden="true" />
+            : <ExpandMoreIcon fontSize="small" aria-hidden="true" />}
         </Stack>
-      </Stack>
+      </Box>
 
       {/* Applicant list */}
-      <Collapse in={expanded}>
+      <Collapse in={expanded} id={`job-applicants-${group.jobId}`}>
         {group.applications.length === 0 ? (
           <Box sx={{ px: 2, pb: 2, pt: 0.5 }}>
             <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "italic" }}>
@@ -189,7 +199,7 @@ function ApplicantRow({ application }: { application: JobApplicationResult }) {
       <Stack direction="row" alignItems="flex-start" justifyContent="space-between" flexWrap="wrap" gap={1}>
         {/* Student info */}
         <Stack direction="row" spacing={1.5} alignItems="center">
-          <Avatar sx={{ width: 36, height: 36, fontSize: 14, bgcolor: "grey.200", color: "text.primary" }}>
+          <Avatar aria-hidden="true" sx={{ width: 36, height: 36, fontSize: 14, bgcolor: "grey.200", color: "text.primary" }}>
             {application.student.firstName.charAt(0).toUpperCase()}
           </Avatar>
           <Box>
@@ -205,9 +215,9 @@ function ApplicantRow({ application }: { application: JobApplicationResult }) {
         {/* Meta + actions */}
         <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
           <Stack direction="row" spacing={0.5} alignItems="center">
-            <CalendarTodayOutlinedIcon sx={{ fontSize: 13, color: "text.disabled" }} />
+            <CalendarTodayOutlinedIcon sx={{ fontSize: 13, color: "text.disabled" }} aria-hidden="true" />
             <Typography variant="caption" color="text.secondary">
-              {appliedDate}
+              Applied {appliedDate}
             </Typography>
           </Stack>
 
@@ -216,21 +226,23 @@ function ApplicantRow({ application }: { application: JobApplicationResult }) {
             href={`/talent-discovery/student-profile/${application.studentId}`}
             size="small"
             variant="outlined"
-            startIcon={<PersonOutlineIcon fontSize="small" />}
+            startIcon={<PersonOutlineIcon fontSize="small" aria-hidden="true" />}
+            aria-label={`View profile for ${application.student.firstName} ${application.student.lastName}`}
             sx={{ fontSize: 11, borderRadius: 1.5, height: 28 }}
           >
             View Profile
           </Button>
 
           {application.cv ? (
-            <Tooltip title="Download CV">
+            <Tooltip title={`Download CV: ${application.cv.label}`}>
               <Button
                 size="small"
                 variant="outlined"
-                startIcon={<DescriptionOutlinedIcon fontSize="small" />}
+                startIcon={<DescriptionOutlinedIcon fontSize="small" aria-hidden="true" />}
                 href={application.cv.fileUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label={`Download CV: ${application.cv.label} for ${application.student.firstName} ${application.student.lastName}`}
                 sx={{ fontSize: 11, borderRadius: 1.5, height: 28 }}
               >
                 {application.cv.label}
@@ -247,6 +259,8 @@ function ApplicantRow({ application }: { application: JobApplicationResult }) {
               size="small"
               variant="text"
               onClick={() => setCoverOpen((v) => !v)}
+              aria-expanded={coverOpen}
+              aria-label={`${coverOpen ? "Hide" : "View"} cover letter for ${application.student.firstName} ${application.student.lastName}`}
               sx={{ fontSize: 11, borderRadius: 1.5, height: 28 }}
             >
               {coverOpen ? "Hide letter" : "View letter"}

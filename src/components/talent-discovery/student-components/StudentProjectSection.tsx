@@ -196,6 +196,7 @@ export default function StudentProjectsSection({
                         >
                           <GitHub
                             sx={{ fontSize: 18, color: "text.secondary" }}
+                            aria-hidden="true"
                           />
                           <Link
                             href={project.projectLink}
@@ -224,8 +225,9 @@ export default function StudentProjectsSection({
                     <IconButton
                       color="error"
                       onClick={() => handleRemoveProject(project.id)}
+                      aria-label={`Delete project: ${project.title}`}
                     >
-                      <Delete />
+                      <Delete aria-hidden="true" />
                     </IconButton>
                   </Stack>
                 </CardContent>
@@ -240,8 +242,9 @@ export default function StudentProjectsSection({
         onClose={() => setDialogOpen(false)}
         fullWidth
         maxWidth="sm"
+        aria-labelledby="project-dialog-title"
       >
-        <DialogTitle>Add Project</DialogTitle>
+        <DialogTitle id="project-dialog-title">Add Project</DialogTitle>
 
         <DialogContent>
           <LocalizationProvider dateAdapter={AdapterDayjs}>

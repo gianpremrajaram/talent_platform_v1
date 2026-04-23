@@ -454,8 +454,9 @@ export default function StudentAcademicInformationForm({
           }}
           fullWidth
           maxWidth="md"
+          aria-labelledby="college-dialog-title"
         >
-          <DialogTitle>
+          <DialogTitle id="college-dialog-title">
             {editingCollegeIndex !== null
               ? "Edit University"
               : "Add University"}
@@ -578,10 +579,11 @@ export default function StudentAcademicInformationForm({
         <Dialog
           open={tagDialogOpen}
           onClose={() => setTagDialogOpen(false)}
+          aria-labelledby="achievement-dialog-title"
           fullWidth
           maxWidth="xs"
         >
-          <DialogTitle>Add Academic Achievement</DialogTitle>
+          <DialogTitle id="achievement-dialog-title">Add Academic Achievement</DialogTitle>
           <DialogContent>
             <TextField
               autoFocus

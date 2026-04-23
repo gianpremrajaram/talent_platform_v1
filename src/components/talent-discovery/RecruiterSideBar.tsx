@@ -151,7 +151,7 @@ export default function RecruiterSideBar() {
                 mb: 0.5,
               }}
             >
-              <ListItemIcon sx={{ minWidth: 40 }}>
+              <ListItemIcon sx={{ minWidth: 40 }} aria-hidden="true">
                 {item.icon}
               </ListItemIcon>
               <ListItemText primary={item.label} />

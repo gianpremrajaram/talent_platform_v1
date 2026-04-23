@@ -145,7 +145,7 @@ function NavSectionList({ items }: { items: NavItem[] }) {
               },
             }}
           >
-            <ListItemIcon sx={{ minWidth: 40, color: "text.secondary" }}>
+            <ListItemIcon sx={{ minWidth: 40, color: "text.secondary" }} aria-hidden="true">
               {item.icon}
             </ListItemIcon>
             <ListItemText primary={item.label} />
@@ -213,6 +213,7 @@ export default function AdminSidebar() {
         }}
       >
         <Box
+          aria-hidden="true"
           sx={{
             width: 34,
             height: 34,

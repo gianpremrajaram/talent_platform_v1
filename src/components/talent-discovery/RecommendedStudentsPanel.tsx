@@ -108,7 +108,8 @@ export default function RecommendedStudentsPanel() {
                 href={`/talent-discovery/student-profile/${r.studentId}`}
                 size="small"
                 variant="outlined"
-                startIcon={<PersonOutlineIcon fontSize="small" />}
+                startIcon={<PersonOutlineIcon fontSize="small" aria-hidden="true" />}
+                aria-label={`View profile for ${r.student.firstName} ${r.student.lastName}`}
                 sx={{ fontSize: 12, borderRadius: 1.5, whiteSpace: "nowrap", textTransform: "none" }}
               >
                 View Profile

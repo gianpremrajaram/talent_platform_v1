@@ -130,6 +130,7 @@ export default function StudentPublicProfileView({ profile, backHref, backLabel 
                   size="small"
                   variant="outlined"
                   startIcon={socialIcon(link.platform)}
+                  aria-label={`Visit ${link.platform.charAt(0) + link.platform.slice(1).toLowerCase()} profile (opens in new tab)`}
                   sx={{ borderRadius: 2, fontSize: "0.75rem", textTransform: "none" }}
                 >
                   {link.platform.charAt(0) + link.platform.slice(1).toLowerCase()}

@@ -507,7 +507,7 @@ export default function AdminRecommendationPage() {
                       disabled={busyId === r.id}
                       aria-label={`Revoke recommendation for ${r.student.firstName} ${r.student.lastName}`}
                     >
-                      <DeleteOutlineRoundedIcon fontSize="small" />
+                      <DeleteOutlineRoundedIcon fontSize="small" aria-hidden="true" />
                     </IconButton>
                   </Stack>
                   <Button

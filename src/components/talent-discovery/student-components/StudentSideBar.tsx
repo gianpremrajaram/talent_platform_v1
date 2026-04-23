@@ -128,7 +128,7 @@ function NavSection({ items }: { items: NavItem[] }) {
               },
             }}
           >
-            <ListItemIcon sx={{ minWidth: 40, color: "text.secondary" }}>
+            <ListItemIcon sx={{ minWidth: 40, color: "text.secondary" }} aria-hidden="true">
               {item.icon}
             </ListItemIcon>
             <ListItemText primary={item.label} />

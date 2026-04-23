@@ -197,8 +197,9 @@ export default function StudentWorkExperience({
                       color="error"
                       onClick={() => handleRemoveExperience(exp.id)}
                       disabled={isPending}
+                      aria-label={`Delete work experience: ${exp.role} at ${exp.company}`}
                     >
-                      <Delete />
+                      <Delete aria-hidden="true" />
                     </IconButton>
                   </Stack>
                 </CardContent>
@@ -213,8 +214,9 @@ export default function StudentWorkExperience({
         onClose={() => setDialogOpen(false)}
         fullWidth
         maxWidth="sm"
+        aria-labelledby="work-exp-dialog-title"
       >
-        <DialogTitle>Add Work Experience</DialogTitle>
+        <DialogTitle id="work-exp-dialog-title">Add Work Experience</DialogTitle>
 
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>

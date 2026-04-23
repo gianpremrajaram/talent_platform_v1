@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Button,
@@ -127,6 +127,7 @@ export default function StudentTechnicalSkills({
                 label={skill.name}
                 onDelete={() => removeSkill(skill)}
                 deleteIcon={<Close fontSize="small" />}
+                aria-label={`${skill.name} skill`}
                 sx={{
                   height: 36,
                   borderRadius: 1,
@@ -154,8 +155,9 @@ export default function StudentTechnicalSkills({
         onClose={() => setDialogOpen(false)}
         fullWidth
         maxWidth="xs"
+        aria-labelledby="skill-dialog-title"
       >
-        <DialogTitle>Add Technical Skill</DialogTitle>
+        <DialogTitle id="skill-dialog-title">Add Technical Skill</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
