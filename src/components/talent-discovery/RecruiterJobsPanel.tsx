@@ -4,11 +4,12 @@
 // Displayed in the "Job Board" tab of PartnerFullView (Gold+).
 // Lists the firm's own postings with create, edit, deactivate/reactivate, and delete.
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Box,
   Button,
   Chip,
+  Divider,
   IconButton,
   Stack,
   Tooltip,
@@ -110,6 +111,21 @@ export default function RecruiterJobsPanel() {
     }
   }
 
+  const { activeJobs, inactiveJobs } = useMemo(() => {
+    const now = new Date();
+    const active: JobPostingResult[] = [];
+    const inactive: JobPostingResult[] = [];
+    for (const job of jobs) {
+      const isExpired = job.expiresAt !== null && new Date(job.expiresAt) <= now;
+      if (job.isActive && !isExpired) {
+        active.push(job);
+      } else {
+        inactive.push(job);
+      }
+    }
+    return { activeJobs: active, inactiveJobs: inactive };
+  }, [jobs]);
+
   if (loading) return <LoadingState message="Loading your job postings…" />;
 
   return (
@@ -152,15 +168,42 @@ export default function RecruiterJobsPanel() {
           />
         )}
 
-        {jobs.map((job) => (
-          <JobPostingCard
-            key={job.id}
-            job={job}
-            onEdit={() => { setError(null); setEditingJob(job); setFormOpen(true); }}
-            onToggleActive={() => handleToggleActive(job)}
-            onDelete={() => handleDelete(job.id)}
-          />
-        ))}
+        {/* Active / upcoming jobs */}
+        {activeJobs.length > 0 && (
+          <>
+            <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#374151", mb: 1 }}>
+              Active ({activeJobs.length})
+            </Typography>
+            {activeJobs.map((job) => (
+              <JobPostingCard
+                key={job.id}
+                job={job}
+                onEdit={() => { setError(null); setEditingJob(job); setFormOpen(true); }}
+                onToggleActive={() => handleToggleActive(job)}
+                onDelete={() => handleDelete(job.id)}
+              />
+            ))}
+          </>
+        )}
+
+        {/* Inactive / expired jobs */}
+        {inactiveJobs.length > 0 && (
+          <>
+            <Divider sx={{ my: 2 }} />
+            <Typography sx={{ fontSize: 13, fontWeight: 600, color: "#6b7280", mb: 1 }}>
+              Inactive / Expired ({inactiveJobs.length})
+            </Typography>
+            {inactiveJobs.map((job) => (
+              <JobPostingCard
+                key={job.id}
+                job={job}
+                onEdit={() => { setError(null); setEditingJob(job); setFormOpen(true); }}
+                onToggleActive={() => handleToggleActive(job)}
+                onDelete={() => handleDelete(job.id)}
+              />
+            ))}
+          </>
+        )}
       </Box>
 
       <RecruiterJobPostForm

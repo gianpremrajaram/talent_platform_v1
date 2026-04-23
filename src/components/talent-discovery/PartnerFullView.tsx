@@ -44,7 +44,7 @@ export default function TalentDiscoveryPartnerFullView({ title, description }: P
   const tierRank: number = session?.user?.membershipTierRank ?? 1;
   const effectiveTierRank = isAdmin ? 99 : tierRank;
 
-  const hasSilver = effectiveTierRank >= TIER_RANK_MAP.SILVER;
+  const hasGold = effectiveTierRank >= TIER_RANK_MAP.GOLD;
   const hasPlatinum = effectiveTierRank >= TIER_RANK_MAP.PLATINUM;
 
   // Build the list of tabs this user can actually see.
@@ -52,7 +52,7 @@ export default function TalentDiscoveryPartnerFullView({ title, description }: P
   // caused the active-tab index to point at the wrong panel.
   const visibleTabs: TabKey[] = [
     "job-board",
-    ...(hasSilver   ? (["talent-search"] as TabKey[]) : []),
+    ...(hasGold     ? (["talent-search"] as TabKey[]) : []),
     ...(hasPlatinum ? (["recommended"]   as TabKey[]) : []),
     "applications",
   ];
@@ -118,7 +118,7 @@ export default function TalentDiscoveryPartnerFullView({ title, description }: P
           sx={{ gap: 0.75 }}
         />
 
-        {hasSilver && (
+        {hasGold && (
           <Tab
             id="tab-talent-search"
             aria-controls="panel-talent-search"
@@ -172,14 +172,14 @@ export default function TalentDiscoveryPartnerFullView({ title, description }: P
       >
         {activeTab === "talent-search" && (
           <TierGate
-            requiredTier="SILVER"
+            requiredTier="GOLD"
             fallback={
               <Box sx={{ p: 4, borderRadius: 2, bgcolor: "background.paper", border: "1px solid", borderColor: "divider", textAlign: "center" }}>
                 <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                  Silver membership or above required
+                  Gold membership or above required
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Talent Search is available to <strong>Silver, Gold, and Platinum</strong>{" "}
+                  Talent Search is available to <strong>Gold and Platinum</strong>{" "}
                   members. Upgrade your membership to access this feature.
                 </Typography>
               </Box>
@@ -228,7 +228,7 @@ export default function TalentDiscoveryPartnerFullView({ title, description }: P
       >
         {activeTab === "applications" && (
           <ErrorBoundary>
-            <RecruiterApplicationsPanel />
+            <RecruiterApplicationsPanel canViewProfiles={effectiveTierRank >= TIER_RANK_MAP.GOLD} />
           </ErrorBoundary>
         )}
       </Box>

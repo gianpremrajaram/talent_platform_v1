@@ -26,7 +26,7 @@ import LoadingState from "@/components/ui/LoadingState";
 import EmptyState from "@/components/ui/EmptyState";
 import type { JobApplicationsForJob, JobApplicationResult } from "@/types/index";
 
-export default function RecruiterApplicationsPanel() {
+export default function RecruiterApplicationsPanel({ canViewProfiles = false }: { canViewProfiles?: boolean }) {
   const [groups, setGroups] = useState<JobApplicationsForJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -86,7 +86,7 @@ export default function RecruiterApplicationsPanel() {
 
       <Stack spacing={1.5}>
         {groups.map((group) => (
-          <JobApplicationGroup key={group.jobId} group={group} />
+          <JobApplicationGroup key={group.jobId} group={group} canViewProfiles={canViewProfiles} />
         ))}
       </Stack>
     </Box>
@@ -95,7 +95,7 @@ export default function RecruiterApplicationsPanel() {
 
 // ─── Job group card ───────────────────────────────────────────────────────────
 
-function JobApplicationGroup({ group }: { group: JobApplicationsForJob }) {
+function JobApplicationGroup({ group, canViewProfiles }: { group: JobApplicationsForJob; canViewProfiles: boolean }) {
   const [expanded, setExpanded] = useState(group.applications.length > 0);
 
   return (
@@ -173,7 +173,7 @@ function JobApplicationGroup({ group }: { group: JobApplicationsForJob }) {
             <Divider />
             <Stack divider={<Divider />}>
               {group.applications.map((app) => (
-                <ApplicantRow key={app.id} application={app} />
+                <ApplicantRow key={app.id} application={app} canViewProfiles={canViewProfiles} />
               ))}
             </Stack>
           </>
@@ -185,7 +185,7 @@ function JobApplicationGroup({ group }: { group: JobApplicationsForJob }) {
 
 // ─── Individual applicant row ─────────────────────────────────────────────────
 
-function ApplicantRow({ application }: { application: JobApplicationResult }) {
+function ApplicantRow({ application, canViewProfiles }: { application: JobApplicationResult; canViewProfiles: boolean }) {
   const [coverOpen, setCoverOpen] = useState(false);
 
   const appliedDate = new Date(application.appliedAt).toLocaleDateString("en-GB", {
@@ -221,17 +221,19 @@ function ApplicantRow({ application }: { application: JobApplicationResult }) {
             </Typography>
           </Stack>
 
-          <Button
-            component={Link}
-            href={`/talent-discovery/student-profile/${application.studentId}`}
-            size="small"
-            variant="outlined"
-            startIcon={<PersonOutlineIcon fontSize="small" aria-hidden="true" />}
-            aria-label={`View profile for ${application.student.firstName} ${application.student.lastName}`}
-            sx={{ fontSize: 11, borderRadius: 1.5, height: 28 }}
-          >
-            View Profile
-          </Button>
+          {canViewProfiles && (
+            <Button
+              component={Link}
+              href={`/talent-discovery/student-profile/${application.studentId}`}
+              size="small"
+              variant="outlined"
+              startIcon={<PersonOutlineIcon fontSize="small" aria-hidden="true" />}
+              aria-label={`View profile for ${application.student.firstName} ${application.student.lastName}`}
+              sx={{ fontSize: 11, borderRadius: 1.5, height: 28 }}
+            >
+              View Profile
+            </Button>
+          )}
 
           {application.cv ? (
             <Tooltip title={`Download CV: ${application.cv.label}`}>
