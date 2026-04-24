@@ -228,7 +228,7 @@ export default function TalentDiscoveryPartnerFullView({ title, description }: P
       >
         {activeTab === "applications" && (
           <ErrorBoundary>
-            <RecruiterApplicationsPanel canViewProfiles={effectiveTierRank >= TIER_RANK_MAP.GOLD} />
+            <RecruiterApplicationsPanel canViewProfiles={effectiveTierRank >= TIER_RANK_MAP.SILVER} />
           </ErrorBoundary>
         )}
       </Box>
