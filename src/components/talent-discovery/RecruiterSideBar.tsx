@@ -91,7 +91,7 @@ export default function RecruiterSideBar() {
       label: "Talent Search",
       tab: "talent-search",
       icon: <SearchIcon />,
-      minTier: TIER_RANK_MAP.SILVER,
+      minTier: TIER_RANK_MAP.GOLD,
     },
     {
       label: "Recommended Students",
