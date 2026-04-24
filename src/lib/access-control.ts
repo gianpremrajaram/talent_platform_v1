@@ -18,7 +18,7 @@ export type FeatureRule = {
 export const FEATURE_PERMISSIONS: Record<string, FeatureRule> = {
   'recruiter-search': { minTierRank: 3, allowedRoles: [] },
   'cv-library': { minTierRank: 3, allowedRoles: [] },
-  'job-board-post': { minTierRank: 3, allowedRoles: [] },
+  'job-board-post': { minTierRank: 2, allowedRoles: [] },
   'job-board-browse': { minTierRank: 2, allowedRoles: ['STUDENT'] },
   'student-profile': { minTierRank: null, allowedRoles: ['STUDENT'] },
   'admin-panel': { minTierRank: null, allowedRoles: ['ADMIN'] },
